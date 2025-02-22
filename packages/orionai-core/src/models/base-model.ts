@@ -1,5 +1,5 @@
 export interface BaseModelConfig {
-  apiKey: string;
+  apiKey?: string;
   model?: string;
   [key: string]: any;
 }

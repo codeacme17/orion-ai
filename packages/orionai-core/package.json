@@ -4,9 +4,14 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "build": "vite build"
+    "build": "vite build",
+    "test": "vitest"
   },
   "dependencies": {
     "openai": "^4.85.3"
+  },
+  "devDependencies": {
+    "http-proxy-agent": "^7.0.2",
+    "https-proxy-agent": "^7.0.6"
   }
 }

@@ -1,18 +1,17 @@
-import Openai from "openai";
-import type { CompletionCreateParamsBase } from "openai/resources/completions.mjs";
+import Openai, { type ClientOptions } from "openai";
 import { BaseModel, type BaseCompleteParams, type BaseModelConfig } from "./base-model";
 import { readEnv } from "@/lib/utils";
+import type { ChatCompletionCreateParamsBase } from "openai/resources/chat/completions.mjs";
 
-export type OpenaiModelType = "gpt-4" | "gpt-4o" | "o1" | "o3" | "gpt-35";
+export type OpenaiModelType = "gpt-4" | "gpt-4o" | "gpt-4o-mini" | "o1" | "o3" | "gpt-35";
 
-export interface OpenAIModelConfig extends BaseModelConfig {
+export interface OpenAIModelConfig extends ClientOptions, BaseModelConfig {
   model?: OpenaiModelType;
 }
 
 export interface CompleteParams
-  extends Omit<CompletionCreateParamsBase, "model">,
+  extends Omit<ChatCompletionCreateParamsBase, "model" | "prompt">,
     BaseCompleteParams {
-  messages: string[];
   model?: OpenaiModelType;
 }
 
@@ -26,26 +25,28 @@ export class OpenAIModel extends BaseModel {
 
     const { apiKey } = config;
 
-    if (!apiKey && !readEnv("OPENAI_API_KEY"))
+    if (!apiKey && !readEnv("OPENAI_API_KEY")) {
       throw new Error("[orion-ai] OpenAI API key is required.");
+    }
 
-    this.openai = new Openai({ apiKey: config.apiKey || readEnv("OPENAI_API_KEY") });
+    this.openai = new Openai({ apiKey: config.apiKey || readEnv("OPENAI_API_KEY"), ...config });
   }
 
-  async complete({ messages, model = DEFAULT_MODEL }: CompleteParams): Promise<string> {
+  async complete({ messages, model = DEFAULT_MODEL, ...options }: CompleteParams): Promise<string> {
     try {
-      const response = await this.openai.completions.create({
+      const response = await this.openai.chat.completions.create({
+        ...options,
         model: model || this.config.model || DEFAULT_MODEL,
-        prompt: messages,
-        max_tokens: 100,
+        messages,
       });
-      return response.choices[0].text;
+
+      if ("choices" in response) {
+        return response.choices[0].message.content || "";
+      }
+
+      throw new Error("Unexpected response format");
     } catch (error) {
       throw error;
     }
   }
 }
-
-const o = new OpenAIModel({
-  apiKey: "",
-});
