@@ -37,17 +37,20 @@ export abstract class BaseMessage implements IBaseMessage {
   metadata?: Record<string, any>;
 
   constructor(props: IBaseMessageProps | string) {
-    if (!props) throw new Error("[orion-ai] Message content is required.");
+    // If the input is not provided, throw an error
+    if (!props || (typeof props !== "string" && !props.content)) {
+      throw new Error("[orion-ai] Message content is required.");
+    }
 
     // If the input is a string, set the content of the message
     if (typeof props === "string") {
       this.content = props;
     } else {
       this.content = props.content;
-      this.id = props.id;
-      this.created_at = props.created_at;
-      this.token_count = props.token_count;
-      this.metadata = props.metadata;
+      this.id = props.id || Math.random().toString(36).substring(7);
+      this.created_at = props.created_at || new Date().toISOString();
+      this.token_count = props.token_count || 0;
+      this.metadata = props.metadata || {};
     }
   }
 
