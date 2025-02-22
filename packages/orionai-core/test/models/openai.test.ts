@@ -37,7 +37,10 @@ describe("OpenAIModel", () => {
   });
 
   it("should successfully call the complete method and return a response", async () => {
-    const response = await model.complete({ messages: [{ role: "user", content: "hello" }] });
+    const response = await model.complete({
+      messages: [{ role: "user", content: "hello" }],
+      model: "",
+    });
     expect(response).toBeTypeOf("string");
     expect(response).not.toBe("");
   });

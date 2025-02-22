@@ -1,21 +1,16 @@
 import Openai, { type ClientOptions } from "openai";
-import { BaseModel, type BaseCompleteParams, type BaseModelConfig } from "./base-model";
+import { BaseModel, type BaseCompleteParams, type BaseModelConfig } from "./base";
 import { readEnv } from "@/lib/utils";
 import type { ChatCompletionCreateParamsBase } from "openai/resources/chat/completions.mjs";
-
-export type OpenaiModelType = "gpt-4" | "gpt-4o" | "gpt-4o-mini" | "o1" | "o3" | "gpt-35";
+import type { ChatModel } from "openai/resources/index.mjs";
 
 export interface OpenAIModelConfig extends ClientOptions, BaseModelConfig {
-  model?: OpenaiModelType;
+  model?: (string & {}) | ChatModel;
 }
 
-export interface CompleteParams
-  extends Omit<ChatCompletionCreateParamsBase, "model" | "prompt">,
-    BaseCompleteParams {
-  model?: OpenaiModelType;
-}
+export interface OpenaiCompleteParams extends ChatCompletionCreateParamsBase, BaseCompleteParams {}
 
-const DEFAULT_MODEL: OpenaiModelType = "gpt-4";
+const DEFAULT_MODEL: ChatModel = "gpt-4o-mini";
 
 export class OpenAIModel extends BaseModel {
   private openai: Openai;
@@ -32,7 +27,7 @@ export class OpenAIModel extends BaseModel {
     this.openai = new Openai({ apiKey: config.apiKey || readEnv("OPENAI_API_KEY"), ...config });
   }
 
-  async complete({ messages, model = DEFAULT_MODEL, ...options }: CompleteParams): Promise<string> {
+  async complete({ messages, model, ...options }: OpenaiCompleteParams): Promise<string> {
     try {
       const response = await this.openai.chat.completions.create({
         ...options,
