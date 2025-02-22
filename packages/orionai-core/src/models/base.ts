@@ -9,6 +9,9 @@ export interface IBaseCompleteParams {}
 export interface IBaseModel extends IBaseModelConfig {}
 
 export abstract class BaseModel implements IBaseModel {
+  /**
+   * The configuration for the model.
+   */
   protected config: IBaseModelConfig;
 
   constructor(config: IBaseModelConfig) {
