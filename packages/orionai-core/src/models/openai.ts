@@ -1,21 +1,32 @@
 import Openai, { type ClientOptions } from "openai";
-import { BaseModel, type BaseCompleteParams, type BaseModelConfig } from "./base";
+import {
+  BaseModel,
+  type IBaseCompleteParams,
+  type IBaseModel,
+  type IBaseModelConfig,
+} from "./base";
 import { readEnv } from "@/lib/utils";
 import type { ChatCompletionCreateParamsBase } from "openai/resources/chat/completions.mjs";
 import type { ChatModel } from "openai/resources/index.mjs";
 
-export interface OpenAIModelConfig extends ClientOptions, BaseModelConfig {
+export interface IOpenAIModelConfig extends ClientOptions, IBaseModelConfig {
   model?: (string & {}) | ChatModel;
 }
 
-export interface OpenaiCompleteParams extends ChatCompletionCreateParamsBase, BaseCompleteParams {}
+export interface IOpenaiCompleteParams
+  extends ChatCompletionCreateParamsBase,
+    IBaseCompleteParams {}
+
+export interface IOpenAIModel extends IBaseModel {
+  complete(params: IOpenaiCompleteParams): Promise<string>;
+}
 
 const DEFAULT_MODEL: ChatModel = "gpt-4o-mini";
 
-export class OpenAIModel extends BaseModel {
+export class OpenAIModel extends BaseModel implements IOpenAIModel {
   private openai: Openai;
 
-  constructor(config: OpenAIModelConfig) {
+  constructor(config: IOpenAIModelConfig) {
     super(config);
 
     const { apiKey } = config;
@@ -24,10 +35,13 @@ export class OpenAIModel extends BaseModel {
       throw new Error("[orion-ai] OpenAI API key is required.");
     }
 
-    this.openai = new Openai({ apiKey: config.apiKey || readEnv("OPENAI_API_KEY"), ...config });
+    this.openai = new Openai({
+      apiKey: this.config.apiKey || readEnv("OPENAI_API_KEY"),
+      ...config,
+    });
   }
 
-  async complete({ messages, model, ...options }: OpenaiCompleteParams): Promise<string> {
+  async complete({ messages, model, ...options }: IOpenaiCompleteParams): Promise<string> {
     try {
       const response = await this.openai.chat.completions.create({
         ...options,

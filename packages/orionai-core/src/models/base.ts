@@ -1,15 +1,17 @@
-export interface BaseModelConfig {
+export interface IBaseModelConfig {
   apiKey?: string;
   model?: string;
   [key: string]: any;
 }
 
-export interface BaseCompleteParams {}
+export interface IBaseCompleteParams {}
 
-export abstract class BaseModel {
-  protected config: BaseModelConfig;
+export interface IBaseModel extends IBaseModelConfig {}
 
-  constructor(config: BaseModelConfig) {
+export abstract class BaseModel implements IBaseModel {
+  protected config: IBaseModelConfig;
+
+  constructor(config: IBaseModelConfig) {
     this.config = config;
   }
 
@@ -18,21 +20,5 @@ export abstract class BaseModel {
    * @param input The input to the model.
    * @returns The generated response.
    */
-  abstract complete(params: BaseCompleteParams): Promise<string>;
-
-  /**
-   * Set the configuration for the model.
-   * @param config The new configuration.
-   */
-  setConfig(config: BaseModelConfig): void {
-    this.config = config;
-  }
-
-  /**
-   * Get the current configuration of the model.
-   * @returns The current configuration.
-   */
-  getConfig(): BaseModelConfig {
-    return this.config;
-  }
+  abstract complete(params: IBaseCompleteParams): Promise<string>;
 }
