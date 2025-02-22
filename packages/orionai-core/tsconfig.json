@@ -5,6 +5,11 @@
       "ESNext",
       "DOM"
     ],
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    },
     "target": "ESNext",
     "module": "ESNext",
     "moduleDetection": "force",
