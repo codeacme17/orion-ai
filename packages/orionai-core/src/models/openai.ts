@@ -11,7 +11,7 @@ import type {
   ChatCompletionMessageParam,
 } from "openai/resources/chat/completions.mjs";
 import type { ChatModel } from "openai/resources/index.mjs";
-import type { UserMessage } from "@/messages";
+import type { IChatCompletionMessage } from "@/messages";
 import type { RequestOptions } from "openai/core.mjs";
 
 export interface IOpenAIModelConfig extends ClientOptions, IBaseModelConfig {
@@ -21,7 +21,7 @@ export interface IOpenAIModelConfig extends ClientOptions, IBaseModelConfig {
 export interface IOpenaiCompleteParams
   extends Omit<ChatCompletionCreateParamsBase, "messages">,
     IBaseCompleteParams {
-  messages: Array<UserMessage>;
+  messages: Array<IChatCompletionMessage>;
 }
 
 export interface IOpenAIModel extends IBaseModel {
