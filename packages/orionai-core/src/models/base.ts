@@ -6,9 +6,7 @@ export interface IBaseModelConfig {
 
 export interface IBaseCompleteParams {}
 
-export interface IBaseModel extends IBaseModelConfig {}
-
-export abstract class BaseModel implements IBaseModel {
+export abstract class BaseModel {
   /**
    * The configuration for the model.
    */

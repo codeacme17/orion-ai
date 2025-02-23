@@ -1,10 +1,5 @@
 import Openai, { type ClientOptions } from "openai";
-import {
-  BaseModel,
-  type IBaseCompleteParams,
-  type IBaseModel,
-  type IBaseModelConfig,
-} from "./base";
+import { BaseModel, type IBaseCompleteParams, type IBaseModelConfig } from "./base";
 import { readEnv } from "@/lib/utils";
 import type {
   ChatCompletionCreateParamsBase,
@@ -14,26 +9,23 @@ import type { ChatModel } from "openai/resources/index.mjs";
 import type { IChatCompletionMessage } from "@/messages";
 import type { RequestOptions } from "openai/core.mjs";
 
-export interface IOpenAIModelConfig extends ClientOptions, IBaseModelConfig {
+export interface IOpenAIModelFields extends ClientOptions, IBaseModelConfig {
   model?: (string & {}) | ChatModel;
 }
 
 export interface IOpenaiCompleteParams
-  extends Omit<ChatCompletionCreateParamsBase, "messages">,
+  extends Omit<ChatCompletionCreateParamsBase, "messages" | "model">,
     IBaseCompleteParams {
   messages: Array<IChatCompletionMessage>;
-}
-
-export interface IOpenAIModel extends IBaseModel {
-  complete(params: IOpenaiCompleteParams): Promise<string>;
+  model?: (string & {}) | ChatModel;
 }
 
 const DEFAULT_MODEL: ChatModel = "gpt-4o-mini";
 
-export class OpenAIModel extends BaseModel implements IOpenAIModel {
+export class OpenAIModel extends BaseModel {
   private openai: Openai;
 
-  constructor(config: IOpenAIModelConfig) {
+  constructor(config: IOpenAIModelFields) {
     super(config);
 
     const { apiKey } = config;
@@ -48,16 +40,15 @@ export class OpenAIModel extends BaseModel implements IOpenAIModel {
     });
   }
 
-  async complete(
-    { messages, model, ...rest }: IOpenaiCompleteParams,
-    options?: RequestOptions
-  ): Promise<string> {
+  async complete(body: IOpenaiCompleteParams, options?: RequestOptions): Promise<string> {
     try {
+      const { model, messages, ...rest } = body;
+
       const response = await this.openai.chat.completions.create(
         {
           ...rest,
           model: model || this.config.model || DEFAULT_MODEL,
-          messages: messages as Array<ChatCompletionMessageParam>,
+          messages: messages as unknown as Array<ChatCompletionMessageParam>,
         },
         { ...options }
       );

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { OpenAIModel } from "@/models/openai";
 import { config as dotConfig } from "dotenv";
 import { HttpsProxyAgent } from "https-proxy-agent";
-import { UserMessage } from "@/messages";
+import { AssistantMessage, SystemMessage, UserMessage } from "@/messages";
 
 describe("OpenAIModel", () => {
   let model: OpenAIModel;
@@ -37,9 +37,16 @@ describe("OpenAIModel", () => {
 
   it("should successfully call the complete method and return a response", async () => {
     const response = await model.complete({
-      messages: [new UserMessage("hello")],
-      model: "",
+      messages: [
+        new SystemMessage("You are a super frontend master, please reply to me in English"),
+        new UserMessage("Please give me a debounce function"),
+        new AssistantMessage("Sure, here is a debounce function"),
+        new UserMessage(
+          "Please first tell me your identity, then tell me what you answered to my last question"
+        ),
+      ],
     });
+
     expect(response).toBeTypeOf("string");
     expect(response).not.toBe("");
   });
