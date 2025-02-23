@@ -66,9 +66,9 @@ export abstract class BaseMessage implements IBaseMessageFields {
       this.content = props;
     } else {
       this.content = props.content;
-      this.id = props.id || Math.random().toString(36).substring(7);
-      this.metadata = props.metadata || {};
-      this.createdAt = props.createdAt || new Date().toISOString();
+      this.id = props.id;
+      this.metadata = props.metadata;
+      this.createdAt = props.createdAt;
     }
   }
 }
