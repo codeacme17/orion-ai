@@ -6,16 +6,14 @@ import { UserMessage } from "@/messages";
 
 describe("OpenAIModel", () => {
   let model: OpenAIModel;
-  dotConfig();
 
-  console.log("process.env.HTTPS_PROXY", process.env.HTTPS_PROXY);
+  dotConfig();
 
   const proxy = new HttpsProxyAgent(process.env.HTTPS_PROXY || "");
 
   beforeEach(() => {
     model = new OpenAIModel({
       apiKey: process.env.OPENAI_API_KEY || "",
-      // model: "gpt-4o-mini",
       httpAgent: proxy,
     });
   });

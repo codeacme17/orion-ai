@@ -1,13 +1,3 @@
-export interface IBaseMessageProps {
-  content: string;
-  role?: TMessageType;
-  id?: string;
-  created_at?: string;
-  name?: string;
-  token_count?: number;
-  metadata?: Record<string, any>;
-}
-
 export type TMessageType =
   | "user"
   | "assistant"
@@ -19,38 +9,53 @@ export type TMessageType =
   | "remove"
   | "unknown";
 
-export abstract class BaseMessage {
+export type TImageDetail = "auto" | "low" | "high";
+
+export type TMessageContentText = {
+  type: "text";
+  text: string;
+};
+
+export type TMessageContentImageUrl = {
+  type: "image_url";
+  image_url: string | { url: string; detail?: TImageDetail };
+};
+
+export type TMessageContentComplex =
+  | TMessageContentText
+  | TMessageContentImageUrl
+  | (Record<string, any> & { type?: "text" | "image_url" | string });
+
+export type TMessageContent = string | TMessageContentComplex[];
+
+export interface IBaseMessageFields {
+  content: TMessageContent;
+  name?: string;
   /**
-   * The content of the message.
+   * Response metadata. For example: response headers, logprobs, token counts.
    */
-  content: string;
+  metadata?: Record<string, any>;
 
   /**
-   * The role of the message.
-   */
-  role: TMessageType;
-
-  /**
-   * The unique identifier for the message.
+   * An optional unique identifier for the message. This should ideally be
+   * provided by the provider/model which created the message.
    */
   id?: string;
 
   /**
    * The timestamp when the message was created.
    */
-  created_at?: string;
+  createdAt?: string;
+}
 
-  /**
-   * The number of tokens in the message.
-   */
-  token_count?: number;
-
-  /**
-   * Additional metadata for the message.
-   */
+export abstract class BaseMessage implements IBaseMessageFields {
+  content: TMessageContent;
+  id?: string;
+  name?: string;
+  createdAt?: string;
   metadata?: Record<string, any>;
 
-  constructor(props: IBaseMessageProps | string) {
+  constructor(props: IBaseMessageFields | string) {
     // If the input is not provided, throw an error
     if (!props || (typeof props !== "string" && !props.content)) {
       throw new Error("[orion-ai] Message content is required.");
@@ -59,25 +64,11 @@ export abstract class BaseMessage {
     // If the input is a string, set the content of the message
     if (typeof props === "string") {
       this.content = props;
-      this.role = "unknown";
     } else {
       this.content = props.content;
-      this.role = props.role!;
       this.id = props.id || Math.random().toString(36).substring(7);
-      this.created_at = props.created_at || new Date().toISOString();
-      this.token_count = props.token_count || 0;
       this.metadata = props.metadata || {};
+      this.createdAt = props.createdAt || new Date().toISOString();
     }
-  }
-
-  get(): IBaseMessageProps {
-    return {
-      content: this.content,
-      role: this.role,
-      id: this.id,
-      created_at: this.created_at,
-      token_count: this.token_count,
-      metadata: this.metadata,
-    };
   }
 }

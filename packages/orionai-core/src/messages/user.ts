@@ -1,23 +1,9 @@
-import { BaseMessage, type IBaseMessageProps, type TMessageType } from "./base";
+import { BaseMessage, type IBaseMessageFields, type TMessageType } from "./base";
 
-export interface IUserMessageProps extends IBaseMessageProps {}
+export interface IUserMessageFields extends IBaseMessageFields {}
 
 export class UserMessage extends BaseMessage {
-  constructor(props: IUserMessageProps | string) {
+  constructor(props: IUserMessageFields | string) {
     super(props);
-    this.role = "user";
-  }
-
-  get(): IUserMessageProps {
-    const { content, role, id, created_at, token_count, metadata } = this;
-
-    return {
-      role,
-      content,
-      id,
-      created_at,
-      token_count,
-      metadata,
-    };
   }
 }
