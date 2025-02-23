@@ -6,16 +6,23 @@ import {
   type IBaseModelConfig,
 } from "./base";
 import { readEnv } from "@/lib/utils";
-import type { ChatCompletionCreateParamsBase } from "openai/resources/chat/completions.mjs";
+import type {
+  ChatCompletionCreateParamsBase,
+  ChatCompletionMessageParam,
+} from "openai/resources/chat/completions.mjs";
 import type { ChatModel } from "openai/resources/index.mjs";
+import type { UserMessage } from "@/messages";
+import type { RequestOptions } from "openai/core.mjs";
 
 export interface IOpenAIModelConfig extends ClientOptions, IBaseModelConfig {
   model?: (string & {}) | ChatModel;
 }
 
 export interface IOpenaiCompleteParams
-  extends ChatCompletionCreateParamsBase,
-    IBaseCompleteParams {}
+  extends Omit<ChatCompletionCreateParamsBase, "messages">,
+    IBaseCompleteParams {
+  messages: Array<UserMessage>;
+}
 
 export interface IOpenAIModel extends IBaseModel {
   complete(params: IOpenaiCompleteParams): Promise<string>;
@@ -41,13 +48,19 @@ export class OpenAIModel extends BaseModel implements IOpenAIModel {
     });
   }
 
-  async complete({ messages, model, ...options }: IOpenaiCompleteParams): Promise<string> {
+  async complete(
+    { messages, model, ...rest }: IOpenaiCompleteParams,
+    options?: RequestOptions
+  ): Promise<string> {
     try {
-      const response = await this.openai.chat.completions.create({
-        ...options,
-        model: model || this.config.model || DEFAULT_MODEL,
-        messages,
-      });
+      const response = await this.openai.chat.completions.create(
+        {
+          ...rest,
+          model: model || this.config.model || DEFAULT_MODEL,
+          messages: messages as Array<ChatCompletionMessageParam>,
+        },
+        { ...options }
+      );
 
       if ("choices" in response) {
         return response.choices[0].message.content || "";
