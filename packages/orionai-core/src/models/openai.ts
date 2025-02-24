@@ -35,9 +35,8 @@ export class OpenAIModel extends BaseModel {
     }
 
     this.openai = new Openai({
-      apiKey: this.config.apiKey || readEnv('OPENAI_API_KEY'),
-      model: this.config.model || DEFAULT_MODEL,
       ...config,
+      apiKey: this.config.apiKey || readEnv('OPENAI_API_KEY'),
     })
   }
 

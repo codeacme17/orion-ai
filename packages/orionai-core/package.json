@@ -6,8 +6,8 @@
   "scripts": {
     "build": "vite build",
     "test": "vitest",
-    "test:models": "vitest run ./test/models",
-    "test:messages": "vitest run ./test/messages"
+    "test:models": "vitest run ./__test__/models",
+    "test:messages": "vitest run ./__test__/messages"
   },
   "dependencies": {
     "openai": "^4.85.3"

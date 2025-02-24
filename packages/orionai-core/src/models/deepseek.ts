@@ -40,7 +40,7 @@ export class DeepSeekModel extends BaseModel {
     this.deepseek = new Openai({
       ...config,
       apiKey: this.config.apiKey || readEnv('DEEPSEEK_API_KEY'),
-      baseURL: DEFAULT_BASE_URL,
+      baseURL: config.baseURL || DEFAULT_BASE_URL,
     })
   }
 
