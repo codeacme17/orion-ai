@@ -3,11 +3,18 @@
   "private": true,
   "description": "orion-ai",
   "type": "module",
-  "devDependencies": {
-    "@types/bun": "latest"
+  "scripts": {
+    "build": "lerna run build"
   },
   "workspaces": [
-    "package/*",
+    "packages/*",
     "examples"
-  ]
+  ],
+  "devDependencies": {
+    "dotenv": "^16.4.7",
+    "lerna": "^8.2.0",
+    "typescript": "^5.0.0",
+    "vite": "^3.0.0",
+    "vitest": "^3.0.6"
+  }
 }

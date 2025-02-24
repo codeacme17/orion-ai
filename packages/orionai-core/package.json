@@ -1,0 +1,19 @@
+{
+  "name": "@orion-ai/core",
+  "version": "0.0.1",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest",
+    "test:models": "vitest run ./test/models",
+    "test:messages": "vitest run ./test/messages"
+  },
+  "dependencies": {
+    "openai": "^4.85.3"
+  },
+  "devDependencies": {
+    "http-proxy-agent": "^7.0.2",
+    "https-proxy-agent": "^7.0.6"
+  }
+}
