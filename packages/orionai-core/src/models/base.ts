@@ -12,7 +12,7 @@ export abstract class BaseModel {
    */
   protected config: IBaseModelConfig
 
-  constructor(config: IBaseModelConfig) {
+  constructor(config: IBaseModelConfig = {}) {
     this.config = config
   }
 

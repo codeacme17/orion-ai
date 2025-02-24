@@ -6,46 +6,49 @@ import type {
   ChatCompletionMessageParam,
 } from 'openai/resources/chat/completions.mjs'
 import type { ChatModel } from 'openai/resources/index.mjs'
-import type { IChatCompletionMessage } from '@/messages'
 import type { RequestOptions } from 'openai/core.mjs'
+import type { IChatCompletionMessage } from '@/messages'
 
-export interface IOpenAIModelFields extends ClientOptions, IBaseModelConfig {
+export interface IDeepSeekModelFields extends ClientOptions, IBaseModelConfig {
   model?: (string & {}) | ChatModel
 }
 
-export interface IOpenaiCompleteParams
+export interface IDeepSeekCompleteParams
   extends Omit<ChatCompletionCreateParamsBase, 'messages' | 'model'>,
     IBaseCompleteParams {
   messages: Array<IChatCompletionMessage>
-  model?: (string & {}) | ChatModel
+  model?: (string & {}) | TChatModel
 }
 
-const DEFAULT_MODEL: ChatModel = 'gpt-4o-mini'
+type TChatModel = 'deepseek-chat'
 
-export class OpenAIModel extends BaseModel {
-  private openai: Openai
+const DEFAULT_MODEL: TChatModel = 'deepseek-chat'
+const DEFAULT_BASE_URL = 'https://api.deepseek.com/beta'
 
-  constructor(config: IOpenAIModelFields = {}) {
+export class DeepSeekModel extends BaseModel {
+  private deepseek: Openai
+
+  constructor(config: IDeepSeekModelFields = {}) {
     super(config)
 
     const { apiKey } = config
 
-    if (!apiKey && !readEnv('OPENAI_API_KEY')) {
-      throw new Error('[orion-ai] OpenAI API key is required.')
+    if (!apiKey && !readEnv('DEEPSEEK_API_KEY')) {
+      throw new Error('[orion-ai] DeepSeek API key is required.')
     }
 
-    this.openai = new Openai({
-      apiKey: this.config.apiKey || readEnv('OPENAI_API_KEY'),
-      model: this.config.model || DEFAULT_MODEL,
+    this.deepseek = new Openai({
       ...config,
+      apiKey: this.config.apiKey || readEnv('DEEPSEEK_API_KEY'),
+      baseURL: DEFAULT_BASE_URL,
     })
   }
 
-  async create(body: IOpenaiCompleteParams, options?: RequestOptions): Promise<string> {
+  async create(body: IDeepSeekCompleteParams, options?: RequestOptions): Promise<string> {
     try {
       const { model, messages, ...rest } = body
 
-      const response = await this.openai.chat.completions.create(
+      const response = await this.deepseek.chat.completions.create(
         {
           ...rest,
           model: model || this.config.model || DEFAULT_MODEL,
