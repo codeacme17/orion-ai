@@ -1,3 +1,5 @@
+export type TSupportModelFamily = 'openai' | 'deepseek' | 'anthropic'
+
 export interface IBaseModelConfig {
   apiKey?: string
   model?: string
