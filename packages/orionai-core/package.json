@@ -10,7 +10,8 @@
     "test:messages": "vitest run ./__test__/messages"
   },
   "dependencies": {
-    "openai": "^4.85.3"
+    "openai": "^4.85.3",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "http-proxy-agent": "^7.0.2",

@@ -23,7 +23,7 @@ describe('DeepSeekModel', () => {
     dotConfig()
     const model = new DeepSeekModel()
     const body: IDeepSeekCompleteParams = {
-      messages: [new UserMessage('hi')],
+      messages: [new UserMessage(`hi`)],
     }
 
     const result = await model.create(body)
