@@ -1,4 +1,3 @@
-import type { z } from 'zod'
 import type { IParametersSchema, ITool, IToolSchema } from '.'
 import type { CancellationToken } from '../lib/cancellation-token'
 
@@ -29,23 +28,24 @@ export interface IBaseToolFields<ArgsT, ReturnT> {
 export abstract class BaseTool<ArgsT, ReturnT> implements ITool {
   protected _argsType: new (...args: any[]) => ArgsT
   protected _returnType: new (...args: any[]) => ReturnT
-
-  public name: string
-  public description: string
   protected _strict: boolean
+  protected _name: string
+  protected _description: string
 
-  constructor(
-    argsType: new (...args: any[]) => ArgsT,
-    returnType: new (...args: any[]) => ReturnT,
-    name: string,
-    description: string,
-    strict: boolean = false,
-  ) {
-    this._argsType = argsType
-    this._returnType = returnType
-    this.name = name
-    this.description = description
-    this._strict = strict
+  constructor(fields: IBaseToolFields<ArgsT, ReturnT>) {
+    this._argsType = fields.argsType
+    this._returnType = fields.returnType
+    this._name = fields.name
+    this._description = fields.description || ''
+    this._strict = fields.strict || false
+  }
+
+  get name(): string {
+    return this._name
+  }
+
+  get description(): string {
+    return this._description
   }
 
   get schema(): IToolSchema {
@@ -57,7 +57,6 @@ export abstract class BaseTool<ArgsT, ReturnT> implements ITool {
       additionalProperties: modelSchema.additionalProperties || false,
     }
 
-    // 处理严格模式
     if (
       this._strict &&
       new Set(parameters.required).size !== new Set(Object.keys(parameters.properties)).size
@@ -66,8 +65,8 @@ export abstract class BaseTool<ArgsT, ReturnT> implements ITool {
     }
 
     return {
-      name: this.name,
-      description: this.description,
+      name: this._name,
+      description: this._description,
       parameters: parameters,
       strict: this._strict,
     }

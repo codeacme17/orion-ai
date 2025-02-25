@@ -52,7 +52,7 @@ export class FunctionTool<ArgsT, ReturnT> extends BaseTool<ArgsT, ReturnT> {
     returnType: new (...args: any[]) => ReturnT,
     strict: boolean = false,
   ) {
-    super(argsType, returnType, name, description, strict)
+    super({ name, description, argsType, returnType, strict })
     this._func = func
   }
 
