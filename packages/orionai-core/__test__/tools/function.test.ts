@@ -7,12 +7,12 @@ describe('base tool', () => {
     // Test implementation goes here
 
     const tool = new FunctionTool({
-      name: 'test',
       description: 'it is a test tool',
       func: async () => {
         console.log('test')
         return 'test'
       },
+      name: 'test',
       schema: z.object({
         location: z.string().describe('it is a location of user'),
       }),

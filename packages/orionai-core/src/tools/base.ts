@@ -2,7 +2,7 @@ import type { z } from 'zod'
 import type { IParametersSchema, ITool, IToolSchema } from '.'
 import type { CancellationToken } from '../lib/cancellation-token'
 
-export interface IBaseToolFields {
+export interface IBaseToolFields<ArgsT, ReturnT> {
   /**
    * The name of the tool/function to be called. Must be a-z, A-Z, 0-9, or contain
    * underscores and dashes, with a maximum length of 64.
@@ -20,6 +20,10 @@ export interface IBaseToolFields {
    * If true, the model will follow the exact schema defined in the parameters field.
    */
   strict?: boolean | null
+
+  argsType: new (...args: any[]) => ArgsT
+
+  returnType: new (...args: any[]) => ReturnT
 }
 
 export abstract class BaseTool<ArgsT, ReturnT> implements ITool {
@@ -45,7 +49,7 @@ export abstract class BaseTool<ArgsT, ReturnT> implements ITool {
   }
 
   get schema(): IToolSchema {
-    const modelSchema = this._argsType.prototype.getSchema() // 假设有一个方法获取 schema
+    const modelSchema = this._argsType.prototype.getSchema()
     const parameters: IParametersSchema = {
       type: 'object',
       properties: modelSchema.properties,
@@ -72,7 +76,7 @@ export abstract class BaseTool<ArgsT, ReturnT> implements ITool {
   abstract run(args: ArgsT, cancellationToken: CancellationToken): Promise<ReturnT>
 
   async runJson(args: Record<string, any>, cancellationToken: CancellationToken): Promise<any> {
-    const validatedArgs = new this._argsType(args) // 假设有一个构造函数进行验证
+    const validatedArgs = new this._argsType(args)
     return await this.run(validatedArgs, cancellationToken)
   }
 

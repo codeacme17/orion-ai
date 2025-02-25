@@ -33,7 +33,7 @@ const functionParamsAdaptor = (rowFields: IFunctionToolFields, modeFamily: TSupp
   }
 }
 
-interface IFunctionToolFields extends IBaseToolFields {
+interface IFunctionToolFields extends IBaseToolFields<any, any> {
   /**
    *
    */
