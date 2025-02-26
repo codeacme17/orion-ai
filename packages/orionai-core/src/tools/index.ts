@@ -1,11 +1,14 @@
 import type { CancellationToken } from '@/lib/cancellation-token'
+import type { z, ZodSchema } from 'zod'
 
 export * from './base'
+
+export type TZodObjectAny = z.ZodObject<any, any, any, any>
 
 /**
  * Represents a tool that can be executed with specific arguments.
  */
-export interface ITool {
+export interface ITool<T extends TZodObjectAny = TZodObjectAny> {
   /**
    * The name of the tool/function to be called.
    */
@@ -19,17 +22,7 @@ export interface ITool {
   /**
    * The schema that defines the parameters for the tool/function.
    */
-  schema: IToolSchema
-
-  /**
-   * Returns the type of arguments that the tool/function accepts.
-   */
-  argsType(): new (...args: any[]) => any
-
-  /**
-   * Returns the type of value that the tool/function returns.
-   */
-  returnType(): new (...args: any[]) => any
+  schema: ZodSchema<T>
 
   /**
    * Converts the return value of the tool/function to a string.

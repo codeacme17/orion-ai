@@ -1,62 +1,47 @@
-import { z } from 'zod'
+import { z, ZodSchema } from 'zod'
 import { BaseTool, type IBaseToolFields } from './base'
-import type { TSupportModelFamily } from '@/models'
-import type { CancellationToken } from '@/lib/cancellation-token'
+import type { CancellationToken } from '../lib/cancellation-token'
+import type { TZodObjectAny } from '.'
 
-type FuncType = (input: string | null) => Promise<any> | any
-
-type ZodObjectAny = z.ZodObject<any, any, any, any>
-
-type SchemaType<T extends ZodObjectAny = ZodObjectAny> = T | z.ZodEffects<T>
-
-/**
- * Parse and adapt function parameters for different model formats.
- * This helper function takes the raw input and converts it into the appropriate
- * format based on the model type and requirements.
- *
- * @param input The raw input parameters to parse
- * @returns The parsed and adapted parameters object
- */
-const functionParamsAdaptor = (rowFields: IFunctionToolFields, modeFamily: TSupportModelFamily) => {
-  try {
-    if (!rowFields.name) {
-      return null
-    }
-
-    if (modeFamily === 'openai' || modeFamily === 'deepseek') {
-    }
-
-    if (modeFamily === 'anthropic') {
-    }
-  } catch (error) {
-    throw error
-  }
+interface IFunctionToolFields<T> extends IBaseToolFields<T> {
+  func: (
+    args: (z.output<T> extends string ? string : never) | z.input<T>,
+  ) => Promise<string> | string
 }
 
-interface IFunctionToolFields extends IBaseToolFields<any, any> {
-  /**
-   *
-   */
-  func: FuncType
-  schema: SchemaType
-}
+export class FunctionTool<T extends TZodObjectAny = TZodObjectAny> extends BaseTool<T> {
+  private _func: (
+    args: (z.output<T> extends string ? string : never) | z.input<T>,
+  ) => Promise<string> | string
 
-export class FunctionTool<ArgsT, ReturnT> extends BaseTool<ArgsT, ReturnT> {
-  private _func: (args: ArgsT) => Promise<ReturnT> | ReturnT
-
-  constructor(
-    func: (args: ArgsT) => Promise<ReturnT> | ReturnT,
-    name: string,
-    description: string,
-    argsType: new (...args: any[]) => ArgsT,
-    returnType: new (...args: any[]) => ReturnT,
-    strict: boolean = false,
-  ) {
-    super({ name, description, argsType, returnType, strict })
-    this._func = func
+  constructor(fields: IFunctionToolFields<T>) {
+    super(fields)
+    this._func = fields.func
   }
 
-  async run(args: ArgsT, cancellationToken: CancellationToken): Promise<ReturnT> {
-    return await this._func(args)
+  async run(
+    args: (z.output<T> extends string ? string : never) | z.input<T>,
+    cancellationToken: CancellationToken,
+  ): Promise<string> {
+    let parsedArgs: z.input<T>
+
+    if (typeof args === 'string') {
+      try {
+        parsedArgs = JSON.parse(args)
+      } catch (error) {
+        parsedArgs = args as z.input<T>
+      }
+    } else {
+      parsedArgs = args
+    }
+
+    try {
+      this.schema.parse(parsedArgs)
+    } catch (error) {
+      throw new Error(`Invalid arguments: ${error.message}`)
+    }
+
+    const result = await this._func(parsedArgs)
+    return result
   }
 }
