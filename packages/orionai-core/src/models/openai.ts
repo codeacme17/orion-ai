@@ -4,20 +4,23 @@ import { readEnv } from '@/lib/utils'
 import type {
   ChatCompletionCreateParamsBase,
   ChatCompletionMessageParam,
+  ChatCompletionTool,
 } from 'openai/resources/chat/completions.mjs'
 import type { ChatModel } from 'openai/resources/index.mjs'
 import type { IChatCompletionMessage } from '@/messages'
 import type { RequestOptions } from 'openai/core.mjs'
+import { FunctionTool } from '@/tools/function'
 
 export interface IOpenAIModelFields extends ClientOptions, IBaseModelConfig {
   model?: (string & {}) | ChatModel
 }
 
 export interface IOpenaiCompleteParams
-  extends Omit<ChatCompletionCreateParamsBase, 'messages' | 'model'>,
+  extends Omit<ChatCompletionCreateParamsBase, 'messages' | 'model' | 'tools'>,
     IBaseCompleteParams {
   messages: Array<IChatCompletionMessage>
   model?: (string & {}) | ChatModel
+  tools?: Array<FunctionTool>
 }
 
 const DEFAULT_MODEL: ChatModel = 'gpt-4o-mini'
@@ -42,13 +45,14 @@ export class OpenAIModel extends BaseModel {
 
   async create(body: IOpenaiCompleteParams, options?: RequestOptions): Promise<string> {
     try {
-      const { model, messages, ...rest } = body
+      const { model, messages, tools, ...rest } = body
 
       const response = await this.openai.chat.completions.create(
         {
           ...rest,
           model: model || this.config.model || DEFAULT_MODEL,
           messages: messages as unknown as Array<ChatCompletionMessageParam>,
+          tools: tools?.map((tool) => tool.toJSON()) as Array<ChatCompletionTool>,
         },
         { ...options },
       )

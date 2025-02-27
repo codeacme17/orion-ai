@@ -18,6 +18,22 @@ export class FunctionTool<T extends TZodObjectAny = TZodObjectAny> extends BaseT
     this._func = fields.func
   }
 
+  toJSON() {
+    const schema = this._schema instanceof z.ZodEffects ? this._schema._def.schema : this._schema
+    return {
+      type: 'function',
+      function: {
+        name: this.name,
+        description: this.description,
+        parameters: {
+          type: 'object',
+          properties: schema.shape,
+          required: Object.keys(schema.shape).filter((k) => !schema.shape[k].isOptional()),
+        },
+      },
+    }
+  }
+
   async run(args: (z.output<T> extends string ? string : never) | z.input<T>): Promise<string> {
     let parsedArgs: z.input<T>
 
@@ -39,5 +55,13 @@ export class FunctionTool<T extends TZodObjectAny = TZodObjectAny> extends BaseT
 
     const result = await this._func(parsedArgs)
     return result
+  }
+
+  get() {
+    return {
+      name: this.name,
+      description: this.description,
+      parameters: this.schema,
+    }
   }
 }

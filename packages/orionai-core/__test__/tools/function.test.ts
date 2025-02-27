@@ -1,21 +1,22 @@
 import { z } from 'zod'
 import { describe, it } from 'vitest'
 import { FunctionTool } from '@/tools/function'
+import { DeepSeekModel, OpenAIModel } from '@/models'
+import { UserMessage } from '@/messages'
+import dotenv from 'dotenv'
 
 describe('base tool', () => {
   it('should run', () => {
-    // Test implementation goes here
-
     const tool = new FunctionTool({
+      name: 'test',
       description: 'it is a test tool',
+      schema: z.object({
+        location: z.string().describe('it is a location of user'),
+      }),
       func: async (args) => {
         console.log('test', args.location)
         return 'test'
       },
-      name: 'test',
-      schema: z.object({
-        location: z.string().describe('it is a location of user'),
-      }),
     })
 
     console.log('tool', tool)
@@ -23,5 +24,36 @@ describe('base tool', () => {
     tool.run({
       location: 'beijing',
     })
+  })
+
+  it('should run in llm', async () => {
+    dotenv.config()
+
+    const tool = new FunctionTool({
+      name: 'test',
+      description: 'it is a test tool',
+      schema: z.object({
+        location: z.string().describe('it is a location of user'),
+      }),
+      func: async (args) => {
+        console.log('test', args.location)
+        return 'test'
+      },
+    })
+
+    const tools: any = [tool]
+
+    const llm = new DeepSeekModel()
+
+    const res = await llm.create({
+      messages: [
+        new UserMessage({
+          content: 'what is the weather in beijing?',
+        }),
+      ],
+      tools,
+    })
+
+    console.log(res)
   })
 })

@@ -4,8 +4,6 @@ import { UserMessage } from '@/messages'
 import { config as dotConfig } from 'dotenv'
 
 describe('DeepSeekModel', () => {
-  console.log('DEEPSEEK_API_KEY', process.env.DEEPSEEK_API_KEY)
-
   it('should throw an error if no API key is provided', () => {
     const invalidConfig = { model: 'deepseek-chat' } as IDeepSeekModelFields
     expect(() => new DeepSeekModel(invalidConfig)).toThrowError(
@@ -21,6 +19,7 @@ describe('DeepSeekModel', () => {
 
   it('should create a chat completion', async () => {
     dotConfig()
+    console.log('DEEPSEEK_API_KEY', process.env.DEEPSEEK_API_KEY)
     const model = new DeepSeekModel()
     const body: IDeepSeekCompleteParams = {
       messages: [new UserMessage(`hi`)],
