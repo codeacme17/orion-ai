@@ -8,8 +8,8 @@ describe('base tool', () => {
 
     const tool = new FunctionTool({
       description: 'it is a test tool',
-      func: async () => {
-        console.log('test')
+      func: async (args) => {
+        console.log('test', args.location)
         return 'test'
       },
       name: 'test',
@@ -19,5 +19,9 @@ describe('base tool', () => {
     })
 
     console.log('tool', tool)
+
+    tool.run({
+      location: 'beijing',
+    })
   })
 })

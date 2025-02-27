@@ -1,8 +1,8 @@
 import type { z, ZodSchema } from 'zod'
 import type { IParametersSchema, ITool, IToolSchema, TZodObjectAny } from '.'
-import type { CancellationToken } from '../lib/cancellation-token'
+import type { CancellationToken } from '../lib/types/cancellation-token'
 
-export interface IBaseToolFields<T> {
+export interface IBaseToolFields<T extends TZodObjectAny = TZodObjectAny> {
   /**
    * The name of the tool/function to be called. Must be a-z, A-Z, 0-9, or contain
    * underscores and dashes, with a maximum length of 64.
@@ -21,14 +21,14 @@ export interface IBaseToolFields<T> {
    */
   strict?: boolean | null
 
-  schema: ZodSchema<T>
+  schema: T | z.ZodEffects<T>
 }
 
 export abstract class BaseTool<T extends TZodObjectAny = TZodObjectAny> implements ITool<T> {
   protected _strict: boolean
   protected _name: string
   protected _description: string
-  protected _schema: ZodSchema<T>
+  protected _schema: T | z.ZodEffects<T>
 
   constructor(fields: IBaseToolFields<T>) {
     this._name = fields.name
@@ -45,17 +45,14 @@ export abstract class BaseTool<T extends TZodObjectAny = TZodObjectAny> implemen
     return this._description
   }
 
-  get schema(): ZodSchema<T> {
+  get schema(): T | z.ZodEffects<T> {
     return this._schema
   }
 
-  abstract run(
-    args: (z.output<T> extends string ? string : never) | z.input<T>,
-    cancellationToken: CancellationToken,
-  ): Promise<string>
+  abstract run(args: (z.output<T> extends string ? string : never) | z.input<T>): Promise<string>
 
-  async runJson(args: Record<string, any>, cancellationToken: CancellationToken): Promise<any> {
-    return await this.run(args, cancellationToken)
+  async runJson(args: Record<string, any>): Promise<any> {
+    return await this.run(args)
   }
 
   returnValueAsString(value: any): string {

@@ -1,9 +1,8 @@
-import { z, ZodSchema } from 'zod'
+import { z } from 'zod'
 import { BaseTool, type IBaseToolFields } from './base'
-import type { CancellationToken } from '../lib/cancellation-token'
 import type { TZodObjectAny } from '.'
 
-interface IFunctionToolFields<T> extends IBaseToolFields<T> {
+interface IFunctionToolFields<T extends TZodObjectAny = TZodObjectAny> extends IBaseToolFields<T> {
   func: (
     args: (z.output<T> extends string ? string : never) | z.input<T>,
   ) => Promise<string> | string
@@ -19,17 +18,14 @@ export class FunctionTool<T extends TZodObjectAny = TZodObjectAny> extends BaseT
     this._func = fields.func
   }
 
-  async run(
-    args: (z.output<T> extends string ? string : never) | z.input<T>,
-    cancellationToken: CancellationToken,
-  ): Promise<string> {
+  async run(args: (z.output<T> extends string ? string : never) | z.input<T>): Promise<string> {
     let parsedArgs: z.input<T>
 
     if (typeof args === 'string') {
       try {
         parsedArgs = JSON.parse(args)
       } catch (error) {
-        parsedArgs = args as z.input<T>
+        parsedArgs = args as unknown as z.input<T>
       }
     } else {
       parsedArgs = args
@@ -37,7 +33,7 @@ export class FunctionTool<T extends TZodObjectAny = TZodObjectAny> extends BaseT
 
     try {
       this.schema.parse(parsedArgs)
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Invalid arguments: ${error.message}`)
     }
 

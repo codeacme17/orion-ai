@@ -22,7 +22,7 @@ export interface ITool<T extends TZodObjectAny = TZodObjectAny> {
   /**
    * The schema that defines the parameters for the tool/function.
    */
-  schema: ZodSchema<T>
+  schema: T | z.ZodEffects<T>
 
   /**
    * Converts the return value of the tool/function to a string.
