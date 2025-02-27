@@ -1,5 +1,4 @@
-import type { CancellationToken } from '@/lib/cancellation-token'
-import type { z, ZodSchema } from 'zod'
+import type { z } from 'zod'
 
 export * from './base'
 
@@ -30,62 +29,4 @@ export interface ITool<T extends TZodObjectAny = TZodObjectAny> {
    * @returns The string representation of the value.
    */
   returnValueAsString(value: any): string
-
-  /**
-   * Executes the tool/function with the provided arguments and cancellation token.
-   * @param args The arguments to be passed to the tool/function.
-   * @param cancellationToken The token to signal cancellation of the operation.
-   * @returns A promise that resolves with the result of the execution.
-   */
-  runJson(args: Record<string, any>, cancellationToken: CancellationToken): Promise<any>
-}
-
-/**
- * Represents the schema for a tool, defining its parameters and other metadata.
- */
-export interface IToolSchema {
-  /**
-   * The parameters schema that defines the structure of the input arguments.
-   */
-  parameters?: IParametersSchema
-
-  /**
-   * The name of the tool/function.
-   */
-  name: string
-
-  /**
-   * A description of the tool/function.
-   */
-  description?: string
-
-  /**
-   * Indicates whether strict adherence to the schema is required.
-   */
-  strict?: boolean
-}
-
-/**
- * Represents the schema for the parameters of a tool/function.
- */
-export interface IParametersSchema {
-  /**
-   * The type of the parameters (e.g., 'object', 'array').
-   */
-  type: string
-
-  /**
-   * The properties of the parameters, defining their structure.
-   */
-  properties: Record<string, any>
-
-  /**
-   * An array of required properties for the parameters.
-   */
-  required?: string[]
-
-  /**
-   * Indicates whether additional properties are allowed in the parameters.
-   */
-  additionalProperties?: boolean
 }
