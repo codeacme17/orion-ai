@@ -23,5 +23,5 @@ export abstract class BaseModel {
    * @param IBaseCompleteParams The input to the model.
    * @returns The generated response.
    */
-  abstract create(params: IBaseCompleteParams): Promise<string>
+  abstract create(params: IBaseCompleteParams): Promise<string | Record<string, any>>
 }

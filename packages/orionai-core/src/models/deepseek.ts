@@ -47,7 +47,10 @@ export class DeepSeekModel extends BaseModel {
     })
   }
 
-  async create(body: IDeepSeekCompleteParams, options?: RequestOptions): Promise<string> {
+  async create(
+    body: IDeepSeekCompleteParams,
+    options?: RequestOptions,
+  ): Promise<string | Record<string, any>> {
     try {
       const { model, messages, tools, ...rest } = body
 
@@ -64,7 +67,17 @@ export class DeepSeekModel extends BaseModel {
       console.log('response', response)
 
       if ('choices' in response) {
-        return response.choices[0].message.content || ''
+        const { choices } = response
+
+        // If the response is a string, return it
+        if (choices[0].message.content) {
+          return choices[0].message.content
+        }
+
+        // If the response is a tool call, return the message
+        if (choices[0].finish_reason === 'tool_calls') {
+          return choices[0].message
+        }
       }
 
       throw new Error('Unexpected response format')

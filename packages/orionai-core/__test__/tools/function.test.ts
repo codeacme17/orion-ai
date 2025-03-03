@@ -54,6 +54,6 @@ describe('base tool', () => {
       tools,
     })
 
-    console.log(res)
+    console.log('res', res)
   })
 })
