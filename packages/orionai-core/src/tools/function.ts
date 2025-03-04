@@ -34,8 +34,24 @@ export class FunctionTool<T extends TZodObjectAny = TZodObjectAny> extends BaseT
     }
   }
 
-  async run(args: (z.output<T> extends string ? string : never) | z.input<T>): Promise<string> {
+  validParams(params: string): boolean {
+    try {
+      const parsed = JSON.parse(params)
+      this.schema.parse(parsed)
+      return true
+    } catch (error) {
+      return false
+    }
+  }
+
+  async run(
+    args: (z.output<T> extends string ? string : never) | z.input<T> | string,
+  ): Promise<string> {
     let parsedArgs: z.input<T>
+
+    if (!this.validParams(args as string)) {
+      throw new Error('Invalid arguments')
+    }
 
     if (typeof args === 'string') {
       try {

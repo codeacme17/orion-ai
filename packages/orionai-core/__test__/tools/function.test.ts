@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { describe, it } from 'vitest'
 import { FunctionTool } from '@/tools/function'
-import { DeepSeekModel, OpenAIModel } from '@/models'
+import { DeepSeekModel } from '@/models'
 import { UserMessage } from '@/messages'
 import dotenv from 'dotenv'
 
@@ -54,6 +54,8 @@ describe('base tool', () => {
       tools,
     })
 
-    console.log('res', res)
+    console.log('res', res.tool_calls[0].function.arguments)
+
+    tool.run(JSON.parse(res.tool_calls[0].function.arguments))
   })
 })
