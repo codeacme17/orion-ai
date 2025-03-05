@@ -34,12 +34,14 @@ export class FunctionTool<T extends TZodObjectAny = TZodObjectAny> extends BaseT
     }
   }
 
-  validParams(params: string): boolean {
+  validParams(
+    params: (z.output<T> extends string ? string : never) | z.input<T> | string,
+  ): boolean {
     try {
-      const parsed = JSON.parse(params)
-      this.schema.parse(parsed)
+      this.schema.parse(params)
       return true
     } catch (error) {
+      console.error('[orion ai] error', error)
       return false
     }
   }
@@ -49,24 +51,16 @@ export class FunctionTool<T extends TZodObjectAny = TZodObjectAny> extends BaseT
   ): Promise<string> {
     let parsedArgs: z.input<T>
 
-    if (!this.validParams(args as string)) {
-      throw new Error('Invalid arguments')
-    }
-
     if (typeof args === 'string') {
       try {
         parsedArgs = JSON.parse(args)
       } catch (error) {
-        parsedArgs = args as unknown as z.input<T>
+        throw new Error('[orion ai] if args is a string, it must be a valid JSON string')
       }
-    } else {
-      parsedArgs = args
-    }
+    } else parsedArgs = args
 
-    try {
-      this.schema.parse(parsedArgs)
-    } catch (error: any) {
-      throw new Error(`Invalid arguments: ${error.message}`)
+    if (!this.validParams(parsedArgs)) {
+      throw new Error('Invalid arguments')
     }
 
     const result = await this._func(parsedArgs)

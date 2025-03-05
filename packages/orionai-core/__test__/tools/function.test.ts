@@ -54,8 +54,8 @@ describe('base tool', () => {
       tools,
     })
 
-    console.log('res', res.tool_calls[0].function.arguments)
+    const toolRes = await tool.run(res.tool_calls[0].function.arguments)
 
-    tool.run(JSON.parse(res.tool_calls[0].function.arguments))
+    console.log('tool res ===>', toolRes)
   })
 })
