@@ -10,8 +10,8 @@ export class LLMAgent extends BaseAgent implements LLMAgentInterface {
 
   constructor() {
     super()
-    this.name = 'LlmAgent'
-    this.systemMessage = 'LlmAgent'
+    this.name = 'LLMAgent'
+    this.systemMessage = 'LLMAgent'
   }
 
   updateSystemMessage(message: string): void {
