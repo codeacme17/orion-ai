@@ -75,3 +75,7 @@ export class FunctionTool<T extends TZodObjectAny = TZodObjectAny> extends BaseT
     }
   }
 }
+
+export const functionTool = <T extends TZodObjectAny = TZodObjectAny>(
+  fields: IFunctionToolFields<T>,
+) => new FunctionTool(fields)

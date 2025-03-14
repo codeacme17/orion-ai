@@ -9,7 +9,7 @@ import type {
 import type { ChatModel } from 'openai/resources/index.mjs'
 import type { IChatCompletionMessage } from '@/messages'
 import type { RequestOptions } from 'openai/core.mjs'
-import { FunctionTool } from '@/tools/function'
+import type { BaseTool } from '@/tools'
 
 export interface IOpenAIModelFields extends ClientOptions, IBaseModelConfig {
   model?: (string & {}) | ChatModel
@@ -20,7 +20,7 @@ export interface IOpenaiCompleteParams
     IBaseCompleteParams {
   messages: Array<IChatCompletionMessage>
   model?: (string & {}) | ChatModel
-  tools?: Array<FunctionTool>
+  tools?: Array<BaseTool>
 }
 
 const DEFAULT_MODEL: ChatModel = 'gpt-4o-mini'

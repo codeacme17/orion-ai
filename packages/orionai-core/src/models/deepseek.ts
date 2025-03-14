@@ -9,7 +9,7 @@ import type {
 import type { ChatModel } from 'openai/resources/index.mjs'
 import type { RequestOptions } from 'openai/core.mjs'
 import type { IChatCompletionMessage } from '@/messages'
-import type { FunctionTool } from '@/tools/function'
+import type { BaseTool } from '@/tools'
 
 export interface IDeepSeekModelFields extends ClientOptions, IBaseModelConfig {
   model?: (string & {}) | ChatModel
@@ -20,7 +20,7 @@ export interface IDeepSeekCompleteParams
     IBaseCompleteParams {
   messages: Array<IChatCompletionMessage>
   model?: (string & {}) | TChatModel
-  tools?: Array<FunctionTool>
+  tools?: Array<BaseTool>
 }
 
 type TChatModel = 'deepseek-chat'

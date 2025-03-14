@@ -53,4 +53,6 @@ export abstract class BaseTool<T extends TZodObjectAny = TZodObjectAny> implemen
   returnValueAsString(value: any): string {
     return JSON.stringify(value)
   }
+
+  abstract toJSON(): Record<string, any>
 }
