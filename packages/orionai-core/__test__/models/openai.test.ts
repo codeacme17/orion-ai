@@ -3,6 +3,7 @@ import { openaiModel, OpenAIModel } from '@/models/openai'
 import { config as dotConfig } from 'dotenv'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import { AssistantMessage, SystemMessage, userMessage, UserMessage } from '@/messages'
+import { DEV_LOGGER } from '@/lib/logger'
 
 describe('OpenAIModel', () => {
   let model: OpenAIModel
@@ -79,7 +80,7 @@ describe('OpenAIModel', () => {
       ],
     })
 
-    console.log('response', response)
+    DEV_LOGGER.SUCCESS('response', response)
     expect(response).toBeTypeOf('string')
     expect(response).not.toBe('')
   })

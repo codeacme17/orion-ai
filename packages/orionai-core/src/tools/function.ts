@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { BaseTool, type IBaseToolFields } from './base'
 import type { TZodObjectAny } from '.'
+import { DEV_LOGGER } from '@/lib/logger'
 
 interface IFunctionToolFields<T extends TZodObjectAny = TZodObjectAny> extends IBaseToolFields<T> {
   func: (
@@ -41,7 +42,7 @@ export class FunctionTool<T extends TZodObjectAny = TZodObjectAny> extends BaseT
       this.schema.parse(params)
       return true
     } catch (error) {
-      console.error('[orion ai] error', error)
+      DEV_LOGGER.ERROR(error)
       return false
     }
   }

@@ -5,6 +5,7 @@ import { DeepSeekModel } from '@/models'
 import { systemMessage, userMessage, UserMessage } from '@/messages'
 import dotenv from 'dotenv'
 import type { BaseTool } from '@/tools'
+import { DEV_LOGGER } from '@/lib/logger'
 
 describe('base tool', () => {
   it('should run', () => {
@@ -15,12 +16,12 @@ describe('base tool', () => {
         location: z.string().describe('it is a location of user'),
       }),
       func: async (args) => {
-        console.log('test', args.location)
+        DEV_LOGGER.INFO('test', args.location)
         return 'test'
       },
     })
 
-    console.log('tool', tool)
+    DEV_LOGGER.SUCCESS('tool', tool)
 
     tool.run({
       location: 'beijing',
@@ -37,7 +38,7 @@ describe('base tool', () => {
         location: z.string().describe('it is a location of user'),
       }),
       func: async (args) => {
-        console.log('test', args.location)
+        DEV_LOGGER.INFO('test', args.location)
         return 'test'
       },
     })
@@ -57,7 +58,7 @@ describe('base tool', () => {
 
     const toolRes = await tool.run(res.tool_calls[0].function.arguments)
 
-    console.log('tool res ===>', toolRes)
+    DEV_LOGGER.SUCCESS('tool res ===>', toolRes)
   })
 
   it('should return 2 tools', async () => {
@@ -97,6 +98,6 @@ describe('base tool', () => {
       tools,
     })
 
-    console.log('res ===>', res)
+    DEV_LOGGER.SUCCESS('res ===>', res)
   })
 })
