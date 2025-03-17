@@ -11,7 +11,7 @@ import type { RequestOptions } from 'openai/core.mjs'
 import type { IChatCompletionMessage } from '@/messages'
 import type { BaseTool } from '@/tools'
 
-export interface IDeepSeekModelFields extends ClientOptions, IBaseModelConfig {
+export interface IDeepSeekModelConfig extends ClientOptions, IBaseModelConfig {
   model?: (string & {}) | ChatModel
 }
 
@@ -31,7 +31,7 @@ const DEFAULT_BASE_URL = 'https://api.deepseek.com/beta'
 export class DeepSeekModel extends BaseModel {
   private deepseek: Openai
 
-  constructor(config: IDeepSeekModelFields = {}) {
+  constructor(config: IDeepSeekModelConfig = {}) {
     super(config)
 
     const { apiKey } = config
@@ -76,5 +76,5 @@ export class DeepSeekModel extends BaseModel {
   }
 }
 
-export const deepseekModel = (config: IDeepSeekModelFields = {}): DeepSeekModel =>
+export const deepseekModel = (config: IDeepSeekModelConfig = {}): DeepSeekModel =>
   new DeepSeekModel(config)

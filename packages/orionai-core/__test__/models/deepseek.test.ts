@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import { DeepSeekModel, type IDeepSeekModelFields, type IDeepSeekCompleteParams } from '@/models'
+import { DeepSeekModel, type IDeepSeekModelConfig, type IDeepSeekCompleteParams } from '@/models'
 import { UserMessage } from '@/messages'
 import { config as dotConfig } from 'dotenv'
 
 describe('DeepSeekModel', () => {
   it('should throw an error if no API key is provided', () => {
-    const invalidConfig = { model: 'deepseek-chat' } as IDeepSeekModelFields
+    const invalidConfig = { model: 'deepseek-chat' } as IDeepSeekModelConfig
     expect(() => new DeepSeekModel(invalidConfig)).toThrowError(
       '[orion-ai] DeepSeek API key is required.',
     )

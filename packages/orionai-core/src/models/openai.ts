@@ -11,7 +11,7 @@ import type { IChatCompletionMessage } from '@/messages'
 import type { RequestOptions } from 'openai/core.mjs'
 import type { BaseTool } from '@/tools'
 
-export interface IOpenAIModelFields extends ClientOptions, IBaseModelConfig {
+export interface IOpenAIModelConfig extends ClientOptions, IBaseModelConfig {
   model?: (string & {}) | ChatModel
 }
 
@@ -28,7 +28,7 @@ const DEFAULT_MODEL: ChatModel = 'gpt-4o-mini'
 export class OpenAIModel extends BaseModel {
   private openai: Openai
 
-  constructor(config: IOpenAIModelFields = {}) {
+  constructor(config: IOpenAIModelConfig = {}) {
     super(config)
 
     const { apiKey } = config
@@ -68,4 +68,4 @@ export class OpenAIModel extends BaseModel {
   }
 }
 
-export const openaiModel = (config: IOpenAIModelFields = {}): OpenAIModel => new OpenAIModel(config)
+export const openaiModel = (config: IOpenAIModelConfig = {}): OpenAIModel => new OpenAIModel(config)
