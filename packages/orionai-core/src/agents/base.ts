@@ -2,8 +2,9 @@ import type { IBaseModelConfig, IDeepSeekModelConfig, IOpenAIModelConfig } from 
 
 export interface BaseAgentInterface {
   name: string
-  description: string
+  description?: string
   modelConfig?: Record<string, any> & IBaseModelConfig & IOpenAIModelConfig & IDeepSeekModelConfig
+  tools?: Record<string, any>[]
 
   /**
    * Send a message to another agent
@@ -82,7 +83,7 @@ export interface BaseAgentInterface {
 
 export interface BaseAgentFields {
   name: string
-  description: string
+  description?: string
   modelConfig?: Record<string, any> & IBaseModelConfig & IOpenAIModelConfig & IDeepSeekModelConfig
 }
 
@@ -92,7 +93,7 @@ export abstract class BaseAgent implements BaseAgentInterface {
   modelConfig
 
   constructor(fields: BaseAgentFields) {
-    const { name, description, modelConfig } = fields
+    const { name, description, modelConfig = {} } = fields
 
     if (!name) {
       throw new Error('[orion ai] name is required')
@@ -102,9 +103,9 @@ export abstract class BaseAgent implements BaseAgentInterface {
       throw new Error('[orion ai] description is required')
     }
 
-    this.name = fields.name
-    this.description = fields.description
-    this.modelConfig = fields.modelConfig = {}
+    this.name = name
+    this.description = description
+    this.modelConfig = modelConfig
   }
 
   send(
