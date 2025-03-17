@@ -26,6 +26,9 @@ importers:
 
   packages/orionai-core:
     dependencies:
+      chalk:
+        specifier: ^5.4.1
+        version: 5.4.1
       openai:
         specifier: ^4.85.3
         version: 4.85.3(encoding@0.1.13)(zod@3.24.2)
@@ -817,6 +820,10 @@ packages:
   chalk@4.1.2:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
     engines: {node: '>=10'}
+
+  chalk@5.4.1:
+    resolution: {integrity: sha512-zgVZuo2WcZgfUEmsn6eO3kINexW8RAE4maiQ8QNs8CtpPCSyMiYsULR3HQYkm3w8FIA3SberyMJMSldGsW+U3w==}
+    engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
 
   chardet@0.7.0:
     resolution: {integrity: sha512-mT8iDcrh03qDGRRmoA2hmBJnxpllMR+0/0qlzjqZES6NdiWDcZkCNAk4rPFZ9Q85r27unkiNNg8ZOiwZXBHwcA==}
@@ -3664,6 +3671,8 @@ snapshots:
       ansi-styles: 4.3.0
       supports-color: 7.2.0
 
+  chalk@5.4.1: {}
+
   chardet@0.7.0: {}
 
   check-error@2.1.1: {}
@@ -4446,13 +4455,13 @@ snapshots:
   jake@10.9.2:
     dependencies:
       async: 3.2.6
-      chalk: 4.1.0
+      chalk: 4.1.2
       filelist: 1.0.4
       minimatch: 3.1.2
 
   jest-diff@29.7.0:
     dependencies:
-      chalk: 4.1.0
+      chalk: 4.1.2
       diff-sequences: 29.6.3
       jest-get-type: 29.6.3
       pretty-format: 29.7.0
@@ -4644,7 +4653,7 @@ snapshots:
 
   log-symbols@4.1.0:
     dependencies:
-      chalk: 4.1.0
+      chalk: 4.1.2
       is-unicode-supported: 0.1.0
 
   loupe@3.1.3: {}
@@ -4920,7 +4929,7 @@ snapshots:
       '@yarnpkg/parsers': 3.0.2
       '@zkochan/js-yaml': 0.0.7
       axios: 1.7.9
-      chalk: 4.1.0
+      chalk: 4.1.2
       cli-cursor: 3.1.0
       cli-spinners: 2.6.1
       cliui: 8.0.1
@@ -4994,7 +5003,7 @@ snapshots:
   ora@5.3.0:
     dependencies:
       bl: 4.1.0
-      chalk: 4.1.0
+      chalk: 4.1.2
       cli-cursor: 3.1.0
       cli-spinners: 2.6.1
       is-interactive: 1.0.0

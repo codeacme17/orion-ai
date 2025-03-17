@@ -7,9 +7,11 @@
     "build": "vite build",
     "test": "vitest",
     "test:models": "vitest run ./__test__/models",
-    "test:messages": "vitest run ./__test__/messages"
+    "test:messages": "vitest run ./__test__/messages",
+    "test:lib": "vitest run ./__test__/lib"
   },
   "dependencies": {
+    "chalk": "^5.4.1",
     "openai": "^4.85.3",
     "zod": "^3.24.2"
   },
