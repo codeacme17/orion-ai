@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { OpenAIModel } from '@/models/openai'
 import { config as dotConfig } from 'dotenv'
 import { HttpsProxyAgent } from 'https-proxy-agent'
-import { AssistantMessage, SystemMessage, UserMessage } from '@/messages'
+import { AssistantMessage, SystemMessage, userMessage, UserMessage } from '@/messages'
 
 describe('OpenAIModel', () => {
   let model: OpenAIModel
@@ -48,6 +48,31 @@ describe('OpenAIModel', () => {
     })
 
     expect(response).toBeTypeOf('string')
+    expect(response).not.toBe('')
+  })
+
+  it('test image can be uploaded', async () => {
+    const response = await model.create({
+      messages: [
+        userMessage({
+          content: [
+            {
+              type: 'text',
+              text: 'Please tell me what you see in this image',
+            },
+            {
+              type: 'image_url',
+              image_url:
+                'https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png',
+            },
+          ],
+        }),
+      ],
+    })
+
+    console.log('response', response)
+
+    // expect(response).toBeTypeOf('string')
     expect(response).not.toBe('')
   })
 })
