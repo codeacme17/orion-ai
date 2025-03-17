@@ -75,3 +75,6 @@ export class DeepSeekModel extends BaseModel {
     }
   }
 }
+
+export const deepseekModel = (config: IDeepSeekModelFields = {}): DeepSeekModel =>
+  new DeepSeekModel(config)

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { OpenAIModel } from '@/models/openai'
+import { openaiModel, OpenAIModel } from '@/models/openai'
 import { config as dotConfig } from 'dotenv'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import { AssistantMessage, SystemMessage, userMessage, UserMessage } from '@/messages'
@@ -18,8 +18,17 @@ describe('OpenAIModel', () => {
     })
   })
 
-  it('should initialize the OpenAIModel correctly', () => {
+  it('should initialize the OpenAIModel correctly (by class)', () => {
     expect(model).toBeInstanceOf(OpenAIModel)
+  })
+
+  it('should initialize the OpenAIModel correctly (by function)', () => {
+    const fModel = openaiModel({
+      apiKey: process.env.OPENAI_API_KEY || '',
+      httpAgent: proxy,
+    })
+
+    expect(fModel).toBeInstanceOf(OpenAIModel)
   })
 
   it('should throw an error if no API key is provided', () => {

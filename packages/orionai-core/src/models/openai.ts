@@ -67,3 +67,5 @@ export class OpenAIModel extends BaseModel {
     }
   }
 }
+
+export const openaiModel = (config: IOpenAIModelFields = {}): OpenAIModel => new OpenAIModel(config)
