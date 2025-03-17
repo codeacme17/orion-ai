@@ -80,8 +80,7 @@ describe('OpenAIModel', () => {
     })
 
     console.log('response', response)
-
-    // expect(response).toBeTypeOf('string')
+    expect(response).toBeTypeOf('string')
     expect(response).not.toBe('')
   })
 })
