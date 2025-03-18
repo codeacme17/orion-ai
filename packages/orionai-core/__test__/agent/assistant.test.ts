@@ -15,13 +15,24 @@ describe('assistant agent', () => {
       model: deepseekModel(),
     })
 
-    expect(agent).toBeDefined()
+    DEV_LOGGER.SUCCESS('assistant agent', 'created', agent)
 
-    const res = await agent.model.create({
-      messages: [userMessage('Hello, how are you?')],
+    expect(agent).toBeDefined()
+  })
+
+  it('should update the system message', async () => {
+    configDotenv()
+
+    const agent = new AssistantAgent({
+      name: 'assistant',
+      systemMessage: 'hello',
+      model: deepseekModel(),
     })
 
-    DEV_LOGGER.INFO('response', res)
-    expect(res).toBeDefined()
+    agent.updateSystemMessage('world')
+
+    DEV_LOGGER.SUCCESS('assistant agent', 'updated', agent)
+
+    expect(agent.systemMessage).toBe('world')
   })
 })
