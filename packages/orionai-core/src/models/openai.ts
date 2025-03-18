@@ -7,7 +7,7 @@ import type {
   ChatCompletionTool,
 } from 'openai/resources/chat/completions.mjs'
 import type { ChatModel } from 'openai/resources/index.mjs'
-import type { IChatCompletionMessage } from '@/messages'
+import type { TMessage } from '@/messages'
 import type { RequestOptions } from 'openai/core.mjs'
 import type { BaseTool } from '@/tools'
 
@@ -18,7 +18,7 @@ export interface IOpenAIModelConfig extends ClientOptions, IBaseModelConfig {
 export interface IOpenaiCompleteParams
   extends Omit<ChatCompletionCreateParamsBase, 'messages' | 'model' | 'tools'>,
     IBaseCompleteParams {
-  messages: Array<IChatCompletionMessage>
+  messages: Array<TMessage>
   model?: (string & {}) | ChatModel
   tools?: Array<BaseTool>
 }
@@ -37,7 +37,17 @@ export class OpenAIModel extends BaseModel {
       throw new Error('[orion-ai] OpenAI API key is required.')
     }
 
-    this.openai = new Openai({
+    this.openai = this.init(config)
+  }
+
+  init(config: IOpenAIModelConfig): Openai {
+    const { apiKey } = config
+
+    if (!apiKey && !readEnv('OPENAI_API_KEY')) {
+      throw new Error('OpenAI API key is required.')
+    }
+
+    return new Openai({
       ...config,
       apiKey: this.config.apiKey || readEnv('OPENAI_API_KEY'),
     })

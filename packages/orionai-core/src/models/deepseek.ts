@@ -8,7 +8,7 @@ import type {
 } from 'openai/resources/chat/completions.mjs'
 import type { ChatModel } from 'openai/resources/index.mjs'
 import type { RequestOptions } from 'openai/core.mjs'
-import type { IChatCompletionMessage } from '@/messages'
+import type { TMessage } from '@/messages'
 import type { BaseTool } from '@/tools'
 
 export interface IDeepSeekModelConfig extends ClientOptions, IBaseModelConfig {
@@ -18,7 +18,7 @@ export interface IDeepSeekModelConfig extends ClientOptions, IBaseModelConfig {
 export interface IDeepSeekCompleteParams
   extends Omit<ChatCompletionCreateParamsBase, 'messages' | 'model' | 'tools'>,
     IBaseCompleteParams {
-  messages: Array<IChatCompletionMessage>
+  messages: Array<TMessage>
   model?: (string & {}) | TChatModel
   tools?: Array<BaseTool>
 }
@@ -40,7 +40,17 @@ export class DeepSeekModel extends BaseModel {
       throw new Error('[orion-ai] DeepSeek API key is required.')
     }
 
-    this.deepseek = new Openai({
+    this.deepseek = this.init(config)
+  }
+
+  init(config: IDeepSeekModelConfig): Openai {
+    const { apiKey } = config
+
+    if (!apiKey && !readEnv('OPENAI_API_KEY')) {
+      throw new Error('OpenAI API key is required.')
+    }
+
+    return new Openai({
       ...config,
       apiKey: this.config.apiKey || readEnv('DEEPSEEK_API_KEY'),
       baseURL: config.baseURL || DEFAULT_BASE_URL,

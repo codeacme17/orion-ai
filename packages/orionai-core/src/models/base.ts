@@ -8,11 +8,16 @@ export interface IBaseModelConfig {
 
 export interface IBaseCompleteParams {}
 
+export interface BaseModelInterface {
+  config: IBaseModelConfig
+  create(params: IBaseCompleteParams): Promise<string | Record<string, any>>
+}
+
 export abstract class BaseModel {
   /**
    * The configuration for the model.
    */
-  protected config: IBaseModelConfig
+  config: IBaseModelConfig
 
   constructor(config: IBaseModelConfig = {}) {
     this.config = config

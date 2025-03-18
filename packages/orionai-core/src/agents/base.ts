@@ -1,9 +1,8 @@
-import type { IBaseModelConfig, IDeepSeekModelConfig, IOpenAIModelConfig } from '@/models'
+import type { IBaseModelConfig, IDeepSeekModelConfig, IOpenAIModelConfig, TModel } from '@/models'
 
 export interface BaseAgentInterface {
   name: string
   description?: string
-  modelConfig?: Record<string, any> & IBaseModelConfig & IOpenAIModelConfig & IDeepSeekModelConfig
   tools?: Record<string, any>[]
 
   /**
@@ -12,7 +11,7 @@ export interface BaseAgentInterface {
    * @param recipient The recipient of the message
    * @param requestReply Whether to request a reply from the recipient
    */
-  send(
+  send?(
     message: Record<string, any> | string,
     recipient: BaseAgentInterface,
     requestReply?: boolean,
@@ -24,7 +23,7 @@ export interface BaseAgentInterface {
    * @param recipient The recipient of the message
    * @param requestReply Whether to request a reply from the recipient
    */
-  aSend(
+  aSend?(
     message: Record<string, any> | string,
     recipient: BaseAgentInterface,
     requestReply?: boolean,
@@ -36,7 +35,7 @@ export interface BaseAgentInterface {
    * @param sender The sender of the message
    * @param requestReply Whether the sender requests a reply
    */
-  receive(
+  receive?(
     message: Record<string, any> | string,
     sender: BaseAgentInterface,
     requestReply?: boolean,
@@ -48,7 +47,7 @@ export interface BaseAgentInterface {
    * @param sender The sender of the message
    * @param requestReply Whether the sender requests a reply
    */
-  aReceive(
+  aReceive?(
     message: Record<string, any> | string,
     sender: BaseAgentInterface,
     requestReply?: boolean,
@@ -61,7 +60,7 @@ export interface BaseAgentInterface {
    * @param kwargs Additional parameters
    * @returns The generated reply. If null, no reply is generated
    */
-  generateReply(
+  generateReply?(
     messages?: Record<string, any>[],
     sender?: BaseAgentInterface,
     kwargs?: Record<string, any>,
@@ -74,7 +73,7 @@ export interface BaseAgentInterface {
    * @param kwargs Additional parameters
    * @returns The generated reply. If null, no reply is generated
    */
-  aGenerateReply(
+  aGenerateReply?(
     messages?: Record<string, any>[],
     sender?: BaseAgentInterface,
     kwargs?: Record<string, any>,
@@ -84,16 +83,16 @@ export interface BaseAgentInterface {
 export interface BaseAgentFields {
   name: string
   description?: string
-  modelConfig?: Record<string, any> & IBaseModelConfig & IOpenAIModelConfig & IDeepSeekModelConfig
+  model?: TModel
 }
 
 export abstract class BaseAgent implements BaseAgentInterface {
   name
   description
-  modelConfig
+  model
 
   constructor(fields: BaseAgentFields) {
-    const { name, description, modelConfig = {} } = fields
+    const { name, description, model } = fields
 
     if (!name) {
       throw new Error('[orion ai] name is required')
@@ -105,7 +104,11 @@ export abstract class BaseAgent implements BaseAgentInterface {
 
     this.name = name
     this.description = description
-    this.modelConfig = modelConfig
+    this.model = model
+  }
+
+  initModel(): void {
+    console.log('Initializing model')
   }
 
   send(
