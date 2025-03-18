@@ -3,6 +3,7 @@ import { BaseAgent, type BaseAgentInterface } from './base'
 
 export interface AssistantAgentInterface extends BaseAgentInterface {
   systemMessage: string
+  description?: string
   model: TModel
   updateSystemMessage?(message: string): void
 }

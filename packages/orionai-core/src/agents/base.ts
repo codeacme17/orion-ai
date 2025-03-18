@@ -82,8 +82,8 @@ export interface BaseAgentInterface {
 
 export interface BaseAgentFields {
   name: string
+  model: TModel
   description?: string
-  model?: TModel
 }
 
 export abstract class BaseAgent implements BaseAgentInterface {
@@ -96,10 +96,6 @@ export abstract class BaseAgent implements BaseAgentInterface {
 
     if (!name) {
       throw new Error('[orion ai] name is required')
-    }
-
-    if (!description) {
-      throw new Error('[orion ai] description is required')
     }
 
     this.name = name

@@ -10,6 +10,7 @@ import type { ChatModel } from 'openai/resources/index.mjs'
 import type { TMessage } from '@/messages'
 import type { RequestOptions } from 'openai/core.mjs'
 import type { BaseTool } from '@/tools'
+import { DEV_LOGGER } from '@/lib/logger'
 
 export interface IOpenAIModelConfig extends ClientOptions, IBaseModelConfig {
   model?: (string & {}) | ChatModel
@@ -34,6 +35,7 @@ export class OpenAIModel extends BaseModel {
     const { apiKey } = config
 
     if (!apiKey && !readEnv('OPENAI_API_KEY')) {
+      DEV_LOGGER.ERROR('OpenAI API key is required.')
       throw new Error('[orion-ai] OpenAI API key is required.')
     }
 
@@ -73,6 +75,7 @@ export class OpenAIModel extends BaseModel {
 
       throw new Error('Unexpected response format')
     } catch (error) {
+      DEV_LOGGER.ERROR(error)
       throw error
     }
   }
