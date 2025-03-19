@@ -1,3 +1,5 @@
+import { nanoid } from 'nanoid'
+
 export type TMessageType =
   | 'user'
   | 'assistant'
@@ -32,26 +34,18 @@ export interface BaseMessageInterface {
   /**
    * The content of the message. This can be a string or an array of objects.
    */
-  content: TMessageContent
-  /**
-   * The name of the message. This is useful for identifying the message type.
-   */
-  name?: string
-  /**
-   * Response metadata. For example: response headers, logprobs, token counts.
-   */
-  metadata?: Record<string, any>
+  readonly content: TMessageContent
 
   /**
    * An optional unique identifier for the message. This should ideally be
    * provided by the provider/model which created the message.
    */
-  id?: string
+  readonly id?: string
 
   /**
    * The timestamp when the message was created.
    */
-  createdAt?: string
+  readonly createdAt?: string
 }
 
 export interface IBaseMessageFields extends BaseMessageInterface {}
@@ -59,9 +53,7 @@ export interface IBaseMessageFields extends BaseMessageInterface {}
 export abstract class BaseMessage implements BaseMessageInterface {
   content: TMessageContent
   id?: string
-  name?: string
   createdAt?: string
-  metadata?: Record<string, any>
 
   constructor(fields: IBaseMessageFields | string) {
     // If the input is not provided, throw an error
@@ -74,9 +66,9 @@ export abstract class BaseMessage implements BaseMessageInterface {
       this.content = fields
     } else {
       this.content = fields.content
-      this.id = fields.id
-      this.metadata = fields.metadata
-      this.createdAt = fields.createdAt
     }
+
+    this.id = nanoid()
+    this.createdAt = new Date().toISOString()
   }
 }

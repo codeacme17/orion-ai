@@ -6,7 +6,6 @@ describe('tool message', () => {
   it('should create a tool message', () => {
     const toolMessage = new ToolMessage({
       tool_call_id: '123',
-      name: 'tool',
       content: 'tool result',
     })
     DEV_LOGGER.SUCCESS('tool message', toolMessage)

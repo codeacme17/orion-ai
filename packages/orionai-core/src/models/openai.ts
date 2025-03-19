@@ -1,6 +1,8 @@
 import Openai, { type ClientOptions } from 'openai'
 import { BaseModel, type IBaseCompleteParams, type IBaseModelConfig } from './base'
 import { readEnv } from '@/lib/utils'
+import { DEV_LOGGER } from '@/lib/logger'
+
 import type {
   ChatCompletionCreateParamsBase,
   ChatCompletionMessageParam,
@@ -10,7 +12,6 @@ import type { ChatModel } from 'openai/resources/index.mjs'
 import type { TMessage } from '@/messages'
 import type { RequestOptions } from 'openai/core.mjs'
 import type { BaseTool } from '@/tools'
-import { DEV_LOGGER } from '@/lib/logger'
 
 export interface IOpenAIModelConfig extends ClientOptions, IBaseModelConfig {
   model?: (string & {}) | ChatModel
