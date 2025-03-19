@@ -58,21 +58,21 @@ describe('assistant agent', () => {
     expect(result).toBeDefined()
   })
 
-  it('should use tool', async () => {
+  it('should use tool and give the result', async () => {
     const agent = new AssistantAgent({
       name: 'assistant',
       systemMessage: 'you are an useful assistant, you can use tools',
       model: deepseekModel(),
       tools: [
-        new FunctionTool({
-          name: 'test',
-          description: 'it is a test tool',
+        functionTool({
+          name: 'location_weather',
+          description: 'this tool can get the weather of a location',
           schema: z.object({
-            location: z.string().describe('it is a location of user'),
+            location: z.string().describe('the location to get the weather'),
           }),
           func: async (args) => {
             DEV_LOGGER.INFO('test', args.location)
-            return 'test'
+            return 'the weather is windy in ' + args.location
           },
         }),
       ],

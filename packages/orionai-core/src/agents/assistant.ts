@@ -1,4 +1,4 @@
-import { SystemMessage, type TMessage } from '@/messages'
+import { assistantMessage, SystemMessage, toolMessage, type TMessage } from '@/messages'
 import { BaseAgent, type BaseAgentInterface } from './base'
 import type { TModel } from '@/models'
 import { DEV_LOGGER } from '@/lib/logger'
@@ -38,17 +38,47 @@ export class AssistantAgent extends BaseAgent implements AssistantAgentInterface
 
   async invoke(messages: Array<TMessage>): Promise<string> {
     try {
-      const conbinedMessages = [
+      const combinedMessages = [
         new SystemMessage(this.systemMessage),
         ...messages,
       ] as Array<TMessage>
 
       const result = await this.model.create({
-        messages: conbinedMessages,
+        messages: combinedMessages,
         tools: this.tools,
       })
 
-      return typeof result === 'string' ? result : JSON.stringify(result)
+      // If the result is an assistant message and there are tool calls, run the tools
+      if (result.role === 'assistant' && result.tool_calls) {
+        const toolCalls = result.tool_calls
+        const toolResults = []
+
+        // Run each tool call
+        for (const tool of toolCalls) {
+          const toolName = tool.function.name
+          const toolArgs = JSON.parse(tool.function.arguments)
+
+          const toolFn = this.tools?.find((t) => t.name === toolName)
+          if (toolFn) {
+            const toolResult = await toolFn.run(toolArgs)
+            toolResults.push(
+              toolMessage({ tool_call_id: tool.id, content: JSON.stringify(toolResult) }),
+            )
+          }
+        }
+
+        DEV_LOGGER.SUCCESS('AssistantAgent.invoke: toolResults', toolResults[0].content)
+        // Combine the messages and tool results
+        const newMessages = [...combinedMessages, result, ...toolResults] as Array<TMessage>
+        DEV_LOGGER.INFO('AssistantAgent.invoke: newMessages', newMessages)
+        const finalResult = await this.model.create({
+          messages: newMessages,
+        })
+
+        return typeof finalResult === 'string' ? finalResult : finalResult.content
+      }
+
+      return typeof result === 'string' ? result : result.content
     } catch (error) {
       DEV_LOGGER.ERROR(`AssistantAgent.invoke: ${error}`)
       throw new Error(`AssistantAgent.invoke: ${error}`)

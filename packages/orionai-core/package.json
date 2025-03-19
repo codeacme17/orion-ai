@@ -7,7 +7,9 @@
     "build": "vite build",
     "test": "vitest",
     "test:models": "vitest run ./__test__/models",
+    "test:agents": "vitest run ./__test__/agents",
     "test:messages": "vitest run ./__test__/messages",
+    "test:tools": "vitest run ./__test__/tools",
     "test:lib": "vitest run ./__test__/lib"
   },
   "dependencies": {

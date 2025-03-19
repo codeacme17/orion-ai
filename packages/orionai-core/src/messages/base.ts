@@ -63,52 +63,20 @@ export abstract class BaseMessage implements BaseMessageInterface {
   createdAt?: string
   metadata?: Record<string, any>
 
-  constructor(props: IBaseMessageFields | string) {
+  constructor(fields: IBaseMessageFields | string) {
     // If the input is not provided, throw an error
-    if (!props || (typeof props !== 'string' && !props.content)) {
+    if (!fields || (typeof fields !== 'string' && !fields.content)) {
       throw new Error('[orion-ai] Message content is required.')
     }
 
     // If the input is a string, set the content of the message
-    if (typeof props === 'string') {
-      this.content = BaseMessage.parseContent(props)
+    if (typeof fields === 'string') {
+      this.content = fields
     } else {
-      this.content = BaseMessage.parseContent(props.content)
-      this.id = props.id
-      this.metadata = props.metadata
-      this.createdAt = props.createdAt
+      this.content = fields.content
+      this.id = fields.id
+      this.metadata = fields.metadata
+      this.createdAt = fields.createdAt
     }
-  }
-
-  /**
-   * Parse the content of the message and return an array of complex message objects.
-   * @param content The content of the message
-   * @returns An array of complex message objects
-   */
-  private static parseContent(content: TMessageContent): TMessageContentComplex[] {
-    if (typeof content === 'string') {
-      return [{ type: 'text', text: content }]
-    }
-
-    // content is already an array of TMessageContentComplex if it's not a string
-    if (Array.isArray(content)) {
-      // Optionally validate each item in the array if needed
-      return content.map((item) => {
-        if (!item.type) {
-          return { type: 'text', text: String(item) }
-        }
-
-        if (item.type === 'image_url' && typeof item.image_url === 'string') {
-          return {
-            type: 'image_url',
-            image_url: { url: item.image_url },
-          }
-        }
-
-        return item
-      })
-    }
-
-    return content
   }
 }

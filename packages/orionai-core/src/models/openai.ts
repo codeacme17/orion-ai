@@ -55,7 +55,8 @@ export class OpenAIModel extends BaseModel {
     })
   }
 
-  async create(body: IOpenaiCompleteParams, options?: RequestOptions): Promise<string> {
+  // TODO - Fix any type here (promoise<any>)
+  async create(body: IOpenaiCompleteParams, options?: RequestOptions): Promise<any> {
     try {
       const { model, messages, tools, ...rest } = body
 
