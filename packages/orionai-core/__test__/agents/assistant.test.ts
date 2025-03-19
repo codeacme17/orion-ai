@@ -75,10 +75,23 @@ describe('assistant agent', () => {
             return 'the weather is windy in ' + args.location
           },
         }),
+        functionTool({
+          name: 'location_time',
+          description: 'this tool can get the time of a location',
+          schema: z.object({
+            location: z.string().describe('the location to get the time'),
+          }),
+          func: async (args) => {
+            DEV_LOGGER.INFO('test', args.location)
+            return 'the time is 12:00 in ' + args.location
+          },
+        }),
       ],
     })
 
-    const result = await agent.invoke([userMessage('can you give me the weather in beijing?')])
+    const result = await agent.invoke([
+      userMessage('can you give me the weather in beijing? and the time?'),
+    ])
 
     DEV_LOGGER.SUCCESS('assistant agent', result)
     expect(result).toBeDefined()

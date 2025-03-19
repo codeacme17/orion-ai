@@ -1,8 +1,7 @@
-import { assistantMessage, SystemMessage, toolMessage, type TMessage } from '@/messages'
+import { SystemMessage, toolMessage, type TMessage } from '@/messages'
 import { BaseAgent, type BaseAgentInterface } from './base'
-import type { TModel } from '@/models'
 import { DEV_LOGGER } from '@/lib/logger'
-import type { FunctionTool } from '@/tools/function'
+import type { TModel } from '@/models'
 
 export interface AssistantAgentInterface extends BaseAgentInterface {
   /**
