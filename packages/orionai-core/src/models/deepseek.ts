@@ -10,6 +10,7 @@ import type { ChatModel } from 'openai/resources/index.mjs'
 import type { RequestOptions } from 'openai/core.mjs'
 import type { TMessage } from '@/messages'
 import type { BaseTool } from '@/tools'
+import { DEV_LOGGER } from '@/lib/logger'
 
 export interface IDeepSeekModelConfig extends ClientOptions, IBaseModelConfig {
   model?: (string & {}) | ChatModel
@@ -26,7 +27,7 @@ export interface IDeepSeekCompleteParams
 type TChatModel = 'deepseek-chat'
 
 const DEFAULT_MODEL: TChatModel = 'deepseek-chat'
-const DEFAULT_BASE_URL = 'https://api.deepseek.com/beta'
+const DEFAULT_BASE_URL = 'https://api.deepseek.com/v1'
 
 export class DeepSeekModel extends BaseModel {
   private deepseek: Openai
@@ -63,6 +64,8 @@ export class DeepSeekModel extends BaseModel {
   ): Promise<Record<string, any>> {
     try {
       const { model, messages, tools, ...rest } = body
+
+      DEV_LOGGER.INFO('tools', tools)
 
       const response = await this.deepseek.chat.completions.create(
         {

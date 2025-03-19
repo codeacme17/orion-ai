@@ -1,25 +1,25 @@
 import { DEV_LOGGER } from '@/lib/logger'
 import type { TModel } from '@/models'
+import type { BaseTool } from '@/tools'
 
 export interface BaseAgentInterface {
   name: string
-  description?: string
-  tools?: Record<string, any>[]
+  tools?: Array<BaseTool>
 }
 
-export interface BaseAgentFields {
+export interface BaseAgentFields extends BaseAgentInterface {
   name: string
   model: TModel
-  description?: string
+  tools?: Array<BaseTool>
 }
 
 export abstract class BaseAgent implements BaseAgentInterface {
   name
-  description
   model
+  tools
 
   constructor(fields: BaseAgentFields) {
-    const { name, description, model } = fields
+    const { name, model, tools } = fields
 
     if (!name) {
       DEV_LOGGER.ERROR('Name is required.')
@@ -27,7 +27,7 @@ export abstract class BaseAgent implements BaseAgentInterface {
     }
 
     this.name = name
-    this.description = description
     this.model = model
+    this.tools = tools
   }
 }
