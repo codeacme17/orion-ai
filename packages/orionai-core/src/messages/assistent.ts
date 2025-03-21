@@ -1,9 +1,10 @@
 import { BaseMessage, type IBaseMessageFields } from './base'
 
 interface TToolCallResult {
-  content: string
-  name: string
-  call_id: string
+  id: string
+  index: number
+  type: 'function' | 'tool'
+  function: Object
   is_error?: boolean
 }
 

@@ -52,6 +52,7 @@ export class AssistantAgent extends BaseAgent implements AssistantAgentInterface
         const toolResults = []
         const resultMessage = assistantMessage({ ...result })
 
+        DEV_LOGGER.INFO(`AssistantAgent.invoke: resultMessage.tool_calls`, resultMessage.tool_calls)
         DEV_LOGGER.INFO(`AssistantAgent.invoke: resultMessage`, resultMessage)
 
         // Run each tool call
@@ -60,12 +61,19 @@ export class AssistantAgent extends BaseAgent implements AssistantAgentInterface
 
           const toolName = tool.function.name
           const toolArgs = JSON.parse(tool.function.arguments)
-
           const toolFn = this.tools?.find((t) => t.name === toolName)
+
+          DEV_LOGGER.INFO(`AssistantAgent.invoke: toolFn`, toolFn)
+
           if (toolFn) {
             const toolResult = await toolFn.run(toolArgs)
+            DEV_LOGGER.INFO(`AssistantAgent.invoke: toolResult`, toolResult)
+
             toolResults.push(
-              toolMessage({ tool_call_id: tool.id, content: JSON.stringify(toolResult) }),
+              toolMessage({
+                content: toolResult,
+                tool_call_id: tool.id,
+              }),
             )
           }
         }
