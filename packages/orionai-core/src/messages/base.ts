@@ -57,7 +57,7 @@ export abstract class BaseMessage implements BaseMessageInterface {
 
   constructor(fields: IBaseMessageFields | string) {
     // If the input is not provided, throw an error
-    if (!fields || (typeof fields !== 'string' && !fields.content)) {
+    if (!fields || (typeof fields !== 'string' && fields.content === undefined)) {
       throw new Error('[orion-ai] Message content is required.')
     }
 

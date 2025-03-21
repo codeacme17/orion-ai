@@ -15,7 +15,6 @@ export interface AssistantAgentInterface extends BaseAgentInterface {
    */
   model: TModel
 
-  description?: string
   updateSystemMessage?(message: string): void
 }
 
@@ -51,7 +50,7 @@ export class AssistantAgent extends BaseAgent implements AssistantAgentInterface
       if (result.role === 'assistant' && result.tool_calls) {
         const toolCalls = result.tool_calls
         const toolResults = []
-        const resultMessage = assistantMessage({ ...result, content: ' ' })
+        const resultMessage = assistantMessage({ ...result })
 
         DEV_LOGGER.INFO(`AssistantAgent.invoke: resultMessage`, resultMessage)
 

@@ -18,6 +18,7 @@ export class ToolMessage extends BaseMessage {
     }
 
     this.role = 'tool'
+    this.content = ''
     this.tool_call_id = tool_call_id
   }
 }
