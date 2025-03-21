@@ -2,11 +2,29 @@ import {
   BaseMessage,
   type IBaseMessageFields,
   type TMessageContent,
-  type TMessageContentComplex,
   type TMessageType,
 } from './base'
 
-export interface IUserMessageFields extends IBaseMessageFields {}
+export type TImageDetail = 'auto' | 'low' | 'high'
+
+export type TMessageContentText = {
+  type: 'text'
+  text: string
+}
+
+export type TMessageContentImageUrl = {
+  type: 'image_url'
+  image_url: string | { url: string; detail?: TImageDetail }
+}
+
+export type TMessageContentComplex =
+  | TMessageContentText
+  | TMessageContentImageUrl
+  | (Record<string, any> & { type?: 'text' | 'image_url' | string })
+
+export interface IUserMessageFields extends IBaseMessageFields {
+  content: TMessageContentComplex | TMessageContentComplex[] | string
+}
 
 export class UserMessage extends BaseMessage {
   role: TMessageType
@@ -27,7 +45,7 @@ export class UserMessage extends BaseMessage {
    * @param content The content of the message
    * @returns An array of complex message objects
    */
-  parseContent(content: TMessageContent): TMessageContentComplex[] {
+  parseContent(content: TMessageContent): TMessageContentComplex[] | TMessageContentComplex {
     if (typeof content === 'string') {
       return [{ type: 'text', text: content }]
     }

@@ -1,6 +1,7 @@
 import Openai, { type ClientOptions } from 'openai'
 import { BaseModel, type IBaseCompleteParams, type IBaseModelConfig } from './base'
 import { readEnv } from '@/lib/utils'
+import { DEV_LOGGER } from '@/lib/logger'
 import type {
   ChatCompletionCreateParamsBase,
   ChatCompletionMessageParam,
@@ -10,7 +11,6 @@ import type { ChatModel } from 'openai/resources/index.mjs'
 import type { RequestOptions } from 'openai/core.mjs'
 import type { TMessage } from '@/messages'
 import type { BaseTool } from '@/tools'
-import { DEV_LOGGER } from '@/lib/logger'
 
 export interface IDeepSeekModelConfig extends ClientOptions, IBaseModelConfig {
   model?: (string & {}) | ChatModel
@@ -58,10 +58,16 @@ export class DeepSeekModel extends BaseModel {
     })
   }
 
-  async create(
-    body: IDeepSeekCompleteParams,
-    options?: RequestOptions,
-  ): Promise<Record<string, any>> {
+  private parseOutput(output: any): string {
+    if ('choices' in output) {
+      DEV_LOGGER.WARNING('output.choices[0]', output.choices[0])
+      return output.choices[0].message || ''
+    }
+
+    throw new Error('Unexpected response format')
+  }
+
+  async create(body: IDeepSeekCompleteParams, options?: RequestOptions): Promise<any> {
     try {
       const { model, messages, tools, ...rest } = body
 
@@ -77,12 +83,8 @@ export class DeepSeekModel extends BaseModel {
         { ...options },
       )
 
-      if ('choices' in response) {
-        const { choices } = response
-        return choices[0].message
-      }
-
-      throw new Error('Unexpected response format')
+      DEV_LOGGER.WARNING('response', response)
+      return this.parseOutput(response)
     } catch (error) {
       throw error
     }

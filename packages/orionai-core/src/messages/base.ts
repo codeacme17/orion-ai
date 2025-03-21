@@ -11,24 +11,7 @@ export type TMessageType =
   | 'remove'
   | 'unknown'
 
-export type TImageDetail = 'auto' | 'low' | 'high'
-
-export type TMessageContentText = {
-  type: 'text'
-  text: string
-}
-
-export type TMessageContentImageUrl = {
-  type: 'image_url'
-  image_url: string | { url: string; detail?: TImageDetail }
-}
-
-export type TMessageContentComplex =
-  | TMessageContentText
-  | TMessageContentImageUrl
-  | (Record<string, any> & { type?: 'text' | 'image_url' | string })
-
-export type TMessageContent = string | TMessageContentComplex[]
+export type TMessageContent = string | Record<string, any> | Array<Record<string, any>>
 
 export interface BaseMessageInterface {
   /**
@@ -41,19 +24,13 @@ export interface BaseMessageInterface {
    * provided by the provider/model which created the message.
    */
   readonly id?: string
-
-  /**
-   * The timestamp when the message was created.
-   */
-  readonly createdAt?: string
 }
 
 export interface IBaseMessageFields extends BaseMessageInterface {}
 
 export abstract class BaseMessage implements BaseMessageInterface {
   content: TMessageContent
-  id?: string
-  createdAt?: string
+  readonly id?: string
 
   constructor(fields: IBaseMessageFields | string) {
     // If the input is not provided, throw an error
@@ -69,6 +46,5 @@ export abstract class BaseMessage implements BaseMessageInterface {
     }
 
     this.id = nanoid()
-    this.createdAt = new Date().toISOString()
   }
 }

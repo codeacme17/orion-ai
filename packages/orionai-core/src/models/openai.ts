@@ -56,6 +56,15 @@ export class OpenAIModel extends BaseModel {
     })
   }
 
+  private parseOutput(output: any): string {
+    if ('choices' in output) {
+      DEV_LOGGER.WARNING('output.choices[0].message.content', output.choices[0].message.content)
+      return output.choices[0].message.content || ''
+    }
+
+    throw new Error('Unexpected response format')
+  }
+
   // TODO - Fix any type here (promoise<any>)
   async create(body: IOpenaiCompleteParams, options?: RequestOptions): Promise<any> {
     try {
@@ -70,12 +79,8 @@ export class OpenAIModel extends BaseModel {
         },
         { ...options },
       )
-
-      if ('choices' in response) {
-        return response.choices[0].message.content || ''
-      }
-
-      throw new Error('Unexpected response format')
+      DEV_LOGGER.WARNING('response', response)
+      return this.parseOutput(response)
     } catch (error) {
       DEV_LOGGER.ERROR(error)
       throw error
