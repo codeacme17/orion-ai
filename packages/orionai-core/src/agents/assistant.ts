@@ -1,4 +1,4 @@
-import { SystemMessage, toolMessage, type TMessage } from '@/messages'
+import { assistantMessage, SystemMessage, toolMessage, type TMessage } from '@/messages'
 import { BaseAgent, type BaseAgentInterface } from './base'
 import { DEV_LOGGER } from '@/lib/logger'
 import type { TModel } from '@/models'
@@ -51,6 +51,9 @@ export class AssistantAgent extends BaseAgent implements AssistantAgentInterface
       if (result.role === 'assistant' && result.tool_calls) {
         const toolCalls = result.tool_calls
         const toolResults = []
+        const resultMessage = assistantMessage({ ...result, content: ' ' })
+
+        DEV_LOGGER.INFO(`AssistantAgent.invoke: resultMessage`, resultMessage)
 
         // Run each tool call
         for (const tool of toolCalls) {
@@ -69,9 +72,9 @@ export class AssistantAgent extends BaseAgent implements AssistantAgentInterface
         }
 
         // Combine the messages and tool results
-        const newMessages = [...combinedMessages, result, ...toolResults] as Array<TMessage>
+        const newMessages = [...combinedMessages, resultMessage, ...toolResults] as Array<TMessage>
 
-        DEV_LOGGER.INFO(`AssistantAgent.invoke: result`, result.tool_calls)
+        DEV_LOGGER.INFO(`AssistantAgent.invoke: newMessages`, newMessages)
 
         const finalResult = await this.model.create({
           messages: newMessages,
