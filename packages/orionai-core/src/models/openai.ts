@@ -1,5 +1,11 @@
 import Openai, { type ClientOptions } from 'openai'
-import { BaseModel, type IBaseCompleteParams, type IBaseModelConfig } from './base'
+import {
+  BaseModel,
+  type IBaseCompleteParams,
+  type IBaseCreateResponse,
+  type IBaseModelConfig,
+  type IToolCallResult,
+} from './base'
 import { readEnv } from '@/lib/utils'
 import { DEV_LOGGER } from '@/lib/logger'
 
@@ -56,17 +62,25 @@ export class OpenAIModel extends BaseModel {
     })
   }
 
-  private parseOutput(output: any): string {
-    if ('choices' in output) {
-      DEV_LOGGER.WARNING('output.choices[0].message.content', output.choices[0].message.content)
-      return output.choices[0].message.content || ''
+  protected parseResult(result: any): IBaseCreateResponse {
+    if ('choices' in result) {
+      DEV_LOGGER.WARNING('output.choices[0]', result.choices[0].message.tool_calls)
+
+      return {
+        finish_reason: result.choices[0].finish_reason || '',
+        content: result.choices[0].message.content || '',
+        usage: result.usage || {},
+        tool_calls: result.choices[0].message.tool_calls as unknown as Array<IToolCallResult>,
+      }
     }
 
     throw new Error('Unexpected response format')
   }
 
-  // TODO - Fix any type here (promoise<any>)
-  async create(body: IOpenaiCompleteParams, options?: RequestOptions) {
+  public async create(
+    body: IOpenaiCompleteParams,
+    options?: RequestOptions,
+  ): Promise<IBaseCreateResponse> {
     try {
       const { model, messages, tools, ...rest } = body
 
@@ -81,7 +95,7 @@ export class OpenAIModel extends BaseModel {
       )
 
       DEV_LOGGER.WARNING('response', response)
-      return this.parseOutput(response)
+      return this.parseResult(response)
     } catch (error) {
       DEV_LOGGER.ERROR(error)
       throw error

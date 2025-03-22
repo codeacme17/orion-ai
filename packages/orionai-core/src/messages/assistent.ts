@@ -1,20 +1,13 @@
+import type { IToolCallResult } from '@/models'
 import { BaseMessage, type IBaseMessageFields } from './base'
 
-interface TToolCallResult {
-  id: string
-  index: number
-  type: 'function' | 'tool'
-  function: Object
-  is_error?: boolean
-}
-
 interface IAssistantMessageFiels extends IBaseMessageFields {
-  tool_calls?: TToolCallResult[]
+  tool_calls?: IToolCallResult[]
 }
 
 export class AssistantMessage extends BaseMessage {
   role
-  tool_calls?: TToolCallResult[]
+  tool_calls?: IToolCallResult[]
 
   constructor(fields: IAssistantMessageFiels | string) {
     super(fields)

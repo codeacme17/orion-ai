@@ -1,9 +1,9 @@
+import { z } from 'zod'
 import { describe, it, expect } from 'vitest'
+import { config as dotConfig } from 'dotenv'
 import { DeepSeekModel, type IDeepSeekModelConfig, type IDeepSeekCompleteParams } from '@/models'
 import { UserMessage } from '@/messages'
-import { config as dotConfig } from 'dotenv'
 import { functionTool } from '@/tools/function'
-import { z } from 'zod'
 import { DEV_LOGGER } from '@/lib/logger'
 
 describe('DeepSeekModel', () => {
@@ -22,19 +22,19 @@ describe('DeepSeekModel', () => {
 
   it('should create a chat completion', async () => {
     dotConfig()
-    console.log('DEEPSEEK_API_KEY', process.env.DEEPSEEK_API_KEY)
+
     const model = new DeepSeekModel()
     const body: IDeepSeekCompleteParams = {
       messages: [new UserMessage(`hi`)],
     }
 
     const result = await model.create(body)
-    console.log('[orion] result', result)
     expect(result).not.toBe('')
   })
 
   it('should use a tool and give the result', async () => {
     dotConfig()
+
     const model = new DeepSeekModel()
     const tool = functionTool({
       name: 'weather_tool',
@@ -51,7 +51,7 @@ describe('DeepSeekModel', () => {
 
     const result = await model.create(body)
     const res = await tool.run(result.tool_calls[0].function.arguments)
-    DEV_LOGGER.SUCCESS('res', res)
+    DEV_LOGGER.SUCCESS('tool call res', res)
     expect(result).not.toBe
   })
 })

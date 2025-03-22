@@ -23,7 +23,7 @@ export interface IToolCallResult {
 export interface IBaseCreateResponse {
   finish_reason: string
 
-  content: string | Array<any>
+  content: string
 
   usage: Record<string, any>
 

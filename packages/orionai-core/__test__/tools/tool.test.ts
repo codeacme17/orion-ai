@@ -28,14 +28,7 @@ describe('tool message', () => {
 
   it('should craete a assistant message', () => {
     const res = assistantMessage({
-      content: 'hello 2123',
-      tool_calls: [
-        {
-          call_id: '123',
-          content: 'tool result',
-          name: 'tool name',
-        },
-      ],
+      content: 'hello',
     })
     DEV_LOGGER.SUCCESS('assistant message', res)
     expect(res).toBeDefined()

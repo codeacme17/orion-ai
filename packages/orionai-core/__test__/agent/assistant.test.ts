@@ -72,7 +72,7 @@ describe('assistant agent', () => {
           }),
           execute: async (args) => {
             DEV_LOGGER.INFO('test', args.location)
-            return 'windy'
+            return `thie weather in ${args.location} windy`
           },
         }),
         functionTool({
@@ -83,7 +83,7 @@ describe('assistant agent', () => {
           }),
           execute: async (args) => {
             DEV_LOGGER.INFO('test', args.location)
-            return '12:00'
+            return `the time in ${args.location} 12:00`
           },
         }),
       ],

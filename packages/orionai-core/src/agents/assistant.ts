@@ -47,7 +47,7 @@ export class AssistantAgent extends BaseAgent implements AssistantAgentInterface
       })
 
       // If the result is an assistant message and there are tool calls, run the tools
-      if (result.role === 'assistant' && result.tool_calls) {
+      if (result.tool_calls) {
         const toolCalls = result.tool_calls
         const toolResults = []
         const resultMessage = assistantMessage({ ...result })
@@ -63,12 +63,10 @@ export class AssistantAgent extends BaseAgent implements AssistantAgentInterface
           const toolArgs = JSON.parse(tool.function.arguments)
           const toolFn = this.tools?.find((t) => t.name === toolName)
 
-          DEV_LOGGER.INFO(`AssistantAgent.invoke: toolFn`, toolFn)
-
+          // If the tool is found, run it
           if (toolFn) {
             const toolResult = await toolFn.run(toolArgs)
-            DEV_LOGGER.INFO(`AssistantAgent.invoke: toolResult`, toolResult)
-
+            // Add the tool result to the toolResults array
             toolResults.push(
               toolMessage({
                 content: toolResult,
@@ -89,7 +87,7 @@ export class AssistantAgent extends BaseAgent implements AssistantAgentInterface
 
         DEV_LOGGER.SUCCESS(`AssistantAgent.invoke: final result`, finalResult)
 
-        return typeof finalResult === 'string' ? finalResult : finalResult.content
+        return finalResult.content
       }
 
       return typeof result === 'string' ? result : result.content
