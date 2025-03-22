@@ -70,7 +70,7 @@ describe('assistant agent', () => {
           schema: z.object({
             location: z.string().describe('the location to get the weather'),
           }),
-          func: async (args) => {
+          execute: async (args) => {
             DEV_LOGGER.INFO('test', args.location)
             return 'windy'
           },
@@ -81,7 +81,7 @@ describe('assistant agent', () => {
           schema: z.object({
             location: z.string().describe('the location to get the time'),
           }),
-          func: async (args) => {
+          execute: async (args) => {
             DEV_LOGGER.INFO('test', args.location)
             return '12:00'
           },

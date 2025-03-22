@@ -15,7 +15,7 @@ describe('base tool', () => {
       schema: z.object({
         location: z.string().describe('it is a location of user'),
       }),
-      func: async (args) => {
+      execute: async (args) => {
         DEV_LOGGER.INFO('test', args.location)
         return 'test'
       },
@@ -37,7 +37,7 @@ describe('base tool', () => {
       schema: z.object({
         location: z.string().describe('it is a location of user'),
       }),
-      func: async (args) => {
+      execute: async (args) => {
         DEV_LOGGER.INFO('test', args.location)
         return 'test'
       },
@@ -70,7 +70,7 @@ describe('base tool', () => {
       schema: z.object({
         location: z.string().describe('用户查询的地点'),
       }),
-      func: async (args) => {
+      execute: async (args) => {
         return `${args.location}的天气是晴天，温度25度`
       },
     })
@@ -81,7 +81,7 @@ describe('base tool', () => {
       schema: z.object({
         location: z.string().describe('需要查询信息的地点'),
       }),
-      func: async (args) => {
+      execute: async (args) => {
         return `${args.location}是中国的首都，人口约2100万`
       },
     })

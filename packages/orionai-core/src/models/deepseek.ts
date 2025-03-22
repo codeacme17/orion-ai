@@ -1,16 +1,25 @@
 import Openai, { type ClientOptions } from 'openai'
-import { BaseModel, type IBaseCompleteParams, type IBaseModelConfig } from './base'
+import {
+  BaseModel,
+  type IBaseCompleteParams,
+  type IBaseCreateResponse,
+  type IBaseModelConfig,
+  type IToolCallResult,
+} from './base'
 import { readEnv } from '@/lib/utils'
 import { DEV_LOGGER } from '@/lib/logger'
 import type {
   ChatCompletionCreateParamsBase,
   ChatCompletionMessageParam,
+  ChatCompletionMessageToolCall,
   ChatCompletionTool,
 } from 'openai/resources/chat/completions.mjs'
 import type { ChatModel } from 'openai/resources/index.mjs'
-import type { RequestOptions } from 'openai/core.mjs'
+import type { APIPromise, RequestOptions } from 'openai/core.mjs'
 import type { TMessage } from '@/messages'
 import type { BaseTool } from '@/tools'
+import type { FunctionTool } from '@/tools/function'
+import type { Stream } from 'openai/streaming.mjs'
 
 export interface IDeepSeekModelConfig extends ClientOptions, IBaseModelConfig {
   model?: (string & {}) | ChatModel
@@ -21,7 +30,7 @@ export interface IDeepSeekCompleteParams
     IBaseCompleteParams {
   messages: Array<TMessage>
   model?: (string & {}) | TChatModel
-  tools?: Array<BaseTool>
+  tools?: Array<BaseTool | FunctionTool>
 }
 
 type TChatModel = 'deepseek-chat'
@@ -44,7 +53,7 @@ export class DeepSeekModel extends BaseModel {
     this.deepseek = this.init(config)
   }
 
-  init(config: IDeepSeekModelConfig): Openai {
+  private init(config: IDeepSeekModelConfig): Openai {
     const { apiKey } = config
 
     if (!apiKey && !readEnv('OPENAI_API_KEY')) {
@@ -58,20 +67,31 @@ export class DeepSeekModel extends BaseModel {
     })
   }
 
-  private parseOutput(output: any): string {
-    if ('choices' in output) {
-      DEV_LOGGER.WARNING('output.choices[0]', output.choices[0])
-      return output.choices[0].message || ''
+  protected parseResult(
+    result:
+      | Stream<Openai.Chat.Completions.ChatCompletionChunk>
+      | Openai.Chat.Completions.ChatCompletion,
+  ): IBaseCreateResponse {
+    if ('choices' in result) {
+      DEV_LOGGER.WARNING('output.choices[0]', result.choices[0].message.tool_calls)
+
+      return {
+        finish_reason: result.choices[0].finish_reason || '',
+        content: result.choices[0].message.content || '',
+        usage: result.usage || {},
+        tool_calls: result.choices[0].message.tool_calls as unknown as Array<IToolCallResult>,
+      }
     }
 
     throw new Error('Unexpected response format')
   }
 
-  async create(body: IDeepSeekCompleteParams, options?: RequestOptions): Promise<any> {
+  public async create(
+    body: IDeepSeekCompleteParams,
+    options?: RequestOptions,
+  ): Promise<IBaseCreateResponse> {
     try {
       const { model, messages, tools, ...rest } = body
-
-      DEV_LOGGER.INFO('tools', tools)
 
       const response = await this.deepseek.chat.completions.create(
         {
@@ -84,7 +104,7 @@ export class DeepSeekModel extends BaseModel {
       )
 
       DEV_LOGGER.WARNING('response', response)
-      return this.parseOutput(response)
+      return this.parseResult(response)
     } catch (error) {
       throw error
     }

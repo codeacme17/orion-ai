@@ -66,7 +66,7 @@ export class OpenAIModel extends BaseModel {
   }
 
   // TODO - Fix any type here (promoise<any>)
-  async create(body: IOpenaiCompleteParams, options?: RequestOptions): Promise<any> {
+  async create(body: IOpenaiCompleteParams, options?: RequestOptions) {
     try {
       const { model, messages, tools, ...rest } = body
 
@@ -79,6 +79,7 @@ export class OpenAIModel extends BaseModel {
         },
         { ...options },
       )
+
       DEV_LOGGER.WARNING('response', response)
       return this.parseOutput(response)
     } catch (error) {

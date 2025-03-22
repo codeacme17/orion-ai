@@ -4,7 +4,7 @@ import type { TZodObjectAny } from '.'
 import { DEV_LOGGER } from '@/lib/logger'
 
 interface IFunctionToolFields<T extends TZodObjectAny = TZodObjectAny> extends IBaseToolFields<T> {
-  func: (
+  execute: (
     args: (z.output<T> extends string ? string : never) | z.input<T>,
   ) => Promise<string> | string
 }
@@ -16,7 +16,7 @@ export class FunctionTool<T extends TZodObjectAny = TZodObjectAny> extends BaseT
 
   constructor(fields: IFunctionToolFields<T>) {
     super(fields)
-    this._func = fields.func
+    this._func = fields.execute
   }
 
   toJSON() {
