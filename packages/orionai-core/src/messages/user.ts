@@ -1,3 +1,4 @@
+import { nanoid } from 'nanoid'
 import {
   BaseMessage,
   type IBaseMessageFields,
@@ -20,7 +21,7 @@ export type TMessageContentImageUrl = {
 export type TMessageContentComplex =
   | TMessageContentText
   | TMessageContentImageUrl
-  | (Record<string, any> & { type?: 'text' | 'image_url' | string })
+  | (Record<string, any> & { type?: 'input_text' | 'input_image' })
 
 export interface IUserMessageFields extends IBaseMessageFields {
   content: TMessageContentComplex | TMessageContentComplex[] | string
@@ -45,9 +46,12 @@ export class UserMessage extends BaseMessage {
    * @param content The content of the message
    * @returns An array of complex message objects
    */
-  parseContent(content: TMessageContent): TMessageContentComplex[] | TMessageContentComplex {
+  parseContent(
+    content: TMessageContent,
+    isResponseMode: boolean = false,
+  ): TMessageContentComplex[] | TMessageContentComplex {
     if (typeof content === 'string') {
-      return [{ type: 'text', text: content }]
+      return [{ type: 'input_text', text: content }]
     }
 
     // content is already an array of TMessageContentComplex if it's not a string
@@ -55,13 +59,13 @@ export class UserMessage extends BaseMessage {
       // Optionally validate each item in the array if needed
       return content.map((item) => {
         if (!item.type) {
-          return { type: 'text', text: String(item) }
+          return { type: 'input_text', text: String(item) }
         }
 
-        if (item.type === 'image_url' && typeof item.image_url === 'string') {
+        if (item.type === 'input_image' && typeof item.image_url === 'string') {
           return {
-            type: 'image_url',
-            image_url: { url: item.image_url },
+            type: 'input_image',
+            image_url: item.image_url,
           }
         }
 

@@ -29,6 +29,7 @@ describe('DeepSeekModel', () => {
     }
 
     const result = await model.create(body)
+    DEV_LOGGER.SUCCESS('result', result)
     expect(result).not.toBe('')
   })
 

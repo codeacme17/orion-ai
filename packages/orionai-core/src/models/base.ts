@@ -21,7 +21,7 @@ export interface IToolCallResult {
 }
 
 export interface IBaseCreateResponse {
-  finish_reason: string
+  finish_reason?: string
 
   content: string
 

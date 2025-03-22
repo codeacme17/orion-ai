@@ -44,7 +44,5 @@ export abstract class BaseMessage implements BaseMessageInterface {
     } else {
       this.content = fields.content
     }
-
-    this.id = nanoid()
   }
 }

@@ -103,7 +103,6 @@ export class DeepSeekModel extends BaseModel {
         { ...options },
       )
 
-      DEV_LOGGER.WARNING('response', response)
       return this.parseResult(response)
     } catch (error) {
       throw error

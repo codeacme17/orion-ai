@@ -4,6 +4,8 @@ import { config as dotConfig } from 'dotenv'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import { AssistantMessage, SystemMessage, userMessage, UserMessage } from '@/messages'
 import { DEV_LOGGER } from '@/lib/logger'
+import { z } from 'zod'
+import { functionTool } from '@/tools/function'
 
 describe('OpenAIModel', () => {
   let model: OpenAIModel
@@ -62,43 +64,48 @@ describe('OpenAIModel', () => {
   })
 
   it('test image can be uploaded', async () => {
-    DEV_LOGGER.INFO(
-      'test',
-      userMessage({
-        content: [
-          {
-            type: 'text',
-            text: 'Please tell me what you see in this image',
-          },
-          {
-            type: 'image_url',
-            image_url:
-              'https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png',
-          },
-        ],
-      }),
-    )
+    const message = userMessage({
+      content: [
+        {
+          type: 'input_text',
+          text: 'Please tell me what you see in this image',
+        },
+        {
+          type: 'input_image',
+          image_url:
+            'https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png',
+        },
+      ],
+    })
 
     const response = await model.create({
-      messages: [
-        userMessage({
-          content: [
-            {
-              type: 'text',
-              text: 'Please tell me what you see in this image',
-            },
-            {
-              type: 'image_url',
-              image_url:
-                'https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png',
-            },
-          ],
-        }),
-      ],
+      model: 'gpt-4o-mini',
+      messages: [message],
     })
 
     DEV_LOGGER.SUCCESS('response', response)
     expect(response).toBeTypeOf('string')
+    expect(response).not.toBe('')
+  })
+
+  it('should use a tool and give the result', async () => {
+    const tool = functionTool({
+      name: 'weather_tool',
+      description: 'use this tool to get the weather',
+      schema: z.object({
+        city: z.string(),
+      }),
+      execute: async ({ city }) => `The weather in ${city} is sunny`,
+    })
+
+    console.log('tool', tool)
+
+    const response = await model.create({
+      messages: [new UserMessage(`hi what the weather like in Hangzhou?`)],
+      tools: [tool],
+    })
+
+    DEV_LOGGER.SUCCESS('response', response)
     expect(response).not.toBe('')
   })
 })

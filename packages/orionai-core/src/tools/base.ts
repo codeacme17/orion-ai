@@ -24,35 +24,21 @@ export interface IBaseToolFields<T extends TZodObjectAny = TZodObjectAny> {
 }
 
 export abstract class BaseTool<T extends TZodObjectAny = TZodObjectAny> implements ITool<T> {
-  protected _strict: boolean
-  protected _name: string
-  protected _description: string
-  protected _schema: T | z.ZodEffects<T>
+  strict: boolean
+  name: string
+  description: string
+  schema: T | z.ZodEffects<T>
 
   constructor(fields: IBaseToolFields<T>) {
-    this._name = fields.name
-    this._description = fields.description || ''
-    this._strict = fields.strict || false
-    this._schema = fields.schema
-  }
-
-  get name(): string {
-    return this._name
-  }
-
-  get description(): string {
-    return this._description
-  }
-
-  get schema(): T | z.ZodEffects<T> {
-    return this._schema
+    this.name = fields.name
+    this.description = fields.description || ''
+    this.strict = fields.strict || false
+    this.schema = fields.schema
   }
 
   abstract run(args: (z.output<T> extends string ? string : never) | z.input<T>): Promise<string>
 
-  returnValueAsString(value: any): string {
-    return JSON.stringify(value)
-  }
-
   abstract toJSON(): Record<string, any>
+
+  abstract toResponseJson(): Record<string, any>
 }

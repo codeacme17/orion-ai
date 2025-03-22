@@ -8,27 +8,31 @@ import {
 } from './base'
 import { readEnv } from '@/lib/utils'
 import { DEV_LOGGER } from '@/lib/logger'
-
-import type {
-  ChatCompletionCreateParamsBase,
-  ChatCompletionMessageParam,
-  ChatCompletionTool,
-} from 'openai/resources/chat/completions.mjs'
 import type { ChatModel } from 'openai/resources/index.mjs'
 import type { TMessage } from '@/messages'
 import type { RequestOptions } from 'openai/core.mjs'
 import type { BaseTool } from '@/tools'
+import type {
+  ResponseCreateParamsNonStreaming,
+  Tool,
+  Response as OpenaiResponse,
+  ResponseInput,
+} from 'openai/resources/responses/responses.mjs'
 
 export interface IOpenAIModelConfig extends ClientOptions, IBaseModelConfig {
   model?: (string & {}) | ChatModel
 }
 
 export interface IOpenaiCompleteParams
-  extends Omit<ChatCompletionCreateParamsBase, 'messages' | 'model' | 'tools'>,
+  extends Omit<
+      ResponseCreateParamsNonStreaming,
+      'messages' | 'model' | 'tools' | 'parallel_tool_calls' | 'input'
+    >,
     IBaseCompleteParams {
   messages: Array<TMessage>
   model?: (string & {}) | ChatModel
   tools?: Array<BaseTool>
+  parallel_tool_calls?: boolean | undefined
 }
 
 const DEFAULT_MODEL: ChatModel = 'gpt-4o-mini'
@@ -62,21 +66,6 @@ export class OpenAIModel extends BaseModel {
     })
   }
 
-  protected parseResult(result: any): IBaseCreateResponse {
-    if ('choices' in result) {
-      DEV_LOGGER.WARNING('output.choices[0]', result.choices[0].message.tool_calls)
-
-      return {
-        finish_reason: result.choices[0].finish_reason || '',
-        content: result.choices[0].message.content || '',
-        usage: result.usage || {},
-        tool_calls: result.choices[0].message.tool_calls as unknown as Array<IToolCallResult>,
-      }
-    }
-
-    throw new Error('Unexpected response format')
-  }
-
   public async create(
     body: IOpenaiCompleteParams,
     options?: RequestOptions,
@@ -84,14 +73,14 @@ export class OpenAIModel extends BaseModel {
     try {
       const { model, messages, tools, ...rest } = body
 
-      const response = await this.openai.chat.completions.create(
+      const response = await this.openai.responses.create(
         {
           ...rest,
           model: model || this.config.model || DEFAULT_MODEL,
-          messages: messages as unknown as Array<ChatCompletionMessageParam>,
-          tools: tools?.map((tool) => tool.toJSON()) as Array<ChatCompletionTool>,
+          input: messages as unknown as string | ResponseInput,
+          tools: tools?.map((tool) => tool.toResponseJson()) as Array<Tool>,
         },
-        { ...options },
+        options,
       )
 
       DEV_LOGGER.WARNING('response', response)
@@ -99,6 +88,16 @@ export class OpenAIModel extends BaseModel {
     } catch (error) {
       DEV_LOGGER.ERROR(error)
       throw error
+    }
+  }
+
+  protected parseResult(result: OpenaiResponse): IBaseCreateResponse {
+    console.log('parseResult', result)
+
+    return {
+      content: result.output_text || '',
+      usage: result.usage || {},
+      tool_calls: [] as unknown as Array<IToolCallResult>,
     }
   }
 }
