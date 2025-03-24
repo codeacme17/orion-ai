@@ -92,10 +92,8 @@ export class OpenAIModel extends BaseModel {
   }
 
   protected parseResult(result: OpenaiResponse): IBaseCreateResponse {
-    console.log('parseResult', result)
-
     return {
-      content: result.output_text || '',
+      output: result.output_text || '',
       usage: result.usage || {},
       tool_calls: [] as unknown as Array<IToolCallResult>,
     }
