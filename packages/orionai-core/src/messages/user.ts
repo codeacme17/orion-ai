@@ -22,6 +22,7 @@ export type TMessageContentComplex =
   | TMessageContentText
   | TMessageContentImageUrl
   | (Record<string, any> & { type?: 'input_text' | 'input_image' })
+  | string
 
 export interface IUserMessageFields extends IBaseMessageFields {
   content: TMessageContentComplex | TMessageContentComplex[] | string
@@ -46,12 +47,9 @@ export class UserMessage extends BaseMessage {
    * @param content The content of the message
    * @returns An array of complex message objects
    */
-  parseContent(
-    content: TMessageContent,
-    isResponseMode: boolean = false,
-  ): TMessageContentComplex[] | TMessageContentComplex {
+  parseContent(content: TMessageContent): TMessageContentComplex[] | TMessageContentComplex {
     if (typeof content === 'string') {
-      return [{ type: 'input_text', text: content }]
+      return content
     }
 
     // content is already an array of TMessageContentComplex if it's not a string

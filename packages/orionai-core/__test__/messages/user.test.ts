@@ -27,7 +27,6 @@ describe('UserMessage', () => {
   it('should return the correct properties from the get method', () => {
     const props: IUserMessageFields = {
       content: 'Hello, world!',
-      id: '123',
     }
 
     const message = new UserMessage(props)
@@ -42,5 +41,26 @@ describe('UserMessage', () => {
     expect(() => new UserMessage()).toThrow('[orion-ai] Message content is required.')
     // @ts-ignore
     expect(() => new UserMessage({ id: '123' })).toThrow('[orion-ai] Message content is required.')
+  })
+
+  it('should be a message list', () => {
+    const props: IUserMessageFields = {
+      content: [
+        { role: 'user', content: 'Hello, world!' },
+        { role: 'assistant', content: 'Hello, user!' },
+      ],
+    }
+
+    const message = new UserMessage({
+      content: {
+        type: 'input_image',
+        image_url:
+          'https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png',
+      },
+    })
+
+    console.log('messages', message)
+
+    expect(message).toBeInstanceOf(UserMessage)
   })
 })
