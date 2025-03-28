@@ -83,8 +83,8 @@ describe('OpenAIModel', () => {
       messages: [message],
     })
 
-    DEV_LOGGER.SUCCESS('response', response.output)
-    expect(response.output).toBeTypeOf('string')
+    DEV_LOGGER.SUCCESS('response', response.content)
+    expect(response.content).toBeTypeOf('string')
     expect(response).not.toBe('')
   })
 

@@ -23,7 +23,7 @@ export interface IToolCallResult {
 export interface IBaseCreateResponse {
   finish_reason?: string
 
-  output: string
+  content: string
 
   usage: Record<string, any>
 

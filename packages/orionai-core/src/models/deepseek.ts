@@ -77,7 +77,7 @@ export class DeepSeekModel extends BaseModel {
 
       return {
         finish_reason: result.choices[0].finish_reason || '',
-        output: result.choices[0].message.content || '',
+        content: result.choices[0].message.content || '',
         usage: result.usage || {},
         tool_calls: result.choices[0].message.tool_calls as unknown as Array<IToolCallResult>,
       }

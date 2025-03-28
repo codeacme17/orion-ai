@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
+    "check": "tsc --noEmit",
     "test": "vitest",
     "test:models": "vitest run ./__test__/models",
     "test:agents": "vitest run ./__test__/agents",

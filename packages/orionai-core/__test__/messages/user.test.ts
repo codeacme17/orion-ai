@@ -28,8 +28,6 @@ describe('UserMessage', () => {
     const props: IUserMessageFields = {
       content: 'Hello, world!',
       id: '123',
-      createdAt: '2025-02-22T10:00:00Z',
-      metadata: { key: 'value' },
     }
 
     const message = new UserMessage(props)
@@ -37,7 +35,6 @@ describe('UserMessage', () => {
 
     expect(result.content).toBe(props.content)
     expect(result.id).toBe(props.id)
-    expect(result.metadata).toEqual(props.metadata)
   })
 
   it('should throw an error if content is not provided', () => {

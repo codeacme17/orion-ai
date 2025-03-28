@@ -93,7 +93,7 @@ export class OpenAIModel extends BaseModel {
 
   protected parseResult(result: OpenaiResponse): IBaseCreateResponse {
     return {
-      output: result.output_text || '',
+      content: result.output_text || '',
       usage: result.usage || {},
       tool_calls: [] as unknown as Array<IToolCallResult>,
     }
