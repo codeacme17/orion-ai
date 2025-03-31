@@ -11,6 +11,7 @@ export interface BaseAgentFields extends BaseAgentInterface {
   name: string
   model: TModel
   tools?: Array<BaseTool>
+  debug?: boolean
 }
 
 export abstract class BaseAgent implements BaseAgentInterface {
@@ -22,7 +23,7 @@ export abstract class BaseAgent implements BaseAgentInterface {
     const { name, model, tools } = fields
 
     if (!name) {
-      DEV_LOGGER.ERROR('Name is required.')
+      DEV_LOGGER.ERROR('name is required.')
       throw new Error('name is required')
     }
 
