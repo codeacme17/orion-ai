@@ -5,6 +5,7 @@ export type TSupportModelFamily = 'openai' | 'deepseek' | 'anthropic'
 export interface IBaseModelConfig {
   apiKey?: string
   model?: string
+  debug?: boolean
   [key: string]: any
 }
 
@@ -37,7 +38,7 @@ export interface BaseModelInterface {
   create(params: IBaseCompleteParams): Promise<string | Record<string, any>>
 }
 
-export abstract class BaseModel {
+export abstract class BaseModel implements BaseModelInterface {
   /**
    * The configuration for the model.
    */

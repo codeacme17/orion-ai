@@ -11,7 +11,6 @@ import { DEV_LOGGER } from '@/lib/logger'
 import type {
   ChatCompletionCreateParamsBase,
   ChatCompletionMessageParam,
-  ChatCompletionMessageToolCall,
   ChatCompletionTool,
 } from 'openai/resources/chat/completions.mjs'
 import type { ChatModel } from 'openai/resources/index.mjs'
@@ -40,6 +39,7 @@ const DEFAULT_BASE_URL = 'https://api.deepseek.com/v1'
 
 export class DeepSeekModel extends BaseModel {
   private deepseek: Openai
+  private debug: boolean
 
   constructor(config: IDeepSeekModelConfig = {}) {
     super(config)
@@ -51,6 +51,7 @@ export class DeepSeekModel extends BaseModel {
     }
 
     this.deepseek = this.init(config)
+    this.debug = config.debug || false
   }
 
   private init(config: IDeepSeekModelConfig): Openai {
@@ -59,6 +60,8 @@ export class DeepSeekModel extends BaseModel {
     if (!apiKey && !readEnv('OPENAI_API_KEY')) {
       throw new Error('OpenAI API key is required.')
     }
+
+    this.debug && DEV_LOGGER.INFO('DeepSeekModel.init \n', { ...config })
 
     return new Openai({
       ...config,
@@ -75,12 +78,16 @@ export class DeepSeekModel extends BaseModel {
     if ('choices' in result) {
       DEV_LOGGER.WARNING('output.choices[0]', result.choices[0].message.tool_calls)
 
-      return {
+      const response: IBaseCreateResponse = {
         finish_reason: result.choices[0].finish_reason || '',
         content: result.choices[0].message.content || '',
         usage: result.usage || {},
         tool_calls: result.choices[0].message.tool_calls as unknown as Array<IToolCallResult>,
       }
+
+      this.debug && DEV_LOGGER.INFO('DeepSeekModel.create \n', { ...response })
+
+      return response
     }
 
     throw new Error('Unexpected response format')

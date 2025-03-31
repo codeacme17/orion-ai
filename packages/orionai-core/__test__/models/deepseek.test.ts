@@ -33,6 +33,15 @@ describe('DeepSeekModel', () => {
     expect(result).not.toBe('')
   })
 
+  it('should log debug info if debug is enabled', async () => {
+    dotConfig()
+    const model = new DeepSeekModel({ debug: true })
+    const body: IDeepSeekCompleteParams = {
+      messages: [new UserMessage(`hi`)],
+    }
+    await model.create(body)
+  })
+
   it('should use a tool and give the result', async () => {
     dotConfig()
 

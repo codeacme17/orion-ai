@@ -39,6 +39,7 @@ const DEFAULT_MODEL: ChatModel = 'gpt-4o-mini'
 
 export class OpenAIModel extends BaseModel {
   private openai: Openai
+  private debug: boolean
 
   constructor(config: IOpenAIModelConfig = {}) {
     super(config)
@@ -51,6 +52,7 @@ export class OpenAIModel extends BaseModel {
     }
 
     this.openai = this.init(config)
+    this.debug = config.debug || false
   }
 
   init(config: IOpenAIModelConfig): Openai {
@@ -59,6 +61,8 @@ export class OpenAIModel extends BaseModel {
     if (!apiKey && !readEnv('OPENAI_API_KEY')) {
       throw new Error('OpenAI API key is required.')
     }
+
+    this.debug && DEV_LOGGER.INFO('OpenaiModel.init \n', { ...config })
 
     return new Openai({
       ...config,
@@ -83,7 +87,6 @@ export class OpenAIModel extends BaseModel {
         options,
       )
 
-      DEV_LOGGER.WARNING('response', response)
       return this.parseResult(response)
     } catch (error) {
       DEV_LOGGER.ERROR(error)
@@ -92,11 +95,15 @@ export class OpenAIModel extends BaseModel {
   }
 
   protected parseResult(result: OpenaiResponse): IBaseCreateResponse {
-    return {
+    const response: IBaseCreateResponse = {
       content: result.output_text || '',
       usage: result.usage || {},
       tool_calls: [] as unknown as Array<IToolCallResult>,
     }
+
+    this.debug && DEV_LOGGER.INFO('OpenaiModel.create \n', { ...response })
+
+    return response
   }
 }
 

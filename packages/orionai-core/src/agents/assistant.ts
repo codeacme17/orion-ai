@@ -52,9 +52,6 @@ export class AssistantAgent extends BaseAgent implements AssistantAgentInterface
         const toolResults = []
         const resultMessage = assistantMessage({ ...result })
 
-        DEV_LOGGER.INFO(`AssistantAgent.invoke: resultMessage.tool_calls`, resultMessage.tool_calls)
-        DEV_LOGGER.INFO(`AssistantAgent.invoke: resultMessage`, resultMessage)
-
         // Run each tool call
         for (const tool of toolCalls) {
           DEV_LOGGER.INFO(`AssistantAgent.invoke: Running tool`, tool)
@@ -79,13 +76,9 @@ export class AssistantAgent extends BaseAgent implements AssistantAgentInterface
         // Combine the messages and tool results
         const newMessages = [...combinedMessages, resultMessage, ...toolResults] as Array<TMessage>
 
-        DEV_LOGGER.INFO(`AssistantAgent.invoke: newMessages`, newMessages)
-
         const finalResult = await this.model.create({
           messages: newMessages,
         })
-
-        DEV_LOGGER.SUCCESS(`AssistantAgent.invoke: final result`, finalResult)
 
         return finalResult.content
       }
