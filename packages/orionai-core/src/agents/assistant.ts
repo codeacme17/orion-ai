@@ -1,9 +1,13 @@
 import { assistantMessage, SystemMessage, toolMessage, type TMessage } from '@/messages'
-import { BaseAgent, type BaseAgentFields, type BaseAgentInterface } from './base'
+import { BaseAgent, type BaseAgentFields } from './base'
 import { DEV_LOGGER } from '@/lib/logger'
 import type { TModel } from '@/models'
 
-export interface AssistantAgentInterface extends BaseAgentInterface {
+export interface IAssistantAgentFields extends BaseAgentFields {
+  systemMessage: string
+}
+
+export class AssistantAgent extends BaseAgent {
   /**
    * The system message that the assistant will respond with.
    * This message is updated as the conversation progresses.
@@ -15,17 +19,6 @@ export interface AssistantAgentInterface extends BaseAgentInterface {
    */
   model: TModel
 
-  updateSystemMessage?(message: string): void
-}
-
-export interface IAssistantAgentFields extends BaseAgentFields {
-  systemMessage: string
-  model: TModel
-}
-
-export class AssistantAgent extends BaseAgent implements AssistantAgentInterface {
-  model
-  systemMessage
   debug: boolean
 
   constructor(fields: IAssistantAgentFields) {

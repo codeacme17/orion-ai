@@ -1,5 +1,3 @@
-import type { z } from 'zod'
-
 export type TSupportModelFamily = 'openai' | 'deepseek' | 'anthropic'
 
 export interface IBaseModelConfig {

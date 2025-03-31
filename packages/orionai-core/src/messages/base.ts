@@ -1,5 +1,3 @@
-import { nanoid } from 'nanoid'
-
 export type TMessageType =
   | 'user'
   | 'assistant'
@@ -13,23 +11,21 @@ export type TMessageType =
 
 export type TMessageContent = string | Record<string, any> | Array<Record<string, any>>
 
-export interface BaseMessageInterface {
+export interface IBaseMessageFields {
+  content: TMessageContent
+  id?: string
+}
+
+export abstract class BaseMessage {
   /**
    * The content of the message. This can be a string or an array of objects.
    */
-  readonly content: TMessageContent
+  content: TMessageContent
 
   /**
    * An optional unique identifier for the message. This should ideally be
    * provided by the provider/model which created the message.
    */
-  readonly id?: string
-}
-
-export interface IBaseMessageFields extends BaseMessageInterface {}
-
-export abstract class BaseMessage implements BaseMessageInterface {
-  content: TMessageContent
   readonly id?: string
 
   constructor(fields: IBaseMessageFields | string) {

@@ -2,19 +2,14 @@ import { DEV_LOGGER } from '@/lib/logger'
 import type { TModel } from '@/models'
 import type { BaseTool } from '@/tools'
 
-export interface BaseAgentInterface {
-  name: string
-  tools?: Array<BaseTool>
+export interface BaseAgentFields {
+  readonly name: string
+  readonly model: TModel
+  readonly tools?: Array<BaseTool>
+  readonly debug?: boolean
 }
 
-export interface BaseAgentFields extends BaseAgentInterface {
-  name: string
-  model: TModel
-  tools?: Array<BaseTool>
-  debug?: boolean
-}
-
-export abstract class BaseAgent implements BaseAgentInterface {
+export abstract class BaseAgent {
   name
   model
   tools

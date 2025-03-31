@@ -1,4 +1,3 @@
-import { nanoid } from 'nanoid'
 import {
   BaseMessage,
   type IBaseMessageFields,
