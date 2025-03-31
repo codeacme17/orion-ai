@@ -75,7 +75,7 @@ export class FunctionTool<T extends TZodObjectAny = TZodObjectAny> extends BaseT
     } else parsedArgs = args
 
     if (!this.validParams(parsedArgs)) {
-      throw new Error('Invalid arguments')
+      throw new Error('[orion ai] Invalid arguments')
     }
 
     const result = await this.execute(parsedArgs)

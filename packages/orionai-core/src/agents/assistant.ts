@@ -12,14 +12,14 @@ export class AssistantAgent extends BaseAgent {
    * The system message that the assistant will respond with.
    * This message is updated as the conversation progresses.
    */
-  systemMessage: string
+  public systemMessage: string
 
   /**
    * The model that the assistant will use to generate responses.
    */
-  model: TModel
+  readonly model: TModel
 
-  debug: boolean
+  private debug: boolean
 
   constructor(fields: IAssistantAgentFields) {
     const { systemMessage, model, debug } = fields
@@ -39,9 +39,12 @@ export class AssistantAgent extends BaseAgent {
         ...messages,
       ] as Array<TMessage>
 
+      this.debug && DEV_LOGGER.INFO('AssistantAgent.invoke: messages \n', combinedMessages)
+
       const result = await this.model.create({
         messages: combinedMessages,
         tools: this.tools,
+        debug: this.debug,
       })
 
       // If the result is an assistant message and there are tool calls, run the tools
@@ -77,6 +80,8 @@ export class AssistantAgent extends BaseAgent {
         const finalResult = await this.model.create({
           messages: newMessages,
         })
+
+        this.debug && DEV_LOGGER.INFO('AssistantAgent.invoke: final response \n', finalResult)
 
         return finalResult.content
       }

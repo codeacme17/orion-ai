@@ -1,23 +1,24 @@
 import Openai, { type ClientOptions } from 'openai'
-import {
-  BaseModel,
-  type IBaseCompleteParams,
-  type IBaseCreateResponse,
-  type IBaseModelConfig,
-  type IToolCallResult,
-} from './base'
+import { BaseModel } from './base'
 import { readEnv } from '@/lib/utils'
 import { DEV_LOGGER } from '@/lib/logger'
+
 import type { ChatModel } from 'openai/resources/index.mjs'
-import type { TMessage } from '@/messages'
-import type { RequestOptions } from 'openai/core.mjs'
-import type { BaseTool } from '@/tools'
 import type {
   ResponseCreateParamsNonStreaming,
   Tool,
   Response as OpenaiResponse,
   ResponseInput,
 } from 'openai/resources/responses/responses.mjs'
+import type { RequestOptions } from 'openai/core.mjs'
+import type {
+  IBaseCompleteParams,
+  IBaseCreateResponse,
+  IBaseModelConfig,
+  IToolCallResult,
+} from './base'
+import type { TMessage } from '@/messages'
+import type { BaseTool } from '@/tools'
 
 export interface IOpenAIModelConfig extends ClientOptions, IBaseModelConfig {
   model?: (string & {}) | ChatModel
@@ -33,6 +34,7 @@ export interface IOpenaiCompleteParams
   model?: (string & {}) | ChatModel
   tools?: Array<BaseTool>
   parallel_tool_calls?: boolean | undefined
+  debug?: boolean
 }
 
 const DEFAULT_MODEL: ChatModel = 'gpt-4o-mini'
@@ -75,7 +77,9 @@ export class OpenAIModel extends BaseModel {
     options?: RequestOptions,
   ): Promise<IBaseCreateResponse> {
     try {
-      const { model, messages, tools, ...rest } = body
+      const { model, messages, tools, debug, ...rest } = body
+
+      this.debug = debug || false
 
       const response = await this.openai.responses.create(
         {

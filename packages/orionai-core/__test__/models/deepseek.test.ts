@@ -1,10 +1,10 @@
 import { z } from 'zod'
 import { describe, it, expect } from 'vitest'
 import { config as dotConfig } from 'dotenv'
+
 import { DeepSeekModel, type IDeepSeekModelConfig, type IDeepSeekCompleteParams } from '@/models'
 import { UserMessage } from '@/messages'
 import { functionTool } from '@/tools/function'
-import { DEV_LOGGER } from '@/lib/logger'
 
 describe('DeepSeekModel', () => {
   it('should throw an error if no API key is provided', () => {
@@ -29,7 +29,6 @@ describe('DeepSeekModel', () => {
     }
 
     const result = await model.create(body)
-    DEV_LOGGER.SUCCESS('result', result)
     expect(result).not.toBe('')
   })
 
@@ -61,7 +60,6 @@ describe('DeepSeekModel', () => {
 
     const result = await model.create(body)
     const res = await tool.run(result.tool_calls[0].function.arguments)
-    DEV_LOGGER.SUCCESS('tool call res', res)
     expect(result).not.toBe
   })
 })

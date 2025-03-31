@@ -1,11 +1,11 @@
-import { AssistantAgent } from '@/agents'
-import { DEV_LOGGER } from '@/lib/logger'
-import { userMessage } from '@/messages'
-import { deepseekModel } from '@/models'
-import { FunctionTool, functionTool } from '@/tools/function'
+import { z } from 'zod'
 import { configDotenv } from 'dotenv'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { z } from 'zod'
+
+import { AssistantAgent } from '@/agents'
+import { userMessage } from '@/messages'
+import { deepseekModel } from '@/models'
+import { functionTool } from '@/tools/function'
 
 describe('assistant agent', () => {
   beforeEach(() => {
@@ -21,8 +21,6 @@ describe('assistant agent', () => {
       model: deepseekModel(),
     })
 
-    DEV_LOGGER.SUCCESS('assistant agent', 'created', agent)
-
     expect(agent).toBeDefined()
   })
 
@@ -36,8 +34,6 @@ describe('assistant agent', () => {
     })
 
     agent.updateSystemMessage('world')
-
-    DEV_LOGGER.SUCCESS('assistant agent', 'updated', agent)
 
     expect(agent.systemMessage).toBe('world')
   })
@@ -53,8 +49,6 @@ describe('assistant agent', () => {
 
     const result = await agent.invoke([userMessage('hello, what is your name?')])
 
-    DEV_LOGGER.SUCCESS('assistant agent', result)
-
     expect(result).toBeDefined()
   })
 
@@ -63,6 +57,7 @@ describe('assistant agent', () => {
       name: 'assistant',
       systemMessage: 'you are an useful assistant, you can use tools',
       model: deepseekModel(),
+      debug: true,
       tools: [
         functionTool({
           name: 'location_weather',
@@ -71,7 +66,6 @@ describe('assistant agent', () => {
             location: z.string().describe('the location to get the weather'),
           }),
           execute: async (args) => {
-            DEV_LOGGER.INFO('test', args.location)
             return `thie weather in ${args.location} windy`
           },
         }),
@@ -82,7 +76,6 @@ describe('assistant agent', () => {
             location: z.string().describe('the location to get the time'),
           }),
           execute: async (args) => {
-            DEV_LOGGER.INFO('test', args.location)
             return `the time in ${args.location} 12:00`
           },
         }),
@@ -93,7 +86,6 @@ describe('assistant agent', () => {
       userMessage('can you give me the weather in beijing? and the time?'),
     ])
 
-    DEV_LOGGER.SUCCESS('assistant agent', result)
     expect(result).toBeDefined()
   })
 })
