@@ -35,11 +35,17 @@ export abstract class BaseModel {
   /**
    * The configuration for the model.
    */
-  config: IBaseModelConfig
+  protected config: IBaseModelConfig
 
   constructor(config: IBaseModelConfig = {}) {
     this.config = config
   }
+
+  /**
+   * Abstract method to be implemented by subclasses to initialize the model.
+   * @param config The configuration for the model.
+   */
+  protected abstract init(config: IBaseModelConfig): void
 
   /**
    * Abstract method to be implemented by subclasses to generate a response.

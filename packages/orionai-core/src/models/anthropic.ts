@@ -46,6 +46,15 @@ export class AnthropicModel extends BaseModel {
     }
 
     this.anthropic = new Anthropic({
+      ...config,
+      apiKey,
+    })
+  }
+
+  protected init(config: IAnthropicModelFields): Anthropic {
+    const { apiKey, ...rest } = config
+    return new Anthropic({
+      ...rest,
       apiKey,
     })
   }

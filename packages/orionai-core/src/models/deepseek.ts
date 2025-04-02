@@ -32,7 +32,7 @@ export interface IDeepSeekCompleteParams
   tools?: Array<BaseTool | FunctionTool>
 }
 
-type TChatModel = 'deepseek-chat'
+type TChatModel = 'deepseek-chat' | 'deepseek-reasoner'
 
 const DEFAULT_MODEL: TChatModel = 'deepseek-chat'
 const DEFAULT_BASE_URL = 'https://api.deepseek.com/v1'
@@ -55,7 +55,7 @@ export class DeepSeekModel extends BaseModel {
     this.debug = config.debug || false
   }
 
-  private init(config: IDeepSeekModelConfig): Openai {
+  protected init(config: IDeepSeekModelConfig): Openai {
     const { apiKey } = config
 
     if (!apiKey && !readEnv('OPENAI_API_KEY')) {
