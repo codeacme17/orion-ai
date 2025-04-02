@@ -24,9 +24,9 @@ export interface IBaseCreateResponse {
 
   content: string
 
-  usage: Record<string, any>
+  tool_calls?: Array<IToolCallResult>
 
-  tool_calls: Array<IToolCallResult>
+  usage?: Record<string, any>
 
   thought?: string
 }

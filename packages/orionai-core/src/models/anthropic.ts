@@ -13,7 +13,7 @@ import {
   type IBaseModelConfig,
 } from './base'
 import { readEnv } from '@/lib/utils'
-import type { TMessage } from '@/messages'
+import { ToolMessage, type TMessage } from '@/messages'
 import type { BaseTool } from '@/tools'
 import type { FunctionTool } from '@/tools/function'
 import type { RequestOptions } from '@anthropic-ai/sdk/core.mjs'
@@ -23,14 +23,16 @@ export interface IAnthropicModelFields extends Omit<ClientOptions, 'apiKey'>, IB
 }
 
 export interface IAnthropicCompleteParams
-  extends Omit<MessageCreateParamsNonStreaming, 'messages' | 'model' | 'tools'>,
+  extends Omit<MessageCreateParamsNonStreaming, 'messages' | 'model' | 'tools' | 'max_tokens'>,
     IBaseCompleteParams {
   messages: Array<TMessage>
   model?: Model
   tools?: Array<BaseTool | FunctionTool>
+  max_tokens?: number
 }
 
 const DEFAULT_MODEL = 'claude-3-5-sonnet-20240620'
+const DEFAULT_MAX_TOKENS = 4096
 
 export class AnthropicModel extends BaseModel {
   private anthropic: Anthropic
@@ -59,6 +61,19 @@ export class AnthropicModel extends BaseModel {
     })
   }
 
+  private parseMessages(messages: Array<TMessage>): Array<MessageParam> {
+    const parsedMessages: Array<MessageParam> = []
+    for (const message of messages) {
+      parsedMessages.push({
+        role: message.role as 'user' | 'assistant',
+        content: message.content as string,
+      })
+    }
+
+    console.log('[orion-ai] parseMessages', parsedMessages)
+    return parsedMessages
+  }
+
   public async create(
     body: IAnthropicCompleteParams,
     options: RequestOptions = {},
@@ -70,8 +85,9 @@ export class AnthropicModel extends BaseModel {
         {
           ...rest,
           model: model || this.config.model || DEFAULT_MODEL,
-          messages: messages as unknown as Array<MessageParam>,
+          messages: this.parseMessages(messages),
           tools: tools?.map((tool) => tool.toJSON()) as Array<ToolUnion>,
+          max_tokens: body.max_tokens || DEFAULT_MAX_TOKENS,
         },
         options,
       )
@@ -83,24 +99,18 @@ export class AnthropicModel extends BaseModel {
     }
   }
 
-  protected parseResult(result: any): IBaseCreateResponse {
-    const response: IBaseCreateResponse = {
-      content: result.output_text || '',
-      finish_reason: result.finish_reason || '',
-      usage: result.usage || {},
-      tool_calls: result.tool_calls || [],
-    }
+  protected parseResult(result: Anthropic.Messages.Message): IBaseCreateResponse {
+    console.log('[orion-ai] parseResult', result)
 
-    if (result.tool_calls) {
-      response.tool_calls = result.tool_calls.map((toolCall: any) => ({
-        id: toolCall.id,
-        index: toolCall.index,
-        type: toolCall.type,
-        function: {
-          name: toolCall.function.name,
-          arguments: toolCall.function.arguments,
-        },
-      }))
+    const { content } = result
+
+    const response: IBaseCreateResponse = {
+      content: content
+        .map((item) => {
+          if (item.type === 'text') return item.text
+        })
+        .join('. '),
+      finish_reason: '',
     }
 
     return response
