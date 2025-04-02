@@ -111,6 +111,7 @@ export class AnthropicModel extends BaseModel {
         })
         .join('. '),
       finish_reason: '',
+      tool_calls: [],
     }
 
     return response
