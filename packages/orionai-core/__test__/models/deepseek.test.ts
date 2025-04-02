@@ -62,4 +62,18 @@ describe('DeepSeekModel', () => {
     const res = await tool.run(result.tool_calls[0].function.arguments)
     expect(result).not.toBe
   })
+
+  it('should invoke thinking and give the result', async () => {
+    dotConfig()
+    const model = new DeepSeekModel({
+      model: 'deepseek-reasoner',
+    })
+    const body: IDeepSeekCompleteParams = {
+      messages: [new UserMessage(`hi what the weather like in Hangzhou?`)],
+    }
+
+    const res = await model.create(body)
+    console.log('res ===>', res)
+    expect(res).not.toBe('')
+  })
 })

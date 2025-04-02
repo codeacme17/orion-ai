@@ -21,7 +21,7 @@ import type { FunctionTool } from '@/tools/function'
 import type { Stream } from 'openai/streaming.mjs'
 
 export interface IDeepSeekModelConfig extends ClientOptions, IBaseModelConfig {
-  model?: (string & {}) | ChatModel
+  model?: (string & {}) | TChatModel
 }
 
 export interface IDeepSeekCompleteParams
@@ -100,6 +100,8 @@ export class DeepSeekModel extends BaseModel {
   ): Promise<IBaseCreateResponse> {
     try {
       const { model, messages, tools, ...rest } = body
+
+      console.log('[orion-ai] DeepSeekModel.create \n', model || this.config.model || DEFAULT_MODEL)
 
       const response = await this.deepseek.chat.completions.create(
         {
