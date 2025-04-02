@@ -14,7 +14,7 @@ import type {
   ChatCompletionTool,
 } from 'openai/resources/chat/completions.mjs'
 import type { ChatModel } from 'openai/resources/index.mjs'
-import type { APIPromise, RequestOptions } from 'openai/core.mjs'
+import type { RequestOptions } from 'openai/core.mjs'
 import type { TMessage } from '@/messages'
 import type { BaseTool } from '@/tools'
 import type { FunctionTool } from '@/tools/function'
@@ -44,9 +44,10 @@ export class DeepSeekModel extends BaseModel {
   constructor(config: IDeepSeekModelConfig = {}) {
     super(config)
 
-    const { apiKey } = config
+    const apiKey = config.apiKey || readEnv('DEEPSEEK_API_KEY')
 
-    if (!apiKey && !readEnv('DEEPSEEK_API_KEY')) {
+    if (!apiKey) {
+      DEV_LOGGER.ERROR('Deepseek API key is required.')
       throw new Error('[orion-ai] DeepSeek API key is required.')
     }
 

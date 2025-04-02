@@ -31,12 +31,7 @@ export interface IBaseCreateResponse {
   thought?: string
 }
 
-export interface BaseModelInterface {
-  config: IBaseModelConfig
-  create(params: IBaseCompleteParams): Promise<string | Record<string, any>>
-}
-
-export abstract class BaseModel implements BaseModelInterface {
+export abstract class BaseModel {
   /**
    * The configuration for the model.
    */
@@ -53,5 +48,10 @@ export abstract class BaseModel implements BaseModelInterface {
    */
   public abstract create(params: IBaseCompleteParams): Promise<IBaseCreateResponse>
 
+  /**
+   * Abstract method to be implemented by subclasses to parse the result.
+   * @param result The result from the model.
+   * @returns The parsed response.
+   */
   protected abstract parseResult(result: Record<string, any>): IBaseCreateResponse
 }

@@ -46,9 +46,9 @@ export class OpenAIModel extends BaseModel {
   constructor(config: IOpenAIModelConfig = {}) {
     super(config)
 
-    const { apiKey } = config
+    const apiKey = config.apiKey || readEnv('OPENAI_API_KEY')
 
-    if (!apiKey && !readEnv('OPENAI_API_KEY')) {
+    if (!apiKey) {
       DEV_LOGGER.ERROR('OpenAI API key is required.')
       throw new Error('[orion-ai] OpenAI API key is required.')
     }
@@ -74,7 +74,7 @@ export class OpenAIModel extends BaseModel {
 
   public async create(
     body: IOpenaiCompleteParams,
-    options?: RequestOptions,
+    options: RequestOptions = {},
   ): Promise<IBaseCreateResponse> {
     try {
       const { model, messages, tools, debug, ...rest } = body
