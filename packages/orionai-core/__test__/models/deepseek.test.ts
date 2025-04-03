@@ -69,11 +69,10 @@ describe('DeepSeekModel', () => {
       model: 'deepseek-reasoner',
     })
     const body: IDeepSeekCompleteParams = {
-      messages: [new UserMessage(`hi what the weather like in Hangzhou?`)],
+      messages: [new UserMessage(`9.11 and 9.8, which is greater?`)],
     }
 
     const res = await model.create(body)
-    console.log('res ===>', res)
-    expect(res).not.toBe('')
+    expect(res.thought).not.toBe('')
   })
 })

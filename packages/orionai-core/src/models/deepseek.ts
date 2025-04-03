@@ -13,7 +13,6 @@ import type {
   ChatCompletionMessageParam,
   ChatCompletionTool,
 } from 'openai/resources/chat/completions.mjs'
-import type { ChatModel } from 'openai/resources/index.mjs'
 import type { RequestOptions } from 'openai/core.mjs'
 import type { TMessage } from '@/messages'
 import type { BaseTool } from '@/tools'
@@ -77,11 +76,10 @@ export class DeepSeekModel extends BaseModel {
       | Openai.Chat.Completions.ChatCompletion,
   ): IBaseCreateResponse {
     if ('choices' in result) {
-      DEV_LOGGER.WARNING('output.choices[0]', result.choices[0].message.tool_calls)
-
       const response: IBaseCreateResponse = {
         finish_reason: result.choices[0].finish_reason || '',
         content: result.choices[0].message.content || '',
+        thought: (result.choices[0].message as any).reasoning_content || '',
         usage: result.usage || {},
         tool_calls: result.choices[0].message.tool_calls as unknown as Array<IToolCallResult>,
       }
@@ -101,8 +99,6 @@ export class DeepSeekModel extends BaseModel {
     try {
       const { model, messages, tools, ...rest } = body
 
-      console.log('[orion-ai] DeepSeekModel.create \n', model || this.config.model || DEFAULT_MODEL)
-
       const response = await this.deepseek.chat.completions.create(
         {
           ...rest,
@@ -112,6 +108,8 @@ export class DeepSeekModel extends BaseModel {
         },
         { ...options },
       )
+
+      console.log('response', JSON.stringify(response, null, 2))
 
       return this.parseResult(response)
     } catch (error) {
