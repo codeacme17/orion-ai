@@ -82,6 +82,8 @@ describe('assistant agent', () => {
       ],
     })
 
+    console.log('agent', agent)
+
     const result = await agent.invoke([
       userMessage('can you give me the weather in beijing? and the time?'),
     ])
