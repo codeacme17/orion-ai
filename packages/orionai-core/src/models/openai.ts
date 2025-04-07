@@ -91,6 +91,8 @@ export class OpenAIModel extends BaseModel {
         options,
       )
 
+      console.log('[response] ', JSON.stringify(response, null, 2))
+
       return this.parseResult(response)
     } catch (error) {
       DEV_LOGGER.ERROR(error)
@@ -102,7 +104,7 @@ export class OpenAIModel extends BaseModel {
     const response: IBaseCreateResponse = {
       content: result.output_text || '',
       usage: result.usage || {},
-      tool_calls: [] as unknown as Array<IToolCallResult>,
+      tool_calls: result.tools as unknown as Array<IToolCallResult>,
     }
 
     this.debug && DEV_LOGGER.INFO('OpenaiModel.create \n', { ...response })

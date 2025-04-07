@@ -4,13 +4,16 @@ import { beforeEach, describe, expect, it } from 'vitest'
 
 import { AssistantAgent } from '@/agents'
 import { userMessage } from '@/messages'
-import { deepseekModel } from '@/models'
+import { deepseekModel, openaiModel } from '@/models'
 import { functionTool } from '@/tools/function'
+import { HttpsProxyAgent } from 'https-proxy-agent'
 
 describe('assistant agent', () => {
   beforeEach(() => {
     configDotenv()
   })
+
+  const proxy = new HttpsProxyAgent(process.env.HTTPS_PROXY || '')
 
   it('should generate an assistant agent', async () => {
     configDotenv()
@@ -56,7 +59,9 @@ describe('assistant agent', () => {
     const agent = new AssistantAgent({
       name: 'assistant',
       systemMessage: 'you are an useful assistant, you can use tools',
-      model: deepseekModel(),
+      model: openaiModel({
+        httpAgent: proxy,
+      }),
       debug: true,
       tools: [
         functionTool({

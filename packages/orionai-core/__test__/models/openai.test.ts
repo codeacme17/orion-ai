@@ -59,8 +59,10 @@ describe('OpenAIModel', () => {
       ],
     })
 
-    expect(response).toBeTypeOf('string')
-    expect(response).not.toBe('')
+    console.log('response', response)
+
+    expect(response.content).toBeTypeOf('string')
+    expect(response.content).not.toBe('')
   })
 
   it('test image can be uploaded', async () => {
@@ -98,10 +100,25 @@ describe('OpenAIModel', () => {
       execute: async ({ city }) => `The weather in ${city} is sunny`,
     })
 
-    console.log('tool', tool)
+    const temp = {
+      type: 'function',
+      name: 'get_weather',
+      description: 'Get current temperature for a given location.',
+      parameters: {
+        type: 'object',
+        properties: {
+          location: {
+            type: 'string',
+            description: 'City and country e.g. Bogotá, Colombia',
+          },
+        },
+        required: ['location'],
+        additionalProperties: false,
+      },
+    }
 
     const response = await model.create({
-      messages: [new UserMessage(`hi what the weather like in Hangzhou?`)],
+      messages: [new UserMessage(`hi what the temperature like in Hangzhou?`)],
       tools: [tool],
     })
 

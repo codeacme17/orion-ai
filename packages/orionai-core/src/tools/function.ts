@@ -37,7 +37,7 @@ export class FunctionTool<T extends TZodObjectAny = TZodObjectAny> extends BaseT
 
   toResponseJson() {
     const schema = this.schema instanceof z.ZodEffects ? this.schema._def.schema : this.schema
-    return {
+    const res = {
       type: 'function',
       name: this.name,
       description: this.description,
@@ -47,6 +47,26 @@ export class FunctionTool<T extends TZodObjectAny = TZodObjectAny> extends BaseT
         required: Object.keys(schema.shape).filter((k) => !schema.shape[k].isOptional()),
       },
     }
+
+    const temp = {
+      type: 'function',
+      name: 'get_weather',
+      description: 'Get current temperature for a given location.',
+      parameters: {
+        type: 'object',
+        properties: {
+          location: {
+            type: 'string',
+            description: 'City and country e.g. Bogotá, Colombia',
+          },
+        },
+        required: ['location'],
+        additionalProperties: false,
+      },
+    }
+    console.log('[res] ', JSON.stringify(res, null, 2))
+
+    return temp
   }
 
   validParams(
