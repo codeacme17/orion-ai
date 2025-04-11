@@ -22,29 +22,31 @@ export interface IToolCallResult {
 }
 
 export interface IBaseCreateResponse {
+  /**
+   * the reason for the completion
+   */
   finish_reason?: string
 
+  /**
+   * the content of the response
+   */
   content: string
 
+  /**
+   * the tool calls in the response
+   */
   tool_calls: Array<IToolCallResult>
 
+  /**
+   * the usage of the response
+   */
   usage?: Record<string, any>
 
+  /**
+   * the thought of the response
+   */
   thought?: string
 }
-
-/**
- * 基础流式事件接口
- * 流可以同时支持事件和异步迭代
- */
-export interface BaseStreamEvent<T> extends AsyncIterable<T> {
-  on(event: 'data', listener: (chunk: T) => void): this
-  on(event: 'end', listener: () => void): this
-  on(event: 'error', listener: (err: Error) => void): this
-}
-
-// extend Stream type to include event handling methods
-export type BaseStreamWithEvents<T> = BaseStreamEvent<T>
 
 export abstract class BaseModel {
   /**

@@ -204,7 +204,7 @@ class StreamResponseAccumulator {
       finish_reason: this.finish_reason,
       tool_calls: this.tool_calls,
       thought: this.thought,
-      usage: {}, // 流式响应无法获取 token 使用情况
+      usage: {},
     }
   }
 }

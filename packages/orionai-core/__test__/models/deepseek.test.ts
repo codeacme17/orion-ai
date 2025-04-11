@@ -91,52 +91,6 @@ describe('DeepSeekModel', () => {
     expect(result.content.length).toBeGreaterThan(10)
   })
 
-  it('should race the stream and timeout', async () => {
-    dotConfig()
-
-    const model = new DeepSeekModel({ debug: true })
-    const body: IDeepSeekCompleteParams = {
-      messages: [new UserMessage('What is AI?')],
-    }
-
-    const stream = await model.createStream(body)
-
-    // 测试stream是否正确返回
-    expect(stream).toBeDefined()
-
-    // 使用异步迭代器方式处理流
-    let receivedData = false
-    let content = ''
-
-    // 设置超时
-    const timeoutPromise = new Promise<void>((_, reject) => {
-      setTimeout(() => {
-        reject(new Error('Stream processing timed out'))
-      }, 15000)
-    })
-
-    const processingPromise = (async () => {
-      try {
-        for await (const chunk of stream) {
-          receivedData = true
-          if (chunk.choices[0]?.delta?.content) {
-            content += chunk.choices[0].delta.content
-            console.log(`接收数据: ${chunk.choices[0].delta.content}`)
-          }
-        }
-        console.log('流处理完成，最终内容:', content)
-        expect(receivedData).toBe(true)
-        expect(content.length).toBeGreaterThan(0)
-      } catch (err) {
-        console.error('流处理错误:', err)
-        throw err
-      }
-    })()
-
-    // 使用 Promise.race 处理超时
-    const res = await Promise.race([processingPromise, timeoutPromise])
-  })
-
   it('should support async iterator for stream processing', async () => {
     dotConfig()
 
@@ -145,13 +99,13 @@ describe('DeepSeekModel', () => {
       messages: [new UserMessage('Give me a short joke')],
     }
 
-    // 每次测试获取新的流
+    // get a new stream for each test
     const stream = await model.createStream(body)
     expect(stream).toBeDefined()
 
     let contentFromIterator = ''
 
-    // 使用异步迭代器处理流
+    // process the stream with async iterator
     for await (const chunk of stream) {
       if (chunk.choices[0]?.delta?.content) {
         console.log('chunk', chunk.choices[0].delta.content)
@@ -159,12 +113,12 @@ describe('DeepSeekModel', () => {
       }
     }
 
-    // 检查通过异步迭代器获取的内容
+    // check the content from async iterator
     expect(contentFromIterator.length).toBeGreaterThan(0)
-    console.log('通过异步迭代器获取的内容:', contentFromIterator)
+    console.log('content from async iterator:', contentFromIterator)
   })
 
-  // 测试流可以被多次迭代
+  // test the stream can be iterated multiple times
   it('should handle multiple iterations of the same stream', async () => {
     dotConfig()
 
@@ -173,10 +127,10 @@ describe('DeepSeekModel', () => {
       messages: [new UserMessage('Tell me a short fact')],
     }
 
-    // 获取流
+    // get a stream
     const stream = await model.createStream(body)
 
-    // 第一次迭代
+    // first iteration
     let content1 = ''
     for await (const chunk of stream) {
       if (chunk.choices[0]?.delta?.content) {
@@ -184,24 +138,24 @@ describe('DeepSeekModel', () => {
       }
     }
 
-    console.log('第一次迭代内容:', content1)
+    console.log('first iteration content:', content1)
     expect(content1.length).toBeGreaterThan(0)
 
-    // 第二次迭代应该也能工作，因为我们实现了缓存功能
+    // second iteration should also work, because we implemented the cache function
     let content2 = ''
     try {
-      // 再次迭代同一个流对象
+      // second iteration
       for await (const chunk of stream) {
         if (chunk.choices[0]?.delta?.content) {
           content2 += chunk.choices[0].delta.content
         }
       }
-      console.log('第二次迭代内容:', content2)
-      // 两次迭代的内容应该完全相同
+      console.log('second iteration content:', content2)
+      // the content of the two iterations should be the same
       expect(content2).toBe(content1)
     } catch (err) {
-      console.error('第二次迭代失败:', err)
-      throw err // 现在我们期望测试通过，所以如果有错误就失败
+      console.error('second iteration failed:', err)
+      throw err // now we expect the test to pass, so if there is an error, it will fail
     }
   })
 })
