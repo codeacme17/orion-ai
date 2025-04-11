@@ -7,7 +7,9 @@ export interface IBaseModelConfig {
   [key: string]: any
 }
 
-export interface IBaseCompleteParams {}
+export interface IBaseCompleteParams {
+  stream?: boolean
+}
 
 export interface IToolCallResult {
   id: string
@@ -31,6 +33,19 @@ export interface IBaseCreateResponse {
   thought?: string
 }
 
+/**
+ * 基础流式事件接口
+ * 流可以同时支持事件和异步迭代
+ */
+export interface BaseStreamEvent<T> extends AsyncIterable<T> {
+  on(event: 'data', listener: (chunk: T) => void): this
+  on(event: 'end', listener: () => void): this
+  on(event: 'error', listener: (err: Error) => void): this
+}
+
+// extend Stream type to include event handling methods
+export type BaseStreamWithEvents<T> = BaseStreamEvent<T>
+
 export abstract class BaseModel {
   /**
    * The configuration for the model.
@@ -53,6 +68,13 @@ export abstract class BaseModel {
    * @returns The generated response.
    */
   public abstract create(params: IBaseCompleteParams): Promise<IBaseCreateResponse>
+
+  /**
+   * Abstract method to be implemented by subclasses to provide a stream.
+   * @param params The input to the model.
+   * @returns A stream of responses that can be used with for await...of syntax.
+   */
+  public abstract createStream(params: IBaseCompleteParams): Promise<AsyncIterable<any>>
 
   /**
    * Abstract method to be implemented by subclasses to parse the result.
