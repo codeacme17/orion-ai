@@ -8,6 +8,7 @@ import {
 } from './base'
 import { readEnv } from '@/lib/utils'
 import { DEV_LOGGER } from '@/lib/logger'
+import { StreamResponseAccumulator } from '@/lib/stream'
 import type {
   ChatCompletionCreateParamsBase,
   ChatCompletionMessageParam,
@@ -37,177 +38,6 @@ type TChatModel = 'deepseek-chat' | 'deepseek-reasoner'
 
 const DEFAULT_MODEL: TChatModel = 'deepseek-chat'
 const DEFAULT_BASE_URL = 'https://api.deepseek.com/v1'
-
-/**
- * 提供缓存功能的流式处理类
- * 第一次迭代时缓存所有数据，后续迭代时从缓存读取
- */
-class CachedStream<T> implements AsyncIterable<T> {
-  private chunks: T[] = []
-  private originalStream: Stream<T>
-  private isFirstIteration: boolean = true
-  private debug: boolean
-
-  constructor(stream: Stream<T>, debug: boolean = false) {
-    this.originalStream = stream
-    this.debug = debug
-  }
-
-  [Symbol.asyncIterator](): AsyncIterator<T> {
-    if (this.isFirstIteration) {
-      // 第一次迭代：读取原始流并缓存结果
-      this.debug && DEV_LOGGER.INFO('First iteration: caching chunks')
-      return this.streamAndCache()
-    } else {
-      // 后续迭代：从缓存返回数据
-      this.debug && DEV_LOGGER.INFO('Using cached chunks', { count: this.chunks.length })
-      return this.iterateCache()
-    }
-  }
-
-  private streamAndCache(): AsyncIterator<T> {
-    const self = this
-    const origIterator = this.originalStream[Symbol.asyncIterator]()
-
-    return {
-      async next(): Promise<IteratorResult<T>> {
-        try {
-          const result = await origIterator.next()
-
-          if (!result.done && result.value) {
-            self.chunks.push(result.value)
-          }
-
-          if (result.done) {
-            self.isFirstIteration = false
-          }
-
-          return result
-        } catch (error) {
-          self.isFirstIteration = false
-          DEV_LOGGER.ERROR('Error in stream iterator', error)
-          throw error
-        }
-      },
-
-      async return(): Promise<IteratorResult<T>> {
-        self.isFirstIteration = false
-        return { done: true, value: undefined as any }
-      },
-
-      async throw(error?: any): Promise<IteratorResult<T>> {
-        self.isFirstIteration = false
-        DEV_LOGGER.ERROR('Error in stream iterator', error)
-        return { done: true, value: undefined as any }
-      },
-    }
-  }
-
-  private iterateCache(): AsyncIterator<T> {
-    let index = 0
-    const chunks = this.chunks
-
-    return {
-      async next(): Promise<IteratorResult<T>> {
-        if (index < chunks.length) {
-          return { done: false, value: chunks[index++] }
-        } else {
-          return { done: true, value: undefined as any }
-        }
-      },
-
-      async return(): Promise<IteratorResult<T>> {
-        return { done: true, value: undefined as any }
-      },
-
-      async throw(error?: any): Promise<IteratorResult<T>> {
-        DEV_LOGGER.ERROR('Error in cached iterator', error)
-        return { done: true, value: undefined as any }
-      },
-    }
-  }
-}
-
-/**
- * 流式响应处理助手，用于累积流式响应的结果
- */
-class StreamResponseAccumulator {
-  private content: string = ''
-  private finish_reason: string = ''
-  private tool_calls: Array<IToolCallResult> = []
-  private thought: string = ''
-  private debug: boolean
-
-  constructor(debug: boolean = false) {
-    this.debug = debug
-  }
-
-  processChunk(chunk: ChatCompletionChunk): void {
-    const delta = chunk.choices[0]?.delta
-
-    if (!delta) return
-
-    if (delta.content) {
-      this.content += delta.content
-    }
-
-    if (chunk.choices[0]?.finish_reason) {
-      this.finish_reason = chunk.choices[0].finish_reason
-    }
-
-    if (delta.tool_calls) {
-      this.processToolCalls(delta.tool_calls)
-    }
-
-    // 处理思考内容（deepseek-reasoner 特性）
-    if ((delta as any).reasoning_content) {
-      this.thought += (delta as any).reasoning_content
-    }
-
-    if (this.debug) {
-      DEV_LOGGER.INFO('Processed chunk', {
-        content: delta.content,
-        tool_calls: delta.tool_calls?.length,
-        reasoning: (delta as any).reasoning_content,
-      })
-    }
-  }
-
-  private processToolCalls(toolCalls: any[]): void {
-    if (!toolCalls.length) return
-
-    if (!this.tool_calls.length) {
-      // 第一个工具调用块
-      this.tool_calls = toolCalls.map((tc) => ({
-        id: tc.id || '',
-        index: tc.index || 0,
-        type: 'function',
-        function: {
-          name: tc.function?.name || '',
-          arguments: tc.function?.arguments || '',
-        },
-      }))
-    } else {
-      // 更新现有工具调用
-      toolCalls.forEach((tc) => {
-        const existingTc = this.tool_calls.find((t) => t.id === tc.id)
-        if (existingTc && tc.function) {
-          existingTc.function.arguments += tc.function.arguments || ''
-        }
-      })
-    }
-  }
-
-  getResult(): IBaseCreateResponse {
-    return {
-      content: this.content,
-      finish_reason: this.finish_reason,
-      tool_calls: this.tool_calls,
-      thought: this.thought,
-      usage: {},
-    }
-  }
-}
 
 export class DeepSeekModel extends BaseModel {
   private deepseek: Openai
@@ -272,7 +102,7 @@ export class DeepSeekModel extends BaseModel {
     try {
       const { model, messages, tools, stream, ...rest } = body
 
-      // 如果 stream 设置为 true，使用流式请求
+      // if stream is set to true, use the streaming request
       if (stream) {
         const streamIterable = await this.createStream(body, options)
         const accumulator = new StreamResponseAccumulator(this.debug)
@@ -284,7 +114,7 @@ export class DeepSeekModel extends BaseModel {
         return accumulator.getResult()
       }
 
-      // 非流式请求
+      // non-streaming request
       const response = await this.deepseek.chat.completions.create(
         {
           ...rest,
@@ -303,8 +133,8 @@ export class DeepSeekModel extends BaseModel {
   }
 
   /**
-   * 创建流式请求
-   * @returns 返回一个异步迭代器，可以用 for await...of 语法遍历
+   * create a streaming request
+   * @returns return an async iterator, which can be iterated with for await...of syntax
    */
   public async createStream(
     body: IDeepSeekCompleteParams,
@@ -326,8 +156,7 @@ export class DeepSeekModel extends BaseModel {
 
       this.debug && DEV_LOGGER.INFO('DeepSeekModel.createStream started')
 
-      // 使用 CachedStream 封装原始流，确保一致的异步迭代器接口
-      return new CachedStream(stream as Stream<ChatCompletionChunk>, this.debug)
+      return stream as Stream<ChatCompletionChunk>
     } catch (error) {
       this.debug && DEV_LOGGER.ERROR('DeepSeekModel.createStream error', error)
       throw error
