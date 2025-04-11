@@ -109,8 +109,6 @@ export class DeepSeekModel extends BaseModel {
         { ...options },
       )
 
-      console.log('response', JSON.stringify(response, null, 2))
-
       return this.parseResult(response)
     } catch (error) {
       throw error

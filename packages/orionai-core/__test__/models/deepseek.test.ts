@@ -73,6 +73,7 @@ describe('DeepSeekModel', () => {
     }
 
     const res = await model.create(body)
+    console.log('[res]', JSON.stringify(res, null, 2))
     expect(res.thought).not.toBe('')
   })
 })

@@ -13,7 +13,7 @@ import {
   type IBaseModelConfig,
 } from './base'
 import { readEnv } from '@/lib/utils'
-import { ToolMessage, type TMessage } from '@/messages'
+import { type TMessage } from '@/messages'
 import type { BaseTool } from '@/tools'
 import type { FunctionTool } from '@/tools/function'
 import type { RequestOptions } from '@anthropic-ai/sdk/core.mjs'
