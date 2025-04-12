@@ -1,7 +1,7 @@
 import Openai, { type ClientOptions } from 'openai'
 import {
   BaseModel,
-  type IBaseCompleteParams,
+  type IBaseCreateParams,
   type IBaseCreateResponse,
   type IBaseModelConfig,
   type IToolCallResult,
@@ -21,28 +21,32 @@ import type { FunctionTool } from '@/tools/function'
 import type { Stream } from 'openai/streaming.mjs'
 
 export interface IDeepSeekModelConfig extends ClientOptions, IBaseModelConfig {
-  model?: (string & {}) | TChatModel
+  model?: (string & {}) | TDeepseekModel
 }
 
-export interface IDeepSeekCompleteParams
+export interface IDeepSeekCreateParams
   extends Omit<ChatCompletionCreateParamsBase, 'messages' | 'model' | 'tools'>,
-    IBaseCompleteParams {
+    IBaseCreateParams {
   messages: Array<TMessage>
-  model?: (string & {}) | TChatModel
+  model?: (string & {}) | TDeepseekModel
   tools?: Array<BaseTool | FunctionTool>
 }
 
-export interface IDeepSeekCompleteParamsWithStream extends IDeepSeekCompleteParams {
+export interface IDeepSeekCompleteParamsWithStream extends IDeepSeekCreateParams {
   stream: true
 }
 
-export interface IDeepSeekCompleteParamsWithoutStream extends IDeepSeekCompleteParams {
+export interface IDeepSeekCompleteParamsWithoutStream extends IDeepSeekCreateParams {
   stream?: false | null
 }
 
-type TChatModel = 'deepseek-chat' | 'deepseek-reasoner'
+export type TDeepseekParams =
+  | IDeepSeekCompleteParamsWithStream
+  | IDeepSeekCompleteParamsWithoutStream
 
-const DEFAULT_MODEL: TChatModel = 'deepseek-chat'
+type TDeepseekModel = 'deepseek-chat' | 'deepseek-reasoner'
+
+const DEFAULT_MODEL: TDeepseekModel = 'deepseek-chat'
 const DEFAULT_BASE_URL = 'https://api.deepseek.com/v1'
 
 export class DeepSeekModel extends BaseModel {
@@ -110,7 +114,7 @@ export class DeepSeekModel extends BaseModel {
     options?: RequestOptions,
   ): Promise<IBaseCreateResponse>
   public async create(
-    body: IDeepSeekCompleteParamsWithStream | IDeepSeekCompleteParamsWithoutStream,
+    body: TDeepseekParams,
     options?: RequestOptions,
   ): Promise<IBaseCreateResponse | AsyncIterable<ChatCompletionChunk>> {
     try {
@@ -142,7 +146,7 @@ export class DeepSeekModel extends BaseModel {
    * @returns return an async iterator, which can be iterated with for await...of syntax
    */
   protected async createStream(
-    body: IDeepSeekCompleteParams,
+    body: IDeepSeekCreateParams,
     options?: RequestOptions,
   ): Promise<AsyncIterable<ChatCompletionChunk>> {
     try {

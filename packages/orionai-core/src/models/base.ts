@@ -7,7 +7,7 @@ export interface IBaseModelConfig {
   [key: string]: any
 }
 
-export interface IBaseCompleteParams {
+export interface IBaseCreateParams {
   stream?: boolean | null
 }
 
@@ -73,16 +73,14 @@ export abstract class BaseModel {
    * @param IBaseCompleteParams The input to the model.
    * @returns The generated response or a stream of responses.
    */
-  public abstract create(
-    params: IBaseCompleteParams,
-  ): Promise<IBaseCreateResponse | IStreamResponse>
+  public abstract create(params: IBaseCreateParams): Promise<IBaseCreateResponse | IStreamResponse>
 
   /**
    * Abstract method to be implemented by subclasses to provide a stream.
    * @param params The input to the model.
    * @returns A stream of responses that can be used with for await...of syntax.
    */
-  protected abstract createStream(params: IBaseCompleteParams): Promise<AsyncIterable<any>>
+  protected abstract createStream(params: IBaseCreateParams): Promise<AsyncIterable<any>>
 
   /**
    * Abstract method to be implemented by subclasses to parse the result.
