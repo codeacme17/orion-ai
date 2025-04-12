@@ -115,11 +115,14 @@ describe('OpenAIModel', () => {
       stream: true,
     })
 
+    let result = ''
     for await (const chunk of response) {
       if (chunk.type === 'response.output_text.delta') {
-        console.log('chunk', chunk.delta)
+        result += chunk.delta
       }
     }
+
+    expect(result).not.toBe('')
   })
 
   it('should support funciton call in streaming', async () => {
