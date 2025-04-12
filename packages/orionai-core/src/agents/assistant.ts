@@ -1,7 +1,7 @@
 import { assistantMessage, SystemMessage, toolMessage, type TMessage } from '@/messages'
 import { BaseAgent, type BaseAgentFields } from './base'
 import { DEV_LOGGER } from '@/lib/logger'
-import type { TModel } from '@/models'
+import type { BaseModel, TModel } from '@/models'
 
 export interface IAssistantAgentFields extends BaseAgentFields {
   systemMessage: string
@@ -41,7 +41,7 @@ export class AssistantAgent extends BaseAgent {
 
       this.debug && DEV_LOGGER.INFO('AssistantAgent.invoke: messages \n', combinedMessages)
 
-      const result = await this.model.create({
+      const result = await (this.model as BaseModel).create({
         messages: combinedMessages,
         tools: this.tools,
         debug: this.debug,
@@ -77,7 +77,7 @@ export class AssistantAgent extends BaseAgent {
         // Combine the messages and tool results
         const newMessages = [...combinedMessages, resultMessage, ...toolResults] as Array<TMessage>
 
-        const finalResult = await this.model.create({
+        const finalResult = await (this.model as BaseModel).create({
           messages: newMessages,
         })
 
