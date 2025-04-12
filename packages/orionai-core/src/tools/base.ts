@@ -1,5 +1,6 @@
 import type { z } from 'zod'
-import type { TZodObjectAny } from '.'
+
+export type TZodObjectAny = z.ZodObject<any, any, any, any>
 
 /**
  * Represents a tool that can be executed with specific arguments.

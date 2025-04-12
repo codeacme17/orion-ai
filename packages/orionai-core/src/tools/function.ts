@@ -1,8 +1,8 @@
 import { z } from 'zod'
 import { BaseTool, type IBaseToolFields } from './base'
 import { DEV_LOGGER } from '@/lib/logger'
-import type { TZodObjectAny } from '.'
 import { getTypeFromZodType } from '@/lib/utils'
+import type { TZodObjectAny } from './base'
 
 interface IFunctionToolFields<T extends TZodObjectAny = TZodObjectAny> extends IBaseToolFields<T> {
   execute: (
