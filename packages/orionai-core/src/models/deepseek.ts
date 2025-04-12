@@ -15,9 +15,6 @@ import type {
   ChatCompletionChunk,
 } from 'openai/resources/chat/completions.mjs'
 import type { RequestOptions } from 'openai/core.mjs'
-import type { TMessage } from '@/messages'
-import type { BaseTool } from '@/tools'
-import type { FunctionTool } from '@/tools/function'
 import type { Stream } from 'openai/streaming.mjs'
 
 export interface IDeepSeekModelConfig extends ClientOptions, IBaseModelConfig {
@@ -27,9 +24,7 @@ export interface IDeepSeekModelConfig extends ClientOptions, IBaseModelConfig {
 export interface IDeepSeekCreateParams
   extends Omit<ChatCompletionCreateParamsBase, 'messages' | 'model' | 'tools'>,
     IBaseCreateParams {
-  messages: Array<TMessage>
   model?: (string & {}) | TDeepseekModel
-  tools?: Array<BaseTool | FunctionTool>
 }
 
 export interface IDeepSeekCreateParamsWithStream extends IDeepSeekCreateParams {

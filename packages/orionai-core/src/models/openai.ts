@@ -18,26 +18,18 @@ import type {
   IBaseModelConfig,
   IToolCallResult,
 } from './base'
-import type { TMessage } from '@/messages'
-import type { BaseTool } from '@/tools'
 import type { Stream } from 'openai/streaming.mjs'
 
+export type OpenaiChatModel = ChatModel
+
 export interface IOpenAIModelConfig extends ClientOptions, IBaseModelConfig {
-  model?: (string & {}) | ChatModel
+  model?: OpenaiChatModel
 }
 
 export interface IOpenaiCreateParams
-  extends Omit<
-      ResponseCreateParamsNonStreaming,
-      'messages' | 'model' | 'tools' | 'parallel_tool_calls' | 'input' | 'stream'
-    >,
+  extends Omit<ResponseCreateParamsNonStreaming, 'model' | 'tools' | 'input' | 'stream'>,
     IBaseCreateParams {
-  messages: Array<TMessage>
-  model?: (string & {}) | ChatModel
-  tools?: Array<BaseTool>
-  parallel_tool_calls?: boolean | undefined
-  debug?: boolean
-  stream?: boolean | null
+  model?: OpenaiChatModel
 }
 
 export interface IOpenaiCreateParamsWithStream extends IOpenaiCreateParams {
@@ -50,7 +42,7 @@ export interface IOpenaiCreateParamsWithoutStream extends IOpenaiCreateParams {
 
 export type TOpenaiCreateParams = IOpenaiCreateParamsWithStream | IOpenaiCreateParamsWithoutStream
 
-const DEFAULT_MODEL: ChatModel = 'gpt-4o-mini'
+const DEFAULT_MODEL: OpenaiChatModel = 'gpt-4o-mini'
 
 export class OpenAIModel extends BaseModel {
   private openai: Openai

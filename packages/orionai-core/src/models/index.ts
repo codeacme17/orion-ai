@@ -6,5 +6,6 @@ export * from './base'
 export * from './openai'
 export * from './deepseek'
 
-export type TModel = OpenAIModel | DeepSeekModel
+export type TModel = BaseModel | OpenAIModel | DeepSeekModel
+
 export type TModelConfig = IBaseModelConfig | IOpenAIModelConfig | IDeepSeekModelConfig

@@ -15,6 +15,8 @@ export interface IBaseCreateParams {
   messages: Array<TMessage>
   tools?: Array<TTool>
   stream?: boolean | null
+  debug?: boolean
+  model?: string
 }
 
 export interface IToolCallResult {
