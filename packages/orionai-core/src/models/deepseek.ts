@@ -8,7 +8,6 @@ import {
 } from './base'
 import { readEnv } from '@/lib/utils'
 import { DEV_LOGGER } from '@/lib/logger'
-import { StreamResponseAccumulator } from '@/lib/stream'
 import type {
   ChatCompletionCreateParamsBase,
   ChatCompletionMessageParam,
@@ -31,7 +30,14 @@ export interface IDeepSeekCompleteParams
   messages: Array<TMessage>
   model?: (string & {}) | TChatModel
   tools?: Array<BaseTool | FunctionTool>
-  stream?: boolean
+}
+
+export interface IDeepSeekCompleteParamsWithStream extends IDeepSeekCompleteParams {
+  stream: true
+}
+
+export interface IDeepSeekCompleteParamsWithoutStream extends IDeepSeekCompleteParams {
+  stream?: false | null
 }
 
 type TChatModel = 'deepseek-chat' | 'deepseek-reasoner'
@@ -96,25 +102,24 @@ export class DeepSeekModel extends BaseModel {
   }
 
   public async create(
-    body: IDeepSeekCompleteParams,
+    body: IDeepSeekCompleteParamsWithStream,
     options?: RequestOptions,
-  ): Promise<IBaseCreateResponse> {
+  ): Promise<AsyncIterable<ChatCompletionChunk>>
+  public async create(
+    body: IDeepSeekCompleteParamsWithoutStream,
+    options?: RequestOptions,
+  ): Promise<IBaseCreateResponse>
+  public async create(
+    body: IDeepSeekCompleteParamsWithStream | IDeepSeekCompleteParamsWithoutStream,
+    options?: RequestOptions,
+  ): Promise<IBaseCreateResponse | AsyncIterable<ChatCompletionChunk>> {
     try {
       const { model, messages, tools, stream, ...rest } = body
 
-      // if stream is set to true, use the streaming request
       if (stream) {
-        const streamIterable = await this.createStream(body, options)
-        const accumulator = new StreamResponseAccumulator(this.debug)
-
-        for await (const chunk of streamIterable) {
-          accumulator.processChunk(chunk)
-        }
-
-        return accumulator.getResult()
+        return this.createStream(body, options)
       }
 
-      // non-streaming request
       const response = await this.deepseek.chat.completions.create(
         {
           ...rest,
@@ -136,7 +141,7 @@ export class DeepSeekModel extends BaseModel {
    * create a streaming request
    * @returns return an async iterator, which can be iterated with for await...of syntax
    */
-  public async createStream(
+  protected async createStream(
     body: IDeepSeekCompleteParams,
     options?: RequestOptions,
   ): Promise<AsyncIterable<ChatCompletionChunk>> {

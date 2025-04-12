@@ -8,7 +8,7 @@ export interface IBaseModelConfig {
 }
 
 export interface IBaseCompleteParams {
-  stream?: boolean
+  stream?: boolean | null
 }
 
 export interface IToolCallResult {
@@ -48,6 +48,10 @@ export interface IBaseCreateResponse {
   thought?: string
 }
 
+export interface IStreamResponse extends AsyncIterable<any> {
+  [Symbol.asyncIterator](): AsyncIterator<any>
+}
+
 export abstract class BaseModel {
   /**
    * The configuration for the model.
@@ -67,16 +71,18 @@ export abstract class BaseModel {
   /**
    * Abstract method to be implemented by subclasses to generate a response.
    * @param IBaseCompleteParams The input to the model.
-   * @returns The generated response.
+   * @returns The generated response or a stream of responses.
    */
-  public abstract create(params: IBaseCompleteParams): Promise<IBaseCreateResponse>
+  public abstract create(
+    params: IBaseCompleteParams,
+  ): Promise<IBaseCreateResponse | IStreamResponse>
 
   /**
    * Abstract method to be implemented by subclasses to provide a stream.
    * @param params The input to the model.
    * @returns A stream of responses that can be used with for await...of syntax.
    */
-  public abstract createStream(params: IBaseCompleteParams): Promise<AsyncIterable<any>>
+  protected abstract createStream(params: IBaseCompleteParams): Promise<AsyncIterable<any>>
 
   /**
    * Abstract method to be implemented by subclasses to parse the result.
