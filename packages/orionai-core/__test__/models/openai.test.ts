@@ -95,27 +95,10 @@ describe('OpenAIModel', () => {
       name: 'weather_tool',
       description: 'use this tool to get the weather',
       schema: z.object({
-        city: z.string(),
+        city: z.string().describe('The city to get weather for'),
       }),
       execute: async ({ city }) => `The weather in ${city} is sunny`,
     })
-
-    const temp = {
-      type: 'function',
-      name: 'get_weather',
-      description: 'Get current temperature for a given location.',
-      parameters: {
-        type: 'object',
-        properties: {
-          location: {
-            type: 'string',
-            description: 'City and country e.g. Bogotá, Colombia',
-          },
-        },
-        required: ['location'],
-        additionalProperties: false,
-      },
-    }
 
     const response = await model.create({
       messages: [new UserMessage(`hi what the temperature like in Hangzhou?`)],
@@ -137,5 +120,34 @@ describe('OpenAIModel', () => {
         console.log('chunk', chunk.delta)
       }
     }
+  })
+
+  it('should support funciton call in streaming', async () => {
+    const tool = functionTool({
+      name: 'weather_tool',
+      description: 'use this tool to get the weather',
+      schema: z.object({
+        city: z.string().describe('The city to get weather for'),
+      }),
+      execute: async ({ city }) => `The weather in ${city} is sunny`,
+    })
+
+    const response = await model.create({
+      messages: [new UserMessage(`hi what the temperature like in Hangzhou?`)],
+      tools: [tool],
+      stream: true,
+    })
+
+    let functionCallArguments = ''
+    for await (const chunk of response) {
+      if (chunk.type === 'response.function_call_arguments.delta') {
+        functionCallArguments += (chunk as any).delta
+      }
+    }
+
+    const toolResult = await tool.run(functionCallArguments)
+
+    console.log('toolResult', toolResult)
+    expect(toolResult).not.toBe('')
   })
 })

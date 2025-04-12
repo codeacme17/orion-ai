@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { BaseTool, type IBaseToolFields } from './base'
 import { DEV_LOGGER } from '@/lib/logger'
 import type { TZodObjectAny } from '.'
+import { getTypeFromZodType } from '@/lib/utils'
 
 interface IFunctionToolFields<T extends TZodObjectAny = TZodObjectAny> extends IBaseToolFields<T> {
   execute: (
@@ -21,6 +22,7 @@ export class FunctionTool<T extends TZodObjectAny = TZodObjectAny> extends BaseT
 
   toJSON() {
     const schema = this.schema instanceof z.ZodEffects ? this.schema._def.schema : this.schema
+
     return {
       type: 'function',
       function: {
@@ -35,38 +37,31 @@ export class FunctionTool<T extends TZodObjectAny = TZodObjectAny> extends BaseT
     }
   }
 
+  /**
+   * Only for Openai Response Api
+   */
   toResponseJson() {
     const schema = this.schema instanceof z.ZodEffects ? this.schema._def.schema : this.schema
-    const res = {
+    const properties: Record<string, any> = {}
+
+    Object.entries(schema.shape).forEach(([key, value]) => {
+      const zodValue = value as z.ZodTypeAny
+      const description = zodValue.description || ''
+      const type = getTypeFromZodType(schema.shape[key])
+      properties[key] = { type, description }
+    })
+
+    return {
       type: 'function',
       name: this.name,
       description: this.description,
       parameters: {
         type: 'object',
-        properties: schema.shape,
+        properties,
         required: Object.keys(schema.shape).filter((k) => !schema.shape[k].isOptional()),
-      },
-    }
-
-    const temp = {
-      type: 'function',
-      name: 'get_weather',
-      description: 'Get current temperature for a given location.',
-      parameters: {
-        type: 'object',
-        properties: {
-          location: {
-            type: 'string',
-            description: 'City and country e.g. Bogotá, Colombia',
-          },
-        },
-        required: ['location'],
         additionalProperties: false,
       },
     }
-    console.log('[res] ', JSON.stringify(res, null, 2))
-
-    return temp
   }
 
   validParams(
