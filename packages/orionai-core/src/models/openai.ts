@@ -162,5 +162,4 @@ export class OpenAIModel extends BaseModel {
     return response
   }
 }
-
 export const openaiModel = (config: IOpenAIModelConfig = {}): OpenAIModel => new OpenAIModel(config)

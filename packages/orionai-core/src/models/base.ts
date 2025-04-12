@@ -50,10 +50,6 @@ export interface IBaseCreateResponse {
   thought?: string
 }
 
-export interface IStreamResponse extends AsyncIterable<any> {
-  [Symbol.asyncIterator](): AsyncIterator<any>
-}
-
 export abstract class BaseModel {
   /**
    * The configuration for the model.
@@ -75,7 +71,7 @@ export abstract class BaseModel {
    * @param IBaseCompleteParams The input to the model.
    * @returns The generated response or a stream of responses.
    */
-  public abstract create(params: IBaseCreateParams): Promise<IBaseCreateResponse | IStreamResponse>
+  public abstract create(params: IBaseCreateParams): Promise<IBaseCreateResponse>
 
   /**
    * Abstract method to be implemented by subclasses to provide a stream.
