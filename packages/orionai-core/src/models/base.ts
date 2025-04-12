@@ -1,3 +1,5 @@
+import type { Stream } from 'openai/streaming.mjs'
+
 export type TSupportModelFamily = 'openai' | 'deepseek' | 'anthropic'
 
 export interface IBaseModelConfig {
@@ -80,7 +82,7 @@ export abstract class BaseModel {
    * @param params The input to the model.
    * @returns A stream of responses that can be used with for await...of syntax.
    */
-  protected abstract createStream(params: IBaseCreateParams): Promise<AsyncIterable<any>>
+  protected abstract createStream(params: IBaseCreateParams): Promise<Stream<any>>
 
   /**
    * Abstract method to be implemented by subclasses to parse the result.

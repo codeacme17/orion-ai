@@ -125,4 +125,17 @@ describe('OpenAIModel', () => {
     DEV_LOGGER.SUCCESS('response', response)
     expect(response).not.toBe('')
   })
+
+  it('should create a streaming chat completion', async () => {
+    const response = await model.create({
+      messages: [new UserMessage('Tell me about machine learning in 3 sentences')],
+      stream: true,
+    })
+
+    for await (const chunk of response) {
+      if (chunk.type === 'response.output_text.delta') {
+        console.log('chunk', chunk.delta)
+      }
+    }
+  })
 })

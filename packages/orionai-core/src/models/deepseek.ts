@@ -40,7 +40,9 @@ export interface IDeepSeekCreateParamsWithoutStream extends IDeepSeekCreateParam
   stream?: false | null
 }
 
-export type TDeepseekParams = IDeepSeekCreateParamsWithStream | IDeepSeekCreateParamsWithoutStream
+export type TDeepseekCreatParams =
+  | IDeepSeekCreateParamsWithStream
+  | IDeepSeekCreateParamsWithoutStream
 
 export type TDeepseekModel = 'deepseek-chat' | 'deepseek-reasoner'
 
@@ -122,15 +124,15 @@ export class DeepSeekModel extends BaseModel {
   public async create(
     body: IDeepSeekCreateParamsWithStream,
     options?: RequestOptions,
-  ): Promise<AsyncIterable<ChatCompletionChunk>>
+  ): Promise<Stream<ChatCompletionChunk>>
   public async create(
     body: IDeepSeekCreateParamsWithoutStream,
     options?: RequestOptions,
   ): Promise<IBaseCreateResponse>
   public async create(
-    body: TDeepseekParams,
+    body: TDeepseekCreatParams,
     options?: RequestOptions,
-  ): Promise<IBaseCreateResponse | AsyncIterable<ChatCompletionChunk>> {
+  ): Promise<IBaseCreateResponse | Stream<ChatCompletionChunk>> {
     try {
       const { model, messages, tools, stream, ...rest } = body
 
@@ -164,7 +166,7 @@ export class DeepSeekModel extends BaseModel {
   protected async createStream(
     body: IDeepSeekCreateParams,
     options?: RequestOptions,
-  ): Promise<AsyncIterable<ChatCompletionChunk>> {
+  ): Promise<Stream<ChatCompletionChunk>> {
     try {
       const { model, messages, tools, ...rest } = body
 
