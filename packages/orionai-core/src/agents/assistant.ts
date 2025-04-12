@@ -48,14 +48,14 @@ export class AssistantAgent extends BaseAgent {
       })
 
       // If the result is an assistant message and there are tool calls, run the tools
-      if (result.tool_calls) {
+      if (result.tool_calls && result.tool_calls.length > 0) {
         const toolCalls = result.tool_calls
         const toolResults = []
         const resultMessage = assistantMessage({ ...result })
 
         // Run each tool call
         for (const tool of toolCalls) {
-          DEV_LOGGER.INFO(`AssistantAgent.invoke: Running tool`, tool)
+          this.debug && DEV_LOGGER.INFO(`AssistantAgent.invoke: Running tool`, tool)
 
           const toolName = tool.function.name
           const toolArgs = JSON.parse(tool.function.arguments)

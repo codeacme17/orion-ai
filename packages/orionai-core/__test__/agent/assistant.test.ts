@@ -9,11 +9,12 @@ import { functionTool } from '@/tools/function'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 
 describe('assistant agent', () => {
+  let proxy: HttpsProxyAgent<string> | null = null
+
   beforeEach(() => {
     configDotenv()
+    proxy = new HttpsProxyAgent(process.env.HTTPS_PROXY || '')
   })
-
-  const proxy = new HttpsProxyAgent(process.env.HTTPS_PROXY || '')
 
   it('should generate an assistant agent', async () => {
     configDotenv()
@@ -41,7 +42,25 @@ describe('assistant agent', () => {
     expect(agent.systemMessage).toBe('world')
   })
 
-  it('should invoke the assistant agent', async () => {
+  it('should invoke the assistant agent (openai)', async () => {
+    configDotenv()
+
+    const agent = new AssistantAgent({
+      name: 'assistant',
+      systemMessage: 'your name is bob',
+      model: openaiModel({
+        httpAgent: proxy,
+        model: 'gpt-4o-mini',
+      }),
+      debug: true,
+    })
+
+    const result = await agent.invoke([userMessage('hello, what is your name?')])
+
+    expect(result).toBeDefined()
+  })
+
+  it('should invoke the assistant agent (deepseek)', async () => {
     configDotenv()
 
     const agent = new AssistantAgent({
@@ -52,6 +71,7 @@ describe('assistant agent', () => {
 
     const result = await agent.invoke([userMessage('hello, what is your name?')])
 
+    console.log('result', result)
     expect(result).toBeDefined()
   })
 
