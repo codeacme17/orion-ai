@@ -32,19 +32,17 @@ export interface IDeepSeekCreateParams
   tools?: Array<BaseTool | FunctionTool>
 }
 
-export interface IDeepSeekCompleteParamsWithStream extends IDeepSeekCreateParams {
+export interface IDeepSeekCreateParamsWithStream extends IDeepSeekCreateParams {
   stream: true
 }
 
-export interface IDeepSeekCompleteParamsWithoutStream extends IDeepSeekCreateParams {
+export interface IDeepSeekCreateParamsWithoutStream extends IDeepSeekCreateParams {
   stream?: false | null
 }
 
-export type TDeepseekParams =
-  | IDeepSeekCompleteParamsWithStream
-  | IDeepSeekCompleteParamsWithoutStream
+export type TDeepseekParams = IDeepSeekCreateParamsWithStream | IDeepSeekCreateParamsWithoutStream
 
-type TDeepseekModel = 'deepseek-chat' | 'deepseek-reasoner'
+export type TDeepseekModel = 'deepseek-chat' | 'deepseek-reasoner'
 
 const DEFAULT_MODEL: TDeepseekModel = 'deepseek-chat'
 const DEFAULT_BASE_URL = 'https://api.deepseek.com/v1'
@@ -67,6 +65,11 @@ export class DeepSeekModel extends BaseModel {
     this.debug = config.debug || false
   }
 
+  /**
+   * Initialize the OpenAI client
+   * @param config The configuration for the OpenAI client
+   * @returns The OpenAI client
+   */
   protected init(config: IDeepSeekModelConfig): Openai {
     const { apiKey } = config
 
@@ -83,6 +86,11 @@ export class DeepSeekModel extends BaseModel {
     })
   }
 
+  /**
+   * Parse the result from the OpenAI client
+   * @param result The result from the OpenAI client
+   * @returns The parsed result
+   */
   protected parseResult(
     result:
       | Stream<Openai.Chat.Completions.ChatCompletionChunk>
@@ -105,12 +113,18 @@ export class DeepSeekModel extends BaseModel {
     throw new Error('Unexpected response format')
   }
 
+  /**
+   * Create a chat completion
+   * @param body The body of the request
+   * @param options The options for the request
+   * @returns The result of the request
+   */
   public async create(
-    body: IDeepSeekCompleteParamsWithStream,
+    body: IDeepSeekCreateParamsWithStream,
     options?: RequestOptions,
   ): Promise<AsyncIterable<ChatCompletionChunk>>
   public async create(
-    body: IDeepSeekCompleteParamsWithoutStream,
+    body: IDeepSeekCreateParamsWithoutStream,
     options?: RequestOptions,
   ): Promise<IBaseCreateResponse>
   public async create(
@@ -120,10 +134,12 @@ export class DeepSeekModel extends BaseModel {
     try {
       const { model, messages, tools, stream, ...rest } = body
 
+      // create a stream if stream is true
       if (stream) {
         return this.createStream(body, options)
       }
 
+      // create a chat completion
       const response = await this.deepseek.chat.completions.create(
         {
           ...rest,
