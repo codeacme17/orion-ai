@@ -1,3 +1,5 @@
+import type { TMessage } from '@/messages'
+import type { TTool } from '@/tools'
 import type { Stream } from 'openai/streaming.mjs'
 
 export type TSupportModelFamily = 'openai' | 'deepseek' | 'anthropic'
@@ -10,6 +12,8 @@ export interface IBaseModelConfig {
 }
 
 export interface IBaseCreateParams {
+  messages: Array<TMessage>
+  tools?: Array<TTool>
   stream?: boolean | null
 }
 
