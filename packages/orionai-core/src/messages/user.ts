@@ -34,6 +34,11 @@ export class UserMessage extends BaseMessage {
     super(fields)
     this.role = 'user'
 
+    // If the input is not provided, throw an error
+    if (!fields || (typeof fields !== 'string' && fields.content === undefined)) {
+      throw new Error('[orion-ai] Message content is required.')
+    }
+
     if (typeof fields === 'string') {
       this.content = this.parseContent(fields)
     } else {

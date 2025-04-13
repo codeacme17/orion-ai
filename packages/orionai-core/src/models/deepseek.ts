@@ -4,6 +4,7 @@ import {
   type IBaseCreateParams,
   type IBaseCreateResponse,
   type IBaseModelConfig,
+  type IToolCallChatCompletionResult,
   type IToolCallResult,
 } from './base'
 import { readEnv } from '@/lib/utils'
@@ -33,6 +34,10 @@ export interface IDeepSeekCreateParamsWithStream extends IDeepSeekCreateParams {
 
 export interface IDeepSeekCreateParamsWithoutStream extends IDeepSeekCreateParams {
   stream?: false | null
+}
+
+export interface IDeepSeekCreateResponse extends IBaseCreateResponse {
+  tool_calls: IToolCallChatCompletionResult[]
 }
 
 export type TDeepseekCreatParams =
@@ -92,14 +97,29 @@ export class DeepSeekModel extends BaseModel {
     result:
       | Stream<Openai.Chat.Completions.ChatCompletionChunk>
       | Openai.Chat.Completions.ChatCompletion,
-  ): IBaseCreateResponse {
+  ): IDeepSeekCreateResponse {
     if ('choices' in result) {
-      const response: IBaseCreateResponse = {
+      const toolCalls = result.choices[0].message.tool_calls || []
+
+      const parsedToolCalls: IToolCallChatCompletionResult[] = toolCalls.map((tool) => {
+        return {
+          id: tool.id,
+          type: 'function' as const,
+          function: {
+            name: tool.function.name,
+            arguments: tool.function.arguments,
+          },
+          role: 'assistant',
+          content: result.choices[0].message.content || '',
+        }
+      })
+
+      const response: IDeepSeekCreateResponse = {
         finish_reason: result.choices[0].finish_reason || '',
         content: result.choices[0].message.content || '',
         thought: (result.choices[0].message as any).reasoning_content || '',
         usage: result.usage || {},
-        tool_calls: result.choices[0].message.tool_calls as unknown as Array<IToolCallResult>,
+        tool_calls: parsedToolCalls as Array<IToolCallChatCompletionResult>,
       }
 
       this.debug && DEV_LOGGER.INFO('DeepSeekModel.create \n', { ...response })
@@ -123,7 +143,7 @@ export class DeepSeekModel extends BaseModel {
   public async create(
     body: IDeepSeekCreateParamsWithoutStream,
     options?: RequestOptions,
-  ): Promise<IBaseCreateResponse>
+  ): Promise<IDeepSeekCreateResponse>
   public async create(
     body: TDeepseekCreatParams,
     options?: RequestOptions,

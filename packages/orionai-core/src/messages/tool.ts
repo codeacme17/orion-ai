@@ -1,24 +1,46 @@
 import { BaseMessage, type IBaseMessageFields, type TMessageType } from './base'
 
-export interface IToolMessageFields extends IBaseMessageFields {
-  tool_call_id: string
+export interface IToolMessageFields extends Omit<IBaseMessageFields, 'content'> {
+  call_id: string
+  output?: string
+  responseType?: 'chat_completion' | 'response'
 }
 
 export class ToolMessage extends BaseMessage {
-  role: TMessageType
-  tool_call_id: string
+  responseType?: 'chat_completion' | 'response'
+  fields: IToolMessageFields
 
   constructor(fields: IToolMessageFields) {
-    super(fields)
+    super({ content: fields.output })
+    const { call_id } = fields
 
-    const { tool_call_id } = fields
+    if (!call_id) {
+      throw new Error('ToolMessage requires a call_id')
+    }
+    this.responseType = fields.responseType || 'chat_completion'
+    this.fields = fields
+  }
 
-    if (!tool_call_id) {
-      throw new Error('ToolMessage requires a tool_call_id')
+  private fieldsAdapter() {
+    if (this.responseType === 'chat_completion') {
+      return {
+        role: 'tool',
+        content: this.fields.output,
+        tool_call_id: this.fields.call_id,
+      }
     }
 
-    this.role = 'tool'
-    this.tool_call_id = tool_call_id
+    if (this.responseType === 'response') {
+      return {
+        type: 'function_call_output',
+        call_id: this.fields.call_id,
+        output: this.fields.output,
+      }
+    }
+  }
+
+  public get() {
+    return this.fieldsAdapter()
   }
 }
 

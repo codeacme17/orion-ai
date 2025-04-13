@@ -1,7 +1,7 @@
 import { assistantMessage, SystemMessage, toolMessage, type TMessage } from '@/messages'
 import { BaseAgent, type BaseAgentFields } from './base'
 import { DEV_LOGGER } from '@/lib/logger'
-import type { BaseModel, TModel } from '@/models'
+import { DeepSeekModel, OpenAIModel, openaiModel, type BaseModel, type TModel } from '@/models'
 
 export interface IAssistantAgentFields extends BaseAgentFields {
   systemMessage: string
@@ -47,35 +47,45 @@ export class AssistantAgent extends BaseAgent {
         debug: this.debug,
       })
 
+      const toolAssistantMessage = assistantMessage({
+        content: result.content,
+        tool_calls: result.tool_calls,
+      })
+
       // If the result is an assistant message and there are tool calls, run the tools
       if (result.tool_calls && result.tool_calls.length > 0) {
         const toolCalls = result.tool_calls
         const toolResults = []
-        const resultMessage = assistantMessage({ ...result })
 
         // Run each tool call
         for (const tool of toolCalls) {
-          this.debug && DEV_LOGGER.INFO(`AssistantAgent.invoke: Running tool`, tool)
+          this.debug && DEV_LOGGER.INFO(`AssistantAgent.invoke: Running tool \n`, tool)
 
-          const toolName = tool.function.name
-          const toolArgs = JSON.parse(tool.function.arguments)
+          const toolName = 'function' in tool ? tool.function.name : tool.name
+          const toolArgs = JSON.parse('function' in tool ? tool.function.arguments : tool.arguments)
           const toolFn = this.tools?.find((t) => t.name === toolName)
 
           // If the tool is found, run it
           if (toolFn) {
             const toolResult = await toolFn.run(toolArgs)
+
             // Add the tool result to the toolResults array
             toolResults.push(
               toolMessage({
-                content: toolResult,
-                tool_call_id: tool.id,
-              }),
+                output: toolResult,
+                call_id: 'call_id' in tool ? tool.call_id : tool.id,
+                responseType: this.model instanceof OpenAIModel ? 'response' : 'chat_completion',
+              }).get(),
             )
           }
         }
 
         // Combine the messages and tool results
-        const newMessages = [...combinedMessages, resultMessage, ...toolResults] as Array<TMessage>
+        const newMessages = [
+          ...combinedMessages,
+          ...(this.model instanceof OpenAIModel ? result.tool_calls : [toolAssistantMessage]),
+          ...toolResults,
+        ] as Array<TMessage>
 
         const finalResult = await (this.model as BaseModel).create({
           messages: newMessages,

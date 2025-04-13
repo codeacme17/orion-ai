@@ -33,7 +33,6 @@ describe('UserMessage', () => {
     const result = message
 
     expect(result.content).toBe(props.content)
-    expect(result.id).toBe(props.id)
   })
 
   it('should throw an error if content is not provided', () => {

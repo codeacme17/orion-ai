@@ -61,5 +61,8 @@ export abstract class BaseTool<T extends TZodObjectAny = TZodObjectAny> implemen
 
   abstract toJSON(): Record<string, any>
 
+  /**
+   * For new "Response API", the tool result is different from old "Chat Completion API",
+   */
   abstract toResponseJson(): Record<string, any>
 }

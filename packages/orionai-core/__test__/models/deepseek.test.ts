@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest'
 import { config as dotConfig } from 'dotenv'
 
 import { DeepSeekModel, type IDeepSeekModelConfig } from '@/models'
-import { UserMessage } from '@/messages'
+import { userMessage, UserMessage } from '@/messages'
 import { functionTool } from '@/tools/function'
 
 describe('DeepSeekModel', () => {

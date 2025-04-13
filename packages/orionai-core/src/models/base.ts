@@ -19,15 +19,25 @@ export interface IBaseCreateParams {
   model?: string
 }
 
-export interface IToolCallResult {
+export interface ITollCallResponsesApiResult {
   id: string
-  index: number
+  call_id: string
+  type: 'function_call'
+  name: string
+  arguments: string
+}
+
+export interface IToolCallChatCompletionResult {
+  id: string
+  index?: number
   type: 'function' | 'tool'
   function: {
     name: string
     arguments: string
   }
 }
+
+export type IToolCallResult = ITollCallResponsesApiResult | IToolCallChatCompletionResult
 
 export interface IBaseCreateResponse {
   /**

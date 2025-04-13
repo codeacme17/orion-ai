@@ -82,6 +82,7 @@ describe('assistant agent', () => {
       model: openaiModel({
         httpAgent: proxy,
       }),
+      // model: deepseekModel(),
       debug: true,
       tools: [
         functionTool({

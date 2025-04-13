@@ -10,12 +10,14 @@ import type {
   Response as OpenaiResponse,
   ResponseInput,
   ResponseStreamEvent,
+  ResponseFunctionToolCall,
 } from 'openai/resources/responses/responses.mjs'
 import type { RequestOptions } from 'openai/core.mjs'
 import type {
   IBaseCreateParams,
   IBaseCreateResponse,
   IBaseModelConfig,
+  ITollCallResponsesApiResult,
   IToolCallResult,
 } from './base'
 import type { Stream } from 'openai/streaming.mjs'
@@ -34,6 +36,10 @@ export interface IOpenaiCreateParams
 
 export interface IOpenaiCreateParamsWithStream extends IOpenaiCreateParams {
   stream: true
+}
+
+export interface IOpenaiCreateResponse extends IBaseCreateResponse {
+  tool_calls: ITollCallResponsesApiResult[]
 }
 
 export interface IOpenaiCreateParamsWithoutStream extends IOpenaiCreateParams {
@@ -84,11 +90,11 @@ export class OpenAIModel extends BaseModel {
   public async create(
     body: IOpenaiCreateParamsWithoutStream,
     options?: RequestOptions,
-  ): Promise<IBaseCreateResponse>
+  ): Promise<IOpenaiCreateResponse>
   public async create(
     body: TOpenaiCreateParams,
     options?: RequestOptions,
-  ): Promise<IBaseCreateResponse | Stream<ResponseStreamEvent>> {
+  ): Promise<IOpenaiCreateResponse | Stream<ResponseStreamEvent>> {
     try {
       const { model, messages, tools, debug, stream, ...rest } = body
 
@@ -142,11 +148,11 @@ export class OpenAIModel extends BaseModel {
     }
   }
 
-  protected parseResult(result: OpenaiResponse): IBaseCreateResponse {
-    const response: IBaseCreateResponse = {
+  protected parseResult(result: OpenaiResponse): IOpenaiCreateResponse {
+    const response: IOpenaiCreateResponse = {
       content: result.output_text || '',
       usage: result.usage || {},
-      tool_calls: result.tools as unknown as Array<IToolCallResult>,
+      tool_calls: (result.output as Array<ITollCallResponsesApiResult>) || [],
     }
 
     this.debug && DEV_LOGGER.INFO('OpenaiModel.create \n', { ...response })
