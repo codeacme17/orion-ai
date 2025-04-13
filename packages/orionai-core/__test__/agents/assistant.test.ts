@@ -114,4 +114,15 @@ describe('assistant agent', () => {
 
     expect(result).toBeDefined()
   })
+
+  it('should invoke MCP agent', async () => {
+    const agent = new AssistantAgent({
+      name: 'assistant',
+      systemMessage: 'you are an useful assistant, you can use tools',
+      model: openaiModel({
+        httpAgent: proxy,
+      }),
+      debug: true,
+    })
+  })
 })
