@@ -5,15 +5,26 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
+    "check": "tsc --noEmit",
     "test": "vitest",
-    "test:models": "vitest run ./test/models",
-    "test:messages": "vitest run ./test/messages"
+    "test:models": "vitest run ./__test__/models",
+    "test:agents": "vitest run ./__test__/agents",
+    "test:messages": "vitest run ./__test__/messages",
+    "test:tools": "vitest run ./__test__/tools",
+    "test:lib": "vitest run ./__test__/lib"
   },
   "dependencies": {
-    "openai": "^4.85.3"
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@modelcontextprotocol/sdk": "^1.9.0",
+    "chalk": "^5.4.1",
+    "nanoid": "^5.1.5",
+    "openai": "^4.89.0",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "^3.1.1",
     "http-proxy-agent": "^7.0.2",
-    "https-proxy-agent": "^7.0.6"
+    "https-proxy-agent": "^7.0.6",
+    "vitest": "3.1.1"
   }
 }
