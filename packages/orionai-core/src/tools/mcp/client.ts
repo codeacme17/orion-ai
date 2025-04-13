@@ -1,23 +1,18 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
-import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
+import {
+  StdioClientTransport,
+  type StdioServerParameters,
+} from '@modelcontextprotocol/sdk/client/stdio.js'
 import { DEV_LOGGER } from '@/lib/logger'
-import type {
-  IMCPClient,
-  IMCPClientOptions,
-  IMCPTool,
-  IMCPToolCall,
-  IMCPToolList,
-  IMCPToolResult,
-  JSONValue,
-} from './types'
+import type { IMCPClientOptions, IMCPTool, IMCPToolCall, JSONValue } from './types'
 
-export class MCPClient implements IMCPClient {
+export class MCPClient {
   private client: Client
   private transport: StdioClientTransport
   private debug: boolean
   private toolNamePrefix?: string
 
-  constructor(options: IMCPClientOptions = {}) {
+  constructor(options: IMCPClientOptions = {}, transportOptions: StdioServerParameters) {
     this.debug = options.verbose ?? false
     this.toolNamePrefix = options.toolNamePrefix
 
@@ -26,10 +21,7 @@ export class MCPClient implements IMCPClient {
       version: options.clientVersion ?? '1.0.0',
     })
 
-    this.transport = new StdioClientTransport({
-      command: 'mcp',
-      args: [],
-    })
+    this.transport = new StdioClientTransport(transportOptions)
   }
 
   async connect(): Promise<void> {
@@ -38,30 +30,27 @@ export class MCPClient implements IMCPClient {
     await this.client.connect(this.transport)
   }
 
-  async listTools(): Promise<IMCPToolList> {
+  async listTools(): Promise<IMCPTool[]> {
     const tools = await this.client.listTools()
-    return {
-      tools: tools.tools.map((tool: IMCPTool) => ({
-        name: this.toolNamePrefix ? `${this.toolNamePrefix}_${tool.name}` : tool.name,
-        description: tool.description,
-        inputSchema: tool.inputSchema,
-      })),
-    }
+
+    return tools.tools.map((tool: IMCPTool) => ({
+      name: this.toolNamePrefix ? `${this.toolNamePrefix}_${tool.name}` : tool.name,
+      description: tool.description,
+      inputSchema: tool.inputSchema,
+    }))
   }
 
-  async callTool(tool: IMCPToolCall): Promise<IMCPToolResult> {
+  async callTool(tool: IMCPToolCall): Promise<JSONValue> {
     this.debug && DEV_LOGGER.INFO('Calling tool:', tool.name, 'with arguments:', tool.arguments)
-
+    console.log('tool.name', tool.name)
     const result = await this.client.callTool({
-      name: tool.name,
+      name: this.toolNamePrefix ? tool.name.split('_')[1] : tool.name,
       arguments: tool.arguments,
     })
 
     this.debug && DEV_LOGGER.INFO('Tool result:', result)
 
-    return {
-      result: result.result as JSONValue,
-    }
+    return result as JSONValue
   }
 
   async close(): Promise<void> {

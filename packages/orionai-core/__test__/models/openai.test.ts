@@ -6,6 +6,8 @@ import { AssistantMessage, SystemMessage, userMessage, UserMessage } from '@/mes
 import { DEV_LOGGER } from '@/lib/logger'
 import { z } from 'zod'
 import { functionTool } from '@/tools/function'
+import { mcpTool } from '@/tools'
+import { MCPTool } from '@/tools/mcp'
 
 describe('OpenAIModel', () => {
   let model: OpenAIModel

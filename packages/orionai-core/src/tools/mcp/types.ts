@@ -40,16 +40,6 @@ export interface IMCPToolCall {
   arguments: Record<string, unknown>
 }
 
-export interface IMCPToolResult {
-  result: JSONValue
-}
-
 export interface IMCPToolList {
   tools: IMCPTool[]
-}
-
-export interface IMCPClient {
-  listTools(): Promise<IMCPToolList>
-  callTool(tool: IMCPToolCall): Promise<IMCPToolResult>
-  close(): Promise<void>
 }
