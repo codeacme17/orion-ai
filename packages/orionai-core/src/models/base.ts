@@ -72,6 +72,11 @@ export abstract class BaseModel {
    */
   protected config: IBaseModelConfig
 
+  /**
+   * The response type format for the model's API
+   */
+  abstract readonly apiType: 'chat_completion' | 'response'
+
   constructor(config: IBaseModelConfig = {}) {
     this.config = config
   }

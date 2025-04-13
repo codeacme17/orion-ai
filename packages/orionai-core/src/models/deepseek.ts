@@ -51,6 +51,7 @@ const DEFAULT_BASE_URL = 'https://api.deepseek.com/v1'
 export class DeepSeekModel extends BaseModel {
   private deepseek: Openai
   private debug: boolean
+  readonly apiType = 'chat_completion' as const
 
   constructor(config: IDeepSeekModelConfig = {}) {
     super(config)

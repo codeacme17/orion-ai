@@ -3,11 +3,11 @@ import { BaseMessage, type IBaseMessageFields, type TMessageType } from './base'
 export interface IToolMessageFields extends Omit<IBaseMessageFields, 'content'> {
   call_id: string
   output?: string
-  responseType?: 'chat_completion' | 'response'
+  apiType?: 'chat_completion' | 'response'
 }
 
 export class ToolMessage extends BaseMessage {
-  responseType?: 'chat_completion' | 'response'
+  apiType?: 'chat_completion' | 'response'
   fields: IToolMessageFields
 
   constructor(fields: IToolMessageFields) {
@@ -17,12 +17,12 @@ export class ToolMessage extends BaseMessage {
     if (!call_id) {
       throw new Error('ToolMessage requires a call_id')
     }
-    this.responseType = fields.responseType || 'chat_completion'
+    this.apiType = fields.apiType || 'chat_completion'
     this.fields = fields
   }
 
   private fieldsAdapter() {
-    if (this.responseType === 'chat_completion') {
+    if (this.apiType === 'chat_completion') {
       return {
         role: 'tool',
         content: this.fields.output,
@@ -30,7 +30,7 @@ export class ToolMessage extends BaseMessage {
       }
     }
 
-    if (this.responseType === 'response') {
+    if (this.apiType === 'response') {
       return {
         type: 'function_call_output',
         call_id: this.fields.call_id,

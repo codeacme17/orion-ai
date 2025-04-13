@@ -1,7 +1,8 @@
 import { assistantMessage, SystemMessage, toolMessage, type TMessage } from '@/messages'
 import { BaseAgent, type BaseAgentFields } from './base'
 import { DEV_LOGGER } from '@/lib/logger'
-import { OpenAIModel, type BaseModel, type TModel } from '@/models'
+import { DeepSeekModel, OpenAIModel, openaiModel, type BaseModel, type TModel } from '@/models'
+import type { IToolCallChatCompletionResult, ITollCallResponsesApiResult } from '@/models/base'
 
 export interface IAssistantAgentFields extends BaseAgentFields {
   systemMessage: string
@@ -61,8 +62,15 @@ export class AssistantAgent extends BaseAgent {
         for (const tool of toolCalls) {
           this.debug && DEV_LOGGER.INFO(`AssistantAgent.invoke: Running tool \n`, tool)
 
-          const toolName = 'function' in tool ? tool.function.name : tool.name
-          const toolArgs = JSON.parse('function' in tool ? tool.function.arguments : tool.arguments)
+          const toolName =
+            this.model.apiType === 'chat_completion'
+              ? (tool as IToolCallChatCompletionResult).function.name
+              : (tool as ITollCallResponsesApiResult).name
+          const toolArgs = JSON.parse(
+            this.model.apiType === 'chat_completion'
+              ? (tool as IToolCallChatCompletionResult).function.arguments
+              : (tool as ITollCallResponsesApiResult).arguments,
+          )
           const toolFn = this.tools?.find((t) => t.name === toolName)
 
           // If the tool is found, run it
@@ -74,7 +82,7 @@ export class AssistantAgent extends BaseAgent {
               toolMessage({
                 output: toolResult,
                 call_id: 'call_id' in tool ? tool.call_id : tool.id,
-                responseType: this.model instanceof OpenAIModel ? 'response' : 'chat_completion',
+                apiType: this.model.apiType,
               }).get(),
             )
           }

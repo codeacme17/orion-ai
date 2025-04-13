@@ -10,7 +10,6 @@ import type {
   Response as OpenaiResponse,
   ResponseInput,
   ResponseStreamEvent,
-  ResponseFunctionToolCall,
 } from 'openai/resources/responses/responses.mjs'
 import type { RequestOptions } from 'openai/core.mjs'
 import type {
@@ -18,7 +17,6 @@ import type {
   IBaseCreateResponse,
   IBaseModelConfig,
   ITollCallResponsesApiResult,
-  IToolCallResult,
 } from './base'
 import type { Stream } from 'openai/streaming.mjs'
 
@@ -53,6 +51,7 @@ const DEFAULT_MODEL: OpenaiChatModel = 'gpt-4o-mini'
 export class OpenAIModel extends BaseModel {
   private openai: Openai
   private debug: boolean
+  readonly apiType = 'response' as const
 
   constructor(config: IOpenAIModelConfig = {}) {
     super(config)
