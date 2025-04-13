@@ -1,7 +1,7 @@
 import { assistantMessage, SystemMessage, toolMessage, type TMessage } from '@/messages'
 import { BaseAgent, type BaseAgentFields } from './base'
 import { DEV_LOGGER } from '@/lib/logger'
-import { DeepSeekModel, OpenAIModel, openaiModel, type BaseModel, type TModel } from '@/models'
+import { OpenAIModel, type BaseModel, type TModel } from '@/models'
 
 export interface IAssistantAgentFields extends BaseAgentFields {
   systemMessage: string

@@ -5,7 +5,6 @@ import {
   type IBaseCreateResponse,
   type IBaseModelConfig,
   type IToolCallChatCompletionResult,
-  type IToolCallResult,
 } from './base'
 import { readEnv } from '@/lib/utils'
 import { DEV_LOGGER } from '@/lib/logger'
