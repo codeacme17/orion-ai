@@ -79,10 +79,10 @@ describe('assistant agent', () => {
     const agent = new AssistantAgent({
       name: 'assistant',
       systemMessage: 'you are an useful assistant, you can use tools',
-      // model: openaiModel({
-      //   httpAgent: proxy,
-      // }),
-      model: deepseekModel(),
+      model: openaiModel({
+        httpAgent: proxy,
+      }),
+      // model: deepseekModel(),
       debug: true,
       tools: [
         functionTool({

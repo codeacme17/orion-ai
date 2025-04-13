@@ -1,10 +1,13 @@
 import { assistantMessage, SystemMessage, toolMessage, type TMessage } from '@/messages'
 import { BaseAgent, type BaseAgentFields } from './base'
 import { DEV_LOGGER } from '@/lib/logger'
-import { DeepSeekModel, OpenAIModel, openaiModel, type BaseModel, type TModel } from '@/models'
+import type { BaseModel, TModel } from '@/models'
 import type { IToolCallChatCompletionResult, ITollCallResponsesApiResult } from '@/models/base'
 
 export interface IAssistantAgentFields extends BaseAgentFields {
+  /**
+   * The system message that the assistant will respond with.
+   */
   systemMessage: string
 }
 
@@ -91,7 +94,9 @@ export class AssistantAgent extends BaseAgent {
         // Combine the messages and tool results
         const newMessages = [
           ...combinedMessages,
-          ...(this.model instanceof OpenAIModel ? result.tool_calls : [toolAssistantMessage]),
+          ...(this.model.apiType === 'chat_completion'
+            ? [toolAssistantMessage]
+            : result.tool_calls),
           ...toolResults,
         ] as Array<TMessage>
 
