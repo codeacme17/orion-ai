@@ -1,5 +1,5 @@
 import { DEV_LOGGER } from '@/lib/logger'
-import { assistantMessage, ToolMessage, UserMessage, userMessage } from '@/messages'
+import { assistantMessage, UserMessage, userMessage } from '@/messages'
 import { mcpTool } from '@/tools'
 import { describe, expect, it } from 'vitest'
 
@@ -74,6 +74,34 @@ describe('tool message', () => {
         return
       }
       throw error
+    }
+  })
+
+  it('should run mcp tool `tojson`', async () => {
+    const tools = await mcpTool(
+      {
+        toolNamePrefix: 'everything',
+        clientName: 'everything-client',
+        clientVersion: '1.0.0',
+        verbose: true,
+      },
+      {
+        command: 'npx',
+        args: ['-y', '@modelcontextprotocol/server-everything'],
+      },
+    )
+
+    // If we get here, MCP server is available
+    try {
+      const echoTool = tools.find((tool) => tool.name === 'everything_echo')
+      const json = echoTool?.toJSON()
+      console.log('json', json)
+      expect(json).toBeDefined()
+    } catch (error) {
+      console.error('Error in Everything MCP test:', error)
+      throw error
+    } finally {
+      await Promise.all(tools.map((tool) => tool.close()))
     }
   })
 })

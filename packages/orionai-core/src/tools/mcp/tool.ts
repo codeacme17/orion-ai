@@ -12,8 +12,9 @@ export class MCPTool extends BaseTool {
     super({
       name: tool.name,
       description: tool.description || '',
-      schema: z.object(tool.inputSchema),
+      schema: tool.inputSchema as z.ZodObject<any, any, any, any>,
     })
+    console.log('tool.inputSchema', tool.inputSchema)
     this.client = client
     this.mcpName = tool.name
   }
@@ -42,7 +43,12 @@ export class MCPTool extends BaseTool {
   }
 
   toResponseJson() {
-    return this.toJSON()
+    return {
+      type: 'function',
+      name: this.name,
+      description: this.description,
+      parameters: this.schema,
+    }
   }
 }
 

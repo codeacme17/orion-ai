@@ -1,13 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { z } from 'zod'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { openaiModel, OpenAIModel } from '@/models/openai'
 import { config as dotConfig } from 'dotenv'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import { AssistantMessage, SystemMessage, userMessage, UserMessage } from '@/messages'
 import { DEV_LOGGER } from '@/lib/logger'
-import { z } from 'zod'
 import { functionTool } from '@/tools/function'
 import { mcpTool } from '@/tools'
-import { MCPTool } from '@/tools/mcp'
 
 describe('OpenAIModel', () => {
   let model: OpenAIModel
@@ -154,5 +153,30 @@ describe('OpenAIModel', () => {
 
     console.log('toolResult', toolResult)
     expect(toolResult).not.toBe('')
+  })
+
+  it('should support mcp tool', async () => {
+    const tools = await mcpTool(
+      {
+        toolNamePrefix: 'everything',
+        clientName: 'everything-client',
+        clientVersion: '1.0.0',
+        verbose: true,
+      },
+      {
+        command: 'npx',
+        args: ['-y', '@modelcontextprotocol/server-everything'],
+      },
+    )
+
+    console.log('[tools] ', tools)
+
+    const response = await model.create({
+      messages: [new UserMessage('use echo tool to echo "hello"')],
+      tools: tools,
+    })
+
+    DEV_LOGGER.SUCCESS('response', response)
+    expect(response).not.toBe('')
   })
 })

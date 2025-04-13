@@ -1,12 +1,21 @@
 import { z } from 'zod'
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { config as dotConfig } from 'dotenv'
 
 import { DeepSeekModel, type IDeepSeekModelConfig } from '@/models'
 import { userMessage, UserMessage } from '@/messages'
 import { functionTool } from '@/tools/function'
+import { mcpTool } from '@/tools'
+import { DEV_LOGGER } from '@/lib/logger'
 
 describe('DeepSeekModel', () => {
+  let model: DeepSeekModel
+
+  beforeEach(() => {
+    dotConfig()
+    model = new DeepSeekModel()
+  })
+
   it('should throw an error if no API key is provided', () => {
     const invalidConfig = { model: 'deepseek-chat' } as IDeepSeekModelConfig
     expect(() => new DeepSeekModel(invalidConfig)).toThrowError(
@@ -138,5 +147,30 @@ describe('DeepSeekModel', () => {
       }
     }
     expect(content.length).toBeGreaterThan(0)
+  })
+
+  it('should support mcp tool', async () => {
+    const tools = await mcpTool(
+      {
+        toolNamePrefix: 'everything',
+        clientName: 'everything-client',
+        clientVersion: '1.0.0',
+        verbose: true,
+      },
+      {
+        command: 'npx',
+        args: ['-y', '@modelcontextprotocol/server-everything'],
+      },
+    )
+
+    console.log('[tools] ', tools)
+
+    const response = await model.create({
+      messages: [new UserMessage('use echo tool to echo "hello"')],
+      tools: tools,
+    })
+
+    DEV_LOGGER.SUCCESS('response', response)
+    expect(response).not.toBe('')
   })
 })
