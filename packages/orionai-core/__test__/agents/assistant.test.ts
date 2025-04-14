@@ -7,6 +7,7 @@ import { userMessage } from '@/messages'
 import { deepseekModel, openaiModel } from '@/models'
 import { functionTool } from '@/tools/function'
 import { HttpsProxyAgent } from 'https-proxy-agent'
+import { mcpTool } from '@/tools'
 
 describe('assistant agent', () => {
   let proxy: HttpsProxyAgent<string> | null = null
@@ -116,13 +117,32 @@ describe('assistant agent', () => {
   })
 
   it('should invoke MCP agent', async () => {
+    const tools = await mcpTool(
+      {
+        toolNamePrefix: 'everything',
+        clientName: 'everything-client',
+        clientVersion: '1.0.0',
+        verbose: true,
+      },
+      {
+        command: 'npx',
+        args: ['-y', '@modelcontextprotocol/server-everything'],
+      },
+    )
+
     const agent = new AssistantAgent({
       name: 'assistant',
       systemMessage: 'you are an useful assistant, you can use tools',
-      model: openaiModel({
-        httpAgent: proxy,
-      }),
+      // model: openaiModel({
+      //   httpAgent: proxy,
+      // }),
+      model: deepseekModel(),
       debug: true,
+      tools,
     })
+
+    const result = await agent.invoke([userMessage('use echo tool to echo "hello"')])
+
+    expect(result).toBeDefined()
   })
 })
