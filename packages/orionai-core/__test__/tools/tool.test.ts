@@ -1,6 +1,6 @@
 import { DEV_LOGGER } from '@/lib/logger'
 import { assistantMessage, UserMessage, userMessage } from '@/messages'
-import { mcpTool } from '@/tools'
+import { mcpStdioTool } from '@/tools'
 import { describe, expect, it } from 'vitest'
 
 describe('tool message', () => {
@@ -39,7 +39,7 @@ describe('tool message', () => {
     // Skip test if MCP server is not available
     try {
       // Initialize MCP tools
-      const tools = await mcpTool(
+      const tools = await mcpStdioTool(
         {
           toolNamePrefix: 'everything',
           clientName: 'everything-client',
@@ -78,7 +78,7 @@ describe('tool message', () => {
   })
 
   it('should run mcp tool `tojson`', async () => {
-    const tools = await mcpTool(
+    const tools = await mcpStdioTool(
       {
         toolNamePrefix: 'everything',
         clientName: 'everything-client',

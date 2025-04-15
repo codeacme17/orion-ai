@@ -7,7 +7,7 @@ import { userMessage } from '@/messages'
 import { deepseekModel, openaiModel } from '@/models'
 import { functionTool } from '@/tools/function'
 import { HttpsProxyAgent } from 'https-proxy-agent'
-import { mcpTool } from '@/tools'
+import { mcpStdioTool } from '@/tools'
 
 describe('assistant agent', () => {
   let proxy: HttpsProxyAgent<string> | null = null
@@ -117,7 +117,7 @@ describe('assistant agent', () => {
   })
 
   it('should invoke MCP agent', async () => {
-    const tools = await mcpTool(
+    const tools = await mcpStdioTool(
       {
         toolNamePrefix: 'everything',
         clientName: 'everything-client',

@@ -6,7 +6,7 @@ import {
 import { DEV_LOGGER } from '@/lib/logger'
 import type { IMCPClientOptions, IMCPTool, IMCPToolCall, JSONValue } from './types'
 
-export class MCPClient {
+export class MCPStdioClient {
   private client: Client
   private transport: StdioClientTransport
   private debug: boolean
@@ -42,7 +42,7 @@ export class MCPClient {
 
   async callTool(tool: IMCPToolCall): Promise<JSONValue> {
     this.debug && DEV_LOGGER.INFO('Calling tool:', tool.name, 'with arguments:', tool.arguments)
-    console.log('tool.name', tool.name)
+
     const result = await this.client.callTool({
       name: this.toolNamePrefix ? tool.name.split('_')[1] : tool.name,
       arguments: tool.arguments,
