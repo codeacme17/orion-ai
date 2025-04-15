@@ -4,13 +4,19 @@ import {
   type StdioServerParameters,
 } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { DEV_LOGGER } from '@/lib/logger'
-import type { IMCPClientOptions, IMCPTool, IMCPToolCall, JSONValue } from './types'
+import type {
+  IMCPClientOptions,
+  IMCPTool,
+  IMCPToolCall,
+  JSONValue,
+  IMCPImplementation,
+} from './types'
 
-export class MCPStdioClient {
-  private client: Client
-  private transport: StdioClientTransport
-  private debug: boolean
-  private toolNamePrefix?: string
+export class MCPStdioClient implements IMCPImplementation {
+  readonly client: Client
+  readonly transport: StdioClientTransport
+  readonly debug?: boolean
+  readonly toolNamePrefix?: string
 
   constructor(options: IMCPClientOptions = {}, transportOptions: StdioServerParameters) {
     this.debug = options.verbose ?? false
@@ -34,7 +40,7 @@ export class MCPStdioClient {
     const tools = await this.client.listTools()
 
     return tools.tools.map((tool: IMCPTool) => ({
-      name: this.toolNamePrefix ? `${this.toolNamePrefix}_${tool.name}` : tool.name,
+      name: this.toolNamePrefix ? `[${this.toolNamePrefix}]${tool.name}` : tool.name,
       description: tool.description,
       inputSchema: tool.inputSchema,
     }))
@@ -44,7 +50,7 @@ export class MCPStdioClient {
     this.debug && DEV_LOGGER.INFO('Calling tool:', tool.name, 'with arguments:', tool.arguments)
 
     const result = await this.client.callTool({
-      name: this.toolNamePrefix ? tool.name.split(`${this.toolNamePrefix}_`)[1] : tool.name,
+      name: this.toolNamePrefix ? tool.name.split(`[${this.toolNamePrefix}]`)[1] : tool.name,
       arguments: tool.arguments,
     })
 

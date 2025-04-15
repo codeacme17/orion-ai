@@ -1,16 +1,20 @@
 import { z } from 'zod'
 import { BaseTool } from '../base'
 import { MCPStdioClient } from './stdio-client'
-import { MCPSseClient, type IMCPSseClientOptions, type IMCPSseTransportOptions } from './sse-client'
-
-import type { IMCPClientOptions as IMCPStdioClientOptions, IMCPTool } from './types'
+import { MCPSseClient } from './sse-client'
+import type {
+  IMCPSseClientOptions,
+  IMCPSseTransportOptions,
+  IMCPClientOptions as IMCPStdioClientOptions,
+  IMCPTool,
+} from './types'
 import type { StdioServerParameters } from '@modelcontextprotocol/sdk/client/stdio.js'
 
 export class MCPTool extends BaseTool {
-  private client: MCPStdioClient
+  private client: MCPStdioClient | MCPSseClient
   mcpName: string
 
-  constructor(tool: IMCPTool, client: MCPStdioClient) {
+  constructor(tool: IMCPTool, client: MCPStdioClient | MCPSseClient) {
     super({
       name: tool.name,
       description: tool.description || '',
@@ -66,12 +70,13 @@ export async function mcpStdioTools(
 }
 
 // TODO: add sse tools
-// export async function mcpSseTools(
-//   options: IMCPSseClientOptions,
-//   transportOptions: IMCPSseTransportOptions,
-// ): Promise<MCPTool[]> {
-//   const client = new MCPSseClient(options, transportOptions)
-//   await client.connect()
-//   const tools = await client.listTools()
-//   return tools.map((tool) => new MCPTool(tool, client))
-// }
+export async function mcpSseTools(
+  options: IMCPSseClientOptions,
+  transportOptions: IMCPSseTransportOptions,
+): Promise<MCPTool[]> {
+  const client = new MCPSseClient(options, transportOptions)
+  await client.connect()
+
+  const tools = await client.listTools()
+  return tools.map((tool) => new MCPTool(tool, client))
+}

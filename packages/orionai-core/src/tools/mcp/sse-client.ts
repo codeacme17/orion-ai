@@ -1,108 +1,51 @@
-import { Client, type ClientOptions } from '@modelcontextprotocol/sdk/client/index.js'
-import {
-  SSEClientTransport,
-  type SSEClientTransportOptions,
-} from '@modelcontextprotocol/sdk/client/sse.js'
-import type { Implementation } from '@modelcontextprotocol/sdk/types.js'
+import { Client } from '@modelcontextprotocol/sdk/client/index.js'
+import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js'
+import type {
+  IMCPImplementation,
+  IMCPSseClientOptions,
+  IMCPSseTransportOptions,
+  JSONValue,
+  IMCPToolCall,
+  IMCPTool,
+} from './types'
+import { DEV_LOGGER } from '@/lib/logger'
 
-export interface SSEClientOptions {
-  url: string
-  headers?: Record<string, string>
-  retryInterval?: number
-  maxRetries?: number
-}
-
-export interface SSEMessage {
-  id?: string
-  event?: string
-  data: string
-  retry?: number
-}
-
-export interface IMCPSseClientOptions {
-  clientInfo: Implementation
-  options?: ClientOptions
-}
-
-export interface IMCPSseTransportOptions {
-  url: string
-  options?: SSEClientTransportOptions
-}
-
-export class MCPSseClient {
-  private retryCount: number
-  private eventSource: EventSource | null
-  private _isConnected: boolean
-
-  private client: Client
-  private transport: SSEClientTransport
+export class MCPSseClient implements IMCPImplementation {
+  readonly client: Client
+  readonly transport: SSEClientTransport
+  readonly debug?: boolean
+  readonly toolNamePrefix?: string
 
   constructor(clientOptions: IMCPSseClientOptions, transportOptions: IMCPSseTransportOptions) {
-    this.retryCount = 0
-    this.eventSource = null
-    this._isConnected = false
-
+    this.toolNamePrefix = clientOptions.clientInfo.toolNamePrefix ?? ''
     this.client = new Client(clientOptions.clientInfo, clientOptions.options)
     this.transport = new SSEClientTransport(new URL(transportOptions.url), transportOptions.options)
+    this.debug = clientOptions.clientInfo?.verbose
   }
 
-  public connect(): void {
-    this.client.connect(this.transport)
+  public async connect(): Promise<void> {
+    this.debug && DEV_LOGGER.INFO('Connecting to MCP server...')
+    await this.client.connect(this.transport)
   }
 
-  private setupEventListeners(): void {
-    if (!this.eventSource) return
-
-    this.eventSource.onopen = () => {
-      this._isConnected = true
-      this.retryCount = 0
-    }
-
-    this.eventSource.onmessage = (event: MessageEvent) => {
-      const message: SSEMessage = {
-        data: event.data,
-      }
-    }
-
-    this.eventSource.onerror = (error: Event) => {
-      this._isConnected = false
-    }
+  public async listTools(): Promise<IMCPTool[]> {
+    const tools = await this.client.listTools()
+    return tools.tools.map((tool) => ({
+      name: this.toolNamePrefix ? `[${this.toolNamePrefix}]${tool.name}` : tool.name,
+      description: tool.description,
+      inputSchema: tool.inputSchema,
+    }))
   }
 
-  public disconnect(): void {
-    if (this.eventSource) {
-      this.eventSource.close()
-      this.eventSource = null
-      this._isConnected = false
-    }
-  }
-
-  public getConnectionStatus(): boolean {
-    return this._isConnected
-  }
-
-  public addEventListener(event: string, listener: (message: SSEMessage) => void): void {
-    if (!this.eventSource) return
-    this.eventSource.addEventListener(event, (event: MessageEvent) => {
-      const message: SSEMessage = {
-        data: event.data,
-        event: event.type,
-      }
-      listener(message)
+  public async callTool(tool: IMCPToolCall): Promise<JSONValue> {
+    const result = await this.client.callTool({
+      name: this.toolNamePrefix ? tool.name.split(`[${this.toolNamePrefix}]`)[1] : tool.name,
+      arguments: tool.arguments,
     })
+    return result as JSONValue
   }
 
-  public removeEventListener(event: string, listener: (message: SSEMessage) => void): void {
-    if (!this.eventSource) return
-    const wrappedListener = (event: Event) => {
-      if (event instanceof MessageEvent) {
-        const message: SSEMessage = {
-          data: event.data,
-          event: event.type,
-        }
-        listener(message)
-      }
-    }
-    this.eventSource.removeEventListener(event, wrappedListener)
+  public async close(): Promise<void> {
+    await this.client.close()
   }
 }
