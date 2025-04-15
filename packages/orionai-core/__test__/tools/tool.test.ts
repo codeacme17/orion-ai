@@ -1,9 +1,12 @@
 import { DEV_LOGGER } from '@/lib/logger'
 import { assistantMessage, UserMessage, userMessage } from '@/messages'
-import { mcpStdioTool } from '@/tools'
+import { mcpStdioTools } from '@/tools'
 import { describe, expect, it } from 'vitest'
+import { config as dotConfig } from 'dotenv'
 
 describe('tool message', () => {
+  dotConfig()
+
   it('should create a user message', () => {
     const res = userMessage('hello')
     DEV_LOGGER.SUCCESS('user message', res.content)
@@ -39,7 +42,7 @@ describe('tool message', () => {
     // Skip test if MCP server is not available
     try {
       // Initialize MCP tools
-      const tools = await mcpStdioTool(
+      const tools = await mcpStdioTools(
         {
           toolNamePrefix: 'everything',
           clientName: 'everything-client',
@@ -77,8 +80,51 @@ describe('tool message', () => {
     }
   })
 
+  it('should get github mcp tool list and run get_pull_request_comments', async () => {
+    try {
+      const tools = await mcpStdioTools(
+        {
+          toolNamePrefix: 'github',
+          clientName: 'github-client',
+          clientVersion: '1.0.0',
+          verbose: true,
+        },
+        {
+          command: 'npx',
+          args: ['-y', '@modelcontextprotocol/server-github'],
+          env: {
+            GITHUB_PERSONAL_ACCESS_TOKEN: process.env.GITHUB_TOKEN || '',
+            PATH: process.env.PATH || '/usr/local/bin:/usr/bin:/bin',
+          },
+        },
+      )
+
+      console.log('tools', tools)
+      expect(tools).toBeDefined()
+
+      const getPullRequestFilesTool = tools.find(
+        (tool) => tool.name === 'github_get_pull_request_files',
+      )
+
+      console.log('getPullRequestCommentsTool', getPullRequestFilesTool?.toJSON())
+
+      expect(getPullRequestFilesTool).toBeDefined()
+
+      const response = await getPullRequestFilesTool?.run({
+        owner: 'codeacme17',
+        repo: 'orion-ai',
+        pull_number: 1,
+      })
+      console.log('response', response)
+      expect(response).toBeDefined()
+    } catch (error) {
+      console.error('Error in Github MCP test:', error)
+      throw error
+    }
+  })
+
   it('should run mcp tool `echo`', async () => {
-    const tools = await mcpStdioTool(
+    const tools = await mcpStdioTools(
       {
         toolNamePrefix: 'everything',
         clientName: 'everything-client',
