@@ -77,7 +77,7 @@ describe('tool message', () => {
     }
   })
 
-  it('should run mcp tool `tojson`', async () => {
+  it('should run mcp tool `echo`', async () => {
     const tools = await mcpStdioTool(
       {
         toolNamePrefix: 'everything',
