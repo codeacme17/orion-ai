@@ -161,9 +161,11 @@ describe('tool message', () => {
     )
 
     const echoTool = tools.find((tool) => tool.name === '[example]getTinyImage')
-    console.log('echoTool', echoTool)
-    const res = await echoTool?.run({})
+
+    const res = await echoTool?.run()
 
     console.log(res)
+
+    expect(res).toBeDefined()
   })
 })

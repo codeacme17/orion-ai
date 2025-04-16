@@ -25,7 +25,7 @@ export class MCPTool extends BaseTool {
     this.mcpName = tool.name
   }
 
-  async run(args: any): Promise<string> {
+  async run(args: any = {}): Promise<string> {
     console.log('this.mcpName', this.mcpName)
     const result = await this.client.callTool({
       name: this.mcpName,
