@@ -161,9 +161,12 @@ describe('tool message', () => {
       },
     )
 
-    console.log('tools', tools)
     const echoTool = tools.find((tool) => tool.name === '[example]iframe')
-    const res = await echoTool?.run()
+    const res = await echoTool?.run({
+      url: 'https://www.google.com',
+      width: 100,
+      height: 100,
+    })
 
     console.log(res)
     expect(res).toBeDefined()
@@ -173,8 +176,8 @@ describe('tool message', () => {
     const sseTools = await mcpSseTools(
       {
         clientInfo: {
-          toolNamePrefix: 'example',
-          name: 'example-server',
+          toolNamePrefix: 'dsp',
+          name: 'example-dsp',
           version: '1.0.0',
           verbose: true,
         },
@@ -184,19 +187,20 @@ describe('tool message', () => {
       },
     )
 
-    const stdioTools = await mcpStdioTools(
+    const fecthTools = await mcpStdioTools(
       {
-        toolNamePrefix: 'example',
-        clientName: 'example-client',
+        toolNamePrefix: 'fecth',
+        clientName: 'example-fecth',
         clientVersion: '1.0.0',
       },
       {
-        command: 'node',
-        args: ['/Users/huyanming.hym/Alibaba/temp/mcp-server-demo/build/index.js'],
+        command: 'uvx',
+        args: ['mcp-server-fetch'],
       },
     )
 
-    const tools = [...sseTools, ...stdioTools]
+    const tools = [...sseTools, ...fecthTools]
     console.log('tools', tools)
+    expect(tools).toBeDefined()
   })
 })

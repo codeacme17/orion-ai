@@ -65,6 +65,8 @@ export class AssistantAgent extends BaseAgent {
         for (const tool of toolCalls) {
           this.debug && DEV_LOGGER.INFO(`AssistantAgent.invoke: Running tool \n`, tool)
 
+          console.log('tool', tool)
+
           const toolName =
             this.model.apiType === 'chat_completion'
               ? (tool as IToolCallChatCompletionResult).function.name

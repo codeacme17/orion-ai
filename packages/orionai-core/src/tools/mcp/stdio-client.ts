@@ -40,7 +40,7 @@ export class MCPStdioClient implements IMCPImplementation {
     const tools = await this.client.listTools()
 
     return tools.tools.map((tool: IMCPTool) => ({
-      name: this.toolNamePrefix ? `[${this.toolNamePrefix}]${tool.name}` : tool.name,
+      name: this.toolNamePrefix ? `${this.toolNamePrefix}_${tool.name}` : tool.name,
       description: tool.description,
       inputSchema: tool.inputSchema,
     }))
@@ -50,7 +50,7 @@ export class MCPStdioClient implements IMCPImplementation {
     this.debug && DEV_LOGGER.INFO('Calling tool:', tool.name, 'with arguments:', tool.arguments)
 
     const result = await this.client.callTool({
-      name: this.toolNamePrefix ? tool.name.split(`[${this.toolNamePrefix}]`)[1] : tool.name,
+      name: this.toolNamePrefix ? tool.name.split(`${this.toolNamePrefix}_`)[1] : tool.name,
       arguments: tool.arguments,
     })
 

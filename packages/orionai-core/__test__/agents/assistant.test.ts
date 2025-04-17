@@ -7,7 +7,7 @@ import { userMessage } from '@/messages'
 import { deepseekModel, openaiModel } from '@/models'
 import { functionTool } from '@/tools/function'
 import { HttpsProxyAgent } from 'https-proxy-agent'
-import { mcpStdioTools } from '@/tools'
+import { mcpSseTools, mcpStdioTools } from '@/tools'
 
 describe('assistant agent', () => {
   let proxy: HttpsProxyAgent<string> | null = null
@@ -117,31 +117,47 @@ describe('assistant agent', () => {
   })
 
   it('should invoke MCP agent', async () => {
-    const tools = await mcpStdioTools(
+    const sseTools = await mcpSseTools(
       {
-        toolNamePrefix: 'everything',
-        clientName: 'everything-client',
-        clientVersion: '1.0.0',
-        verbose: true,
+        clientInfo: {
+          toolNamePrefix: 'dsp',
+          name: 'example-dsp',
+          version: '1.0.0',
+          verbose: true,
+        },
       },
       {
-        command: 'npx',
-        args: ['-y', '@modelcontextprotocol/server-everything'],
+        url: 'http://localhost:3000/sse',
       },
     )
+
+    const fecthTools = await mcpStdioTools(
+      {
+        toolNamePrefix: 'fecth',
+        clientName: 'example-fecth',
+        clientVersion: '1.0.0',
+      },
+      {
+        command: 'uvx',
+        args: ['mcp-server-fetch'],
+      },
+    )
+
+    const tools = [...sseTools, ...fecthTools]
 
     const agent = new AssistantAgent({
       name: 'assistant',
       systemMessage: 'you are an useful assistant, you can use tools',
-      // model: openaiModel({
-      //   httpAgent: proxy,
-      // }),
       model: deepseekModel(),
       debug: true,
       tools,
     })
 
-    const result = await agent.invoke([userMessage('use echo tool to echo "hello"')])
+    const result = await agent.invoke([
+      userMessage(
+        'please give me the web content of https://alidocs.dingtalk.com/i/nodes/mExel2BLV59rgdDPiewzwOLwVgk9rpMq?corpId=dingd8e1123006514592&sideCollapsed=true&iframeQuery=utm_source%253Dportal%2526utm_medium%253Dportal_new_tab_open&utm_scene=team_space',
+      ),
+    ])
 
     expect(result).toBeDefined()
   })

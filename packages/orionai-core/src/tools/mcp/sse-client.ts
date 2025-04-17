@@ -24,12 +24,12 @@ export class MCPSseClient implements IMCPImplementation {
   }
 
   public async connect(): Promise<void> {
-    this.debug && DEV_LOGGER.INFO('Connecting to MCP server...')
     try {
-      const res = await this.client.connect(this.transport)
-      console.log('client res', res)
+      this.debug && DEV_LOGGER.INFO('🔄 Connecting to MCP server...')
+      await this.client.connect(this.transport)
+      this.debug && DEV_LOGGER.SUCCESS('🎉 Connected to MCP server')
     } catch (error) {
-      console.error('[orion-ai] Error connecting to MCP server:', error)
+      this.debug && DEV_LOGGER.ERROR('❌ Error connecting to MCP server:', error)
       throw error
     }
   }
@@ -38,21 +38,22 @@ export class MCPSseClient implements IMCPImplementation {
     try {
       const tools = await this.client.listTools()
       return tools.tools.map((tool) => ({
-        name: this.toolNamePrefix ? `[${this.toolNamePrefix}]${tool.name}` : tool.name,
+        name: this.toolNamePrefix ? `${this.toolNamePrefix}_${tool.name}` : tool.name,
         description: tool.description,
         inputSchema: tool.inputSchema,
       }))
     } catch (error) {
-      console.error('[orion-ai] Error listing tools:', error)
+      this.debug && DEV_LOGGER.ERROR('❌ Error listing tools:', error)
       throw error
     }
   }
 
   public async callTool(tool: IMCPToolCall): Promise<JSONValue> {
     const result = await this.client.callTool({
-      name: this.toolNamePrefix ? tool.name.split(`[${this.toolNamePrefix}]`)[1] : tool.name,
+      name: this.toolNamePrefix ? tool.name.split(`${this.toolNamePrefix}_`)[1] : tool.name,
       arguments: tool.arguments,
     })
+
     return result as JSONValue
   }
 
