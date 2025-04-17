@@ -69,14 +69,12 @@ export async function mcpStdioTools(
   return tools.map((tool) => new MCPTool(tool, client))
 }
 
-// TODO: add sse tools
 export async function mcpSseTools(
   options: IMCPSseClientOptions,
   transportOptions: IMCPSseTransportOptions,
 ): Promise<MCPTool[]> {
   const client = new MCPSseClient(options, transportOptions)
   await client.connect()
-
   const tools = await client.listTools()
   return tools.map((tool) => new MCPTool(tool, client))
 }

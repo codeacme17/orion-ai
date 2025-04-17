@@ -3,6 +3,7 @@ import { assistantMessage, UserMessage, userMessage } from '@/messages'
 import { mcpSseTools, mcpStdioTools } from '@/tools'
 import { describe, expect, it } from 'vitest'
 import { config as dotConfig } from 'dotenv'
+import { MCPSseClient } from '@/tools/mcp/sse-client'
 
 describe('tool message', () => {
   dotConfig()
@@ -160,12 +161,42 @@ describe('tool message', () => {
       },
     )
 
-    const echoTool = tools.find((tool) => tool.name === '[example]getTinyImage')
-
+    console.log('tools', tools)
+    const echoTool = tools.find((tool) => tool.name === '[example]iframe')
     const res = await echoTool?.run()
 
     console.log(res)
-
     expect(res).toBeDefined()
+  })
+
+  it('should run multiple tools', async () => {
+    const sseTools = await mcpSseTools(
+      {
+        clientInfo: {
+          toolNamePrefix: 'example',
+          name: 'example-server',
+          version: '1.0.0',
+          verbose: true,
+        },
+      },
+      {
+        url: 'http://localhost:3000/sse',
+      },
+    )
+
+    const stdioTools = await mcpStdioTools(
+      {
+        toolNamePrefix: 'example',
+        clientName: 'example-client',
+        clientVersion: '1.0.0',
+      },
+      {
+        command: 'node',
+        args: ['/Users/huyanming.hym/Alibaba/temp/mcp-server-demo/build/index.js'],
+      },
+    )
+
+    const tools = [...sseTools, ...stdioTools]
+    console.log('tools', tools)
   })
 })

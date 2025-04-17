@@ -25,16 +25,27 @@ export class MCPSseClient implements IMCPImplementation {
 
   public async connect(): Promise<void> {
     this.debug && DEV_LOGGER.INFO('Connecting to MCP server...')
-    await this.client.connect(this.transport)
+    try {
+      const res = await this.client.connect(this.transport)
+      console.log('client res', res)
+    } catch (error) {
+      console.error('[orion-ai] Error connecting to MCP server:', error)
+      throw error
+    }
   }
 
   public async listTools(): Promise<IMCPTool[]> {
-    const tools = await this.client.listTools()
-    return tools.tools.map((tool) => ({
-      name: this.toolNamePrefix ? `[${this.toolNamePrefix}]${tool.name}` : tool.name,
-      description: tool.description,
-      inputSchema: tool.inputSchema,
-    }))
+    try {
+      const tools = await this.client.listTools()
+      return tools.tools.map((tool) => ({
+        name: this.toolNamePrefix ? `[${this.toolNamePrefix}]${tool.name}` : tool.name,
+        description: tool.description,
+        inputSchema: tool.inputSchema,
+      }))
+    } catch (error) {
+      console.error('[orion-ai] Error listing tools:', error)
+      throw error
+    }
   }
 
   public async callTool(tool: IMCPToolCall): Promise<JSONValue> {
