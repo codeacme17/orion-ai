@@ -31,32 +31,46 @@ export class MCPStdioClient implements IMCPImplementation {
   }
 
   async connect(): Promise<void> {
-    this.debug && DEV_LOGGER.INFO('Connecting to MCP server...')
-
-    await this.client.connect(this.transport)
+    try {
+      this.debug && DEV_LOGGER.INFO('🔄 Connecting to MCP server...')
+      await this.client.connect(this.transport)
+      this.debug && DEV_LOGGER.SUCCESS('🎉 Connected to MCP server')
+    } catch (error) {
+      this.debug && DEV_LOGGER.ERROR('❌ Error connecting to MCP server:', error)
+      throw error
+    }
   }
 
   async listTools(): Promise<IMCPTool[]> {
-    const tools = await this.client.listTools()
-
-    return tools.tools.map((tool: IMCPTool) => ({
-      name: this.toolNamePrefix ? `${this.toolNamePrefix}_${tool.name}` : tool.name,
-      description: tool.description,
-      inputSchema: tool.inputSchema,
-    }))
+    try {
+      const tools = await this.client.listTools()
+      return tools.tools.map((tool: IMCPTool) => ({
+        name: this.toolNamePrefix ? `${this.toolNamePrefix}_${tool.name}` : tool.name,
+        description: tool.description,
+        inputSchema: tool.inputSchema,
+      }))
+    } catch (error) {
+      this.debug && DEV_LOGGER.ERROR('❌ Error listing tools:', error)
+      throw error
+    }
   }
 
   async callTool(tool: IMCPToolCall): Promise<JSONValue> {
-    this.debug && DEV_LOGGER.INFO('Calling tool:', tool.name, 'with arguments:', tool.arguments)
+    try {
+      this.debug &&
+        DEV_LOGGER.INFO('🔄 Calling tool:', tool.name, 'with arguments:', tool.arguments)
 
-    const result = await this.client.callTool({
-      name: this.toolNamePrefix ? tool.name.split(`${this.toolNamePrefix}_`)[1] : tool.name,
-      arguments: tool.arguments,
-    })
+      const result = await this.client.callTool({
+        name: this.toolNamePrefix ? tool.name.split(`${this.toolNamePrefix}_`)[1] : tool.name,
+        arguments: tool.arguments,
+      })
 
-    this.debug && DEV_LOGGER.INFO('Tool result:', result)
-
-    return result as JSONValue
+      this.debug && DEV_LOGGER.SUCCESS('🎉 Tool result:', result)
+      return result as JSONValue
+    } catch (error) {
+      this.debug && DEV_LOGGER.ERROR('❌ Error calling tool:', error)
+      throw error
+    }
   }
 
   async close(): Promise<void> {
