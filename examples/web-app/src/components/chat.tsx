@@ -4,27 +4,66 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { assistantAgent, deepseekModel, assistantMessage, userMessage } from '@orion-ai/core'
+
+// 创建 OpenAI 模型实例
+const model = deepseekModel({
+  apiKey: import.meta.env.VITE_DEEPSEEK_API_KEY,
+  debug: true,
+  dangerouslyAllowBrowser: true,
+})
+
+// 创建 Orion AI 助手实例
+const assistant = assistantAgent({
+  name: 'AI Assistant',
+  systemMessage: 'You are a helpful AI assistant.',
+  model,
+  debug: true,
+})
 
 export const Chat = () => {
   const [input, setInput] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
   const { messages, addMessage } = useChatStore()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!input.trim()) return
+    if (!input.trim() || isLoading) return
 
-    addMessage({
+    // 添加用户消息
+    const userMsg = {
       content: input,
-      role: 'user',
-    })
-
-    // TODO: Add AI response logic here
-    addMessage({
-      content: 'This is a placeholder response from the AI.',
-      role: 'assistant',
-    })
-
+      role: 'user' as const,
+    }
+    addMessage(userMsg)
     setInput('')
+
+    setIsLoading(true)
+    try {
+      // 调用 Orion AI 处理消息
+      const response = await assistant.invoke([
+        userMessage(input),
+        ...messages.map((msg) =>
+          msg.role === 'user'
+            ? userMessage(msg.content)
+            : assistantMessage({ content: msg.content }),
+        ),
+      ])
+
+      // 添加 AI 响应
+      addMessage({
+        content: response,
+        role: 'assistant',
+      })
+    } catch (error) {
+      console.error('Error getting AI response:', error)
+      addMessage({
+        content: 'Sorry, there was an error processing your message.',
+        role: 'assistant',
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -65,8 +104,11 @@ export const Chat = () => {
           onChange={(e) => setInput(e.target.value)}
           placeholder="Type your message..."
           className="flex-1"
+          disabled={isLoading}
         />
-        <Button type="submit">Send</Button>
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? 'Sending...' : 'Send'}
+        </Button>
       </form>
     </div>
   )

@@ -122,3 +122,5 @@ export class AssistantAgent extends BaseAgent {
     this.systemMessage = message
   }
 }
+
+export const assistantAgent = (fields: IAssistantAgentFields) => new AssistantAgent(fields)
