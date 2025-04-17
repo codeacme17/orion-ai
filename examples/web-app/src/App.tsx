@@ -3,7 +3,7 @@ import { Chat } from './components/chat'
 function App() {
   return (
     <div className="min-h-screen bg-background p-4">
-      <div className="container mx-auto">
+      <div className="container">
         <Chat />
       </div>
     </div>
