@@ -8,7 +8,7 @@
   },
   "workspaces": [
     "packages/*",
-    "examples"
+    "examples/*"
   ],
   "devDependencies": {
     "dotenv": "^16.4.7",
