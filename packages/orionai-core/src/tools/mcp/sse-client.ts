@@ -29,7 +29,7 @@ export class MCPSseClient implements IMCPImplementation {
       await this.client.connect(this.transport)
       this.debug && DEV_LOGGER.SUCCESS('🎉 Connected to MCP server')
     } catch (error) {
-      this.debug && DEV_LOGGER.ERROR('❌ Error connecting to MCP server:', error)
+      DEV_LOGGER.ERROR('MCPSseClient.connect:', error)
       throw error
     }
   }
@@ -43,7 +43,7 @@ export class MCPSseClient implements IMCPImplementation {
         inputSchema: tool.inputSchema,
       }))
     } catch (error) {
-      this.debug && DEV_LOGGER.ERROR('❌ Error listing tools:', error)
+      DEV_LOGGER.ERROR('MCPSseClient.listTools:', error)
       throw error
     }
   }

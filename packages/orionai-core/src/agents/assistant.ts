@@ -114,7 +114,7 @@ export class AssistantAgent extends BaseAgent {
       return typeof result === 'string' ? result : result.content
     } catch (error) {
       DEV_LOGGER.ERROR(`AssistantAgent.invoke: ${error}`)
-      throw new Error(`AssistantAgent.invoke: ${error}`)
+      throw error
     }
   }
 

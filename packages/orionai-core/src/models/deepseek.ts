@@ -169,7 +169,7 @@ export class DeepSeekModel extends BaseModel {
 
       return this.parseResult(response)
     } catch (error) {
-      this.debug && DEV_LOGGER.ERROR('DeepSeekModel.create error', error)
+      DEV_LOGGER.ERROR('DeepSeekModel.create:', error)
       throw error
     }
   }
@@ -200,7 +200,7 @@ export class DeepSeekModel extends BaseModel {
 
       return stream as Stream<ChatCompletionChunk>
     } catch (error) {
-      this.debug && DEV_LOGGER.ERROR('DeepSeekModel.createStream error', error)
+      DEV_LOGGER.ERROR('DeepSeekModel.createStream:', error)
       throw error
     }
   }

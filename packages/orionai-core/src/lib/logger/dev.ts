@@ -24,7 +24,7 @@ export const DEV_LOGGER = {
   },
 
   WARNING: (content: string, ...args: any) => {
-    console.log(
+    console.warn(
       chalk.bgYellow.black.bold(` ${LOG_PREFIX} WARNING \n`),
       JSON.stringify(content, null, 2),
       ...args,
@@ -33,7 +33,7 @@ export const DEV_LOGGER = {
   },
 
   ERROR: (content: string | Error | unknown, ...args: any) => {
-    console.log(
+    console.error(
       chalk.bgRed.white.bold(` ${LOG_PREFIX} ERROR \n`),
       JSON.stringify(content, null, 2),
       ...args,

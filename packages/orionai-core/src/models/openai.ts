@@ -115,7 +115,7 @@ export class OpenAIModel extends BaseModel {
 
       return this.parseResult(response)
     } catch (error) {
-      DEV_LOGGER.ERROR(error)
+      DEV_LOGGER.ERROR('OpenaiModel.create error:', error)
       throw error
     }
   }
@@ -142,7 +142,7 @@ export class OpenAIModel extends BaseModel {
 
       return stream
     } catch (error) {
-      this.debug && DEV_LOGGER.ERROR('OpenaiModel.createStream error', error)
+      DEV_LOGGER.ERROR('OpenaiModel.createStream:', error)
       throw error
     }
   }

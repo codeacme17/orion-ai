@@ -36,7 +36,7 @@ export class MCPStdioClient implements IMCPImplementation {
       await this.client.connect(this.transport)
       this.debug && DEV_LOGGER.SUCCESS('🎉 Connected to MCP server')
     } catch (error) {
-      this.debug && DEV_LOGGER.ERROR('❌ Error connecting to MCP server:', error)
+      DEV_LOGGER.ERROR('MCPStdioClient.connect:', error)
       throw error
     }
   }
@@ -50,7 +50,7 @@ export class MCPStdioClient implements IMCPImplementation {
         inputSchema: tool.inputSchema,
       }))
     } catch (error) {
-      this.debug && DEV_LOGGER.ERROR('❌ Error listing tools:', error)
+      DEV_LOGGER.ERROR('MCPStdioClient.listTools:', error)
       throw error
     }
   }
@@ -68,7 +68,7 @@ export class MCPStdioClient implements IMCPImplementation {
       this.debug && DEV_LOGGER.SUCCESS('🎉 Tool result:', result)
       return result as JSONValue
     } catch (error) {
-      this.debug && DEV_LOGGER.ERROR('❌ Error calling tool:', error)
+      DEV_LOGGER.ERROR('MCPStdioClient.callTool:', error)
       throw error
     }
   }
