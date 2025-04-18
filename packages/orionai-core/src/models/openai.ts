@@ -120,7 +120,7 @@ export class OpenAIModel extends BaseModel {
     }
   }
 
-  protected async createStream(
+  async createStream(
     body: IOpenaiCreateParams,
     options?: RequestOptions,
   ): Promise<Stream<ResponseStreamEvent>> {

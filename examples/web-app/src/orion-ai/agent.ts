@@ -1,6 +1,6 @@
-import { AssistantAgent, deepseekModel } from '@orion-ai/core'
+import { assistantAgent, deepseekModel } from '@orion-ai/core'
 
-const agent = new AssistantAgent({
+const agent = assistantAgent({
   name: 'assistant',
   systemMessage: 'You are a helpful assistant.',
   model: deepseekModel(),

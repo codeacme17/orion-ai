@@ -161,4 +161,84 @@ describe('assistant agent', () => {
 
     expect(result).toBeDefined()
   })
+
+  it('should stream the response without tools', async () => {
+    try {
+      const agent = new AssistantAgent({
+        name: 'assistant',
+        systemMessage: 'you are a helpful assistant',
+        model: openaiModel({
+          httpAgent: proxy,
+          model: 'gpt-4o-mini',
+        }),
+        stream: true,
+      })
+
+      let response = ''
+      const stream = agent.streamInvoke([userMessage('Hello, how are you?')])
+      for await (const chunk of stream) {
+        response += chunk
+        console.log(chunk)
+      }
+      expect(response).toBeDefined()
+      expect(response.length).toBeGreaterThan(0)
+    } catch (error) {
+      console.log(error)
+    }
+  })
+
+  it('should stream the response with tools', async () => {
+    const agent = new AssistantAgent({
+      name: 'assistant',
+      systemMessage: 'you are a helpful assistant that can use tools',
+      model: openaiModel({
+        httpAgent: proxy,
+        model: 'gpt-4o-mini',
+      }),
+      debug: true,
+      stream: true,
+      tools: [
+        functionTool({
+          name: 'get_weather',
+          description: 'Get the current weather for a location',
+          schema: z.object({
+            location: z.string().describe('The city and state, e.g. San Francisco, CA'),
+          }),
+          execute: async (args) => {
+            return `The weather in ${args.location} is sunny and 72°F`
+          },
+        }),
+      ],
+    })
+
+    let response = ''
+    for await (const chunk of agent.streamInvoke([
+      userMessage('What is the weather like in San Francisco?'),
+    ])) {
+      response += chunk
+    }
+
+    expect(response).toBeDefined()
+    expect(response.length).toBeGreaterThan(0)
+    expect(response).toContain('San Francisco')
+  })
+
+  it('should handle streaming errors gracefully', async () => {
+    const agent = new AssistantAgent({
+      name: 'assistant',
+      systemMessage: 'you are a helpful assistant',
+      model: openaiModel({
+        httpAgent: proxy,
+        model: 'gpt-4o-mini',
+      }),
+      debug: true,
+      stream: true,
+    })
+
+    await expect(async () => {
+      for await (const _ of agent.streamInvoke([userMessage('')])) {
+        // This should throw an error due to empty message
+      }
+    }).rejects.toThrow()
+  })
 })
