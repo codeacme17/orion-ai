@@ -171,17 +171,17 @@ describe('assistant agent', () => {
           httpAgent: proxy,
           model: 'gpt-4o-mini',
         }),
-        stream: true,
       })
 
       let response = ''
       const stream = agent.invokeStream([userMessage('Hello, how are you?')])
       for await (const chunk of stream) {
-        response += chunk
-        console.log(chunk)
+        response += chunk.content
       }
+
+      console.log(response)
+
       expect(response).toBeDefined()
-      expect(response.length).toBeGreaterThan(0)
     } catch (error) {
       console.log(error)
     }

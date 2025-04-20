@@ -48,7 +48,7 @@ export type TDeepseekModel = 'deepseek-chat' | 'deepseek-reasoner'
 const DEFAULT_MODEL: TDeepseekModel = 'deepseek-chat'
 const DEFAULT_BASE_URL = 'https://api.deepseek.com/v1'
 
-export class DeepSeekModel extends BaseModel {
+export class DeepseekModel extends BaseModel {
   private deepseek: Openai
   private debug: boolean
   readonly apiType = 'chat_completion' as const
@@ -79,7 +79,7 @@ export class DeepSeekModel extends BaseModel {
       throw new Error('OpenAI API key is required.')
     }
 
-    this.debug && DEV_LOGGER.INFO('DeepSeekModel.init \n', { ...config })
+    this.debug && DEV_LOGGER.INFO('DeepseekModel.init \n', { ...config })
 
     return new Openai({
       ...config,
@@ -122,7 +122,7 @@ export class DeepSeekModel extends BaseModel {
         tool_calls: parsedToolCalls as Array<IToolCallChatCompletionResult>,
       }
 
-      this.debug && DEV_LOGGER.INFO('DeepSeekModel.create \n', { ...response })
+      this.debug && DEV_LOGGER.INFO('DeepseekModel.create \n', { ...response })
 
       return response
     }
@@ -169,7 +169,7 @@ export class DeepSeekModel extends BaseModel {
 
       return this.parseResult(response)
     } catch (error) {
-      DEV_LOGGER.ERROR('DeepSeekModel.create:', error)
+      DEV_LOGGER.ERROR('DeepseekModel.create:', error)
       throw error
     }
   }
@@ -178,7 +178,7 @@ export class DeepSeekModel extends BaseModel {
    * create a streaming request
    * @returns return an async iterator, which can be iterated with for await...of syntax
    */
-  protected async createStream(
+  public async createStream(
     body: IDeepSeekCreateParams,
     options?: RequestOptions,
   ): Promise<Stream<ChatCompletionChunk>> {
@@ -196,15 +196,15 @@ export class DeepSeekModel extends BaseModel {
         { ...options },
       )
 
-      this.debug && DEV_LOGGER.INFO('DeepSeekModel.createStream started')
+      this.debug && DEV_LOGGER.INFO('DeepseekModel.createStream started')
 
       return stream as Stream<ChatCompletionChunk>
     } catch (error) {
-      DEV_LOGGER.ERROR('DeepSeekModel.createStream:', error)
+      DEV_LOGGER.ERROR('DeepseekModel.createStream:', error)
       throw error
     }
   }
 }
 
-export const deepseekModel = (config: IDeepSeekModelConfig = {}): DeepSeekModel =>
-  new DeepSeekModel(config)
+export const deepseekModel = (config: IDeepSeekModelConfig = {}): DeepseekModel =>
+  new DeepseekModel(config)

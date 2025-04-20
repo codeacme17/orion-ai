@@ -7,6 +7,7 @@ export type Message = {
 
 export type ChatState = {
   messages: Message[]
-  addMessage: (message: Omit<Message, 'id' | 'timestamp'>) => void
+  addMessage: (message: Message) => void
+  updateMessage: (message: Message) => void
   clearMessages: () => void
 }

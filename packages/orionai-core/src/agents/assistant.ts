@@ -7,6 +7,7 @@ import type {
   ITollCallResponsesApiResult,
   IToolCallResult,
 } from '@/models/base'
+import type { ResponseStreamEvent } from 'openai/resources/responses/responses.mjs'
 
 export interface IAssistantAgentFields extends BaseAgentFields {
   /**
@@ -124,7 +125,7 @@ export class AssistantAgent extends BaseAgent {
     }
   }
 
-  async *invokeStream(messages: Array<TMessage>): AsyncGenerator<string, void, unknown> {
+  async *invokeStream(messages: Array<TMessage>): AsyncGenerator<any, void, unknown> {
     try {
       const combinedMessages = [
         new SystemMessage(this.systemMessage),
@@ -142,10 +143,11 @@ export class AssistantAgent extends BaseAgent {
       let toolCalls: Array<IToolCallResult> = []
 
       for await (const chunk of stream) {
-        console.log('chunk', chunk)
-        if (chunk.content) {
-          accumulatedContent += chunk.content
-          yield chunk.content
+        const parsedChunk = this.parseChunk(chunk)
+        if (parsedChunk && typeof parsedChunk.content === 'string') {
+          accumulatedContent += parsedChunk.content
+          console.log('accumulatedContent', accumulatedContent)
+          yield parsedChunk
         }
 
         if (chunk.tool_calls) {
@@ -210,6 +212,38 @@ export class AssistantAgent extends BaseAgent {
     } catch (error) {
       DEV_LOGGER.ERROR(`AssistantAgent.streamInvoke: ${error}`)
       throw error
+    }
+  }
+
+  parseChunk(chunk: ResponseStreamEvent): any {
+    console.log('chunk', chunk)
+
+    if (this.model.apiType === 'response') {
+      if (chunk.type === 'response.output_text.delta') {
+        return {
+          type: 'invoke.text.content',
+          content: chunk.delta,
+        }
+      }
+
+      if (chunk.type === 'response.output_text.done') {
+        return {
+          type: 'invoke.text.done',
+          content: chunk.text,
+        }
+      }
+
+      if (chunk.type === 'response.completed') {
+        return {
+          type: 'invoke.text.done',
+          content: chunk.response.output,
+          useage: chunk.response.usage,
+        }
+      }
+    }
+
+    if (this.model.apiType === 'chat_completion') {
+      console.log('chunk chat_completion', chunk)
     }
   }
 

@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { describe, it } from 'vitest'
 import { functionTool, FunctionTool } from '@/tools/function'
-import { DeepSeekModel } from '@/models'
+import { DeepseekModel } from '@/models'
 import { systemMessage, userMessage, UserMessage } from '@/messages'
 import dotenv from 'dotenv'
 import type { BaseTool } from '@/tools'
@@ -45,7 +45,7 @@ describe('base tool', () => {
 
     const tools: any = [tool]
 
-    const llm = new DeepSeekModel()
+    const llm = new DeepseekModel()
 
     const res = await llm.create({
       messages: [
@@ -88,7 +88,7 @@ describe('base tool', () => {
 
     const tools = [weatherTool, locationTool]
 
-    const llm = new DeepSeekModel()
+    const llm = new DeepseekModel()
 
     const res = await llm.create({
       messages: [

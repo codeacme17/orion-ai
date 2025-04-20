@@ -7,16 +7,24 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   assistantAgent,
-  deepseekModel,
   assistantMessage,
   userMessage,
   functionTool,
+  OpenAIModel,
+  // DeepseekModel,
 } from '@orion-ai/core'
 import { Browser } from './Browser'
 import { z } from 'zod'
+import { v4 as uuidv4 } from 'uuid'
 
-const model = deepseekModel({
-  apiKey: import.meta.env.VITE_DEEPSEEK_API_KEY,
+// const deepseekModel = new DeepseekModel({
+//   apiKey: import.meta.env.VITE_DEEPSEEK_API_KEY,
+//   debug: true,
+//   dangerouslyAllowBrowser: true,
+// })
+
+const openaiModel = new OpenAIModel({
+  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
   debug: true,
   dangerouslyAllowBrowser: true,
 })
@@ -24,7 +32,7 @@ const model = deepseekModel({
 const assistant = assistantAgent({
   name: 'AI Assistant',
   systemMessage: 'You are a helpful AI assistant.',
-  model,
+  model: openaiModel,
   stream: true,
   debug: true,
   tools: [
@@ -47,7 +55,7 @@ const assistant = assistantAgent({
 export const Chat = () => {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const { messages, addMessage } = useChatStore()
+  const { messages, addMessage, updateMessage } = useChatStore()
   const { isOpen, url, closeBrowser } = useBrowserStore()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -57,13 +65,15 @@ export const Chat = () => {
     const userMsg = {
       content: input,
       role: 'user' as const,
+      id: uuidv4(),
+      timestamp: Date.now(),
     }
     addMessage(userMsg)
     setInput('')
 
     setIsLoading(true)
     try {
-      const response = assistant.streamInvoke([
+      const response = assistant.invokeStream([
         userMessage(input),
         ...messages.map((msg) =>
           msg.role === 'user'
@@ -72,11 +82,25 @@ export const Chat = () => {
         ),
       ])
 
+      const id = uuidv4()
+      const timestamp = Date.now()
+      addMessage({
+        id,
+        content: '',
+        role: 'assistant',
+        timestamp: Date.now(),
+      })
+
+      let content = ''
+
       for await (const chunk of response) {
-        console.log(chunk)
-        addMessage({
-          content: chunk,
+        console.log('CLIENT CHUNK \n ========= \n', chunk, '\n =========')
+        if (chunk.type === 'invoke.text.content') content += chunk.content
+        updateMessage({
+          content,
           role: 'assistant',
+          id,
+          timestamp,
         })
       }
 
@@ -89,6 +113,8 @@ export const Chat = () => {
       addMessage({
         content: 'Sorry, there was an error processing your message.',
         role: 'assistant',
+        id: messages[messages.length - 1].id || '',
+        timestamp: messages[messages.length - 1].timestamp || 0,
       })
     } finally {
       setIsLoading(false)
