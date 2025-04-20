@@ -72,8 +72,6 @@ export class AssistantAgent extends BaseAgent {
         for (const tool of toolCalls) {
           this.debug && DEV_LOGGER.INFO(`AssistantAgent.invoke: Running tool \n`, tool)
 
-          console.log('tool', tool)
-
           const toolName =
             this.model.apiType === 'chat_completion'
               ? (tool as IToolCallChatCompletionResult).function.name
@@ -141,19 +139,43 @@ export class AssistantAgent extends BaseAgent {
 
       let accumulatedContent = ''
       let toolCalls: Array<IToolCallResult> = []
+      let currentToolIndex: number = 0
 
       for await (const chunk of stream) {
         const parsedChunk = this.parseChunk(chunk)
-        if (parsedChunk && typeof parsedChunk.content === 'string') {
+
+        if (parsedChunk && parsedChunk.type === 'invoke.text.content') {
           accumulatedContent += parsedChunk.content
-          console.log('accumulatedContent', accumulatedContent)
           yield parsedChunk
         }
 
-        if (chunk.tool_calls) {
-          toolCalls = chunk.tool_calls
+        if (parsedChunk && parsedChunk.type === 'invoke.text.done') {
+          yield parsedChunk
+        }
+
+        if (parsedChunk && parsedChunk.type === 'invoke.tool.added') {
+          toolCalls.push(parsedChunk.tool_call)
+          console.log('[tool_calls]', toolCalls)
+          currentToolIndex = parsedChunk.tool_index
+        }
+
+        if (parsedChunk && parsedChunk.type === 'invoke.tool.arguments') {
+          if (this.model.apiType === 'chat_completion') {
+            ;(toolCalls[currentToolIndex] as IToolCallChatCompletionResult).function.arguments +=
+              parsedChunk.content
+          } else {
+            ;(toolCalls[currentToolIndex] as ITollCallResponsesApiResult).arguments +=
+              parsedChunk.content
+          }
+          yield { ...parsedChunk, tool_calls: toolCalls }
+        }
+
+        if (parsedChunk && parsedChunk.type === 'invoke.tool.done') {
+          yield parsedChunk
         }
       }
+
+      // console.log('[tool_calls]', toolCalls)
 
       // If there are tool calls, run them and get the final response
       if (toolCalls.length > 0) {
@@ -200,13 +222,10 @@ export class AssistantAgent extends BaseAgent {
         const finalStream = await (this.model as BaseModel).createStream({
           messages: newMessages,
           tools: this.tools,
-          debug: this.debug,
         })
 
         for await (const chunk of finalStream) {
-          if (chunk.content) {
-            yield chunk.content
-          }
+          yield chunk
         }
       }
     } catch (error) {
@@ -216,7 +235,7 @@ export class AssistantAgent extends BaseAgent {
   }
 
   parseChunk(chunk: ResponseStreamEvent): any {
-    console.log('chunk', chunk)
+    console.log('chunk ========== \n', JSON.stringify(chunk, null, 2), '\n ========== \n')
 
     if (this.model.apiType === 'response') {
       if (chunk.type === 'response.output_text.delta') {
@@ -230,6 +249,30 @@ export class AssistantAgent extends BaseAgent {
         return {
           type: 'invoke.text.done',
           content: chunk.text,
+        }
+      }
+
+      if (chunk.type === 'response.function_call_arguments.delta') {
+        return {
+          type: 'invoke.tool.arguments',
+          content: chunk.delta,
+        }
+      }
+
+      if (chunk.type === 'response.function_call_arguments.done') {
+        return {
+          type: 'invoke.tool.done',
+          content: chunk.arguments,
+        }
+      }
+
+      if (chunk.type === 'response.output_item.added') {
+        if (chunk.item.type === 'function_call') {
+          return {
+            type: 'invoke.tool.added',
+            tool_index: chunk.output_index,
+            tool_call: chunk.item,
+          }
         }
       }
 

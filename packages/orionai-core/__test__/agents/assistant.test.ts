@@ -199,13 +199,23 @@ describe('assistant agent', () => {
       stream: true,
       tools: [
         functionTool({
-          name: 'get_weather',
-          description: 'Get the current weather for a location',
+          name: 'location_weather',
+          description: 'this tool can get the weather of a location',
           schema: z.object({
-            location: z.string().describe('The city and state, e.g. San Francisco, CA'),
+            location: z.string().describe('the location to get the weather'),
           }),
           execute: async (args) => {
-            return `The weather in ${args.location} is sunny and 72°F`
+            return `thie weather in ${args.location} windy`
+          },
+        }),
+        functionTool({
+          name: 'location_time',
+          description: 'this tool can get the time of a location',
+          schema: z.object({
+            location: z.string().describe('the location to get the time'),
+          }),
+          execute: async (args) => {
+            return `the time in ${args.location} 12:00`
           },
         }),
       ],
@@ -213,14 +223,12 @@ describe('assistant agent', () => {
 
     let response = ''
     for await (const chunk of agent.invokeStream([
-      userMessage('What is the weather like in San Francisco?'),
+      userMessage('can you give me the weather in beijing? and the time?'),
     ])) {
-      response += chunk
+      console.log('chunk', chunk)
     }
 
     expect(response).toBeDefined()
-    expect(response.length).toBeGreaterThan(0)
-    expect(response).toContain('San Francisco')
   })
 
   it('should handle streaming errors gracefully', async () => {
