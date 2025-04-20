@@ -99,10 +99,6 @@ export class OpenAIModel extends BaseModel {
 
       this.debug = debug || false
 
-      if (stream) {
-        return this.createStream(body, options)
-      }
-
       const response = await this.openai.responses.create(
         {
           ...rest,

@@ -63,7 +63,7 @@ export const Chat = () => {
 
     setIsLoading(true)
     try {
-      const response = await assistant.invoke([
+      const response = assistant.streamInvoke([
         userMessage(input),
         ...messages.map((msg) =>
           msg.role === 'user'
@@ -72,10 +72,18 @@ export const Chat = () => {
         ),
       ])
 
-      addMessage({
-        content: response,
-        role: 'assistant',
-      })
+      for await (const chunk of response) {
+        console.log(chunk)
+        addMessage({
+          content: chunk,
+          role: 'assistant',
+        })
+      }
+
+      // addMessage({
+      //   content: response,
+      //   role: 'assistant',
+      // })
     } catch (error) {
       console.error('Error getting AI response:', error)
       addMessage({

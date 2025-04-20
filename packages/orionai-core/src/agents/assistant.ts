@@ -124,7 +124,7 @@ export class AssistantAgent extends BaseAgent {
     }
   }
 
-  async *streamInvoke(messages: Array<TMessage>): AsyncGenerator<string, void, unknown> {
+  async *invokeStream(messages: Array<TMessage>): AsyncGenerator<string, void, unknown> {
     try {
       const combinedMessages = [
         new SystemMessage(this.systemMessage),

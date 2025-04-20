@@ -175,7 +175,7 @@ describe('assistant agent', () => {
       })
 
       let response = ''
-      const stream = agent.streamInvoke([userMessage('Hello, how are you?')])
+      const stream = agent.invokeStream([userMessage('Hello, how are you?')])
       for await (const chunk of stream) {
         response += chunk
         console.log(chunk)
@@ -212,7 +212,7 @@ describe('assistant agent', () => {
     })
 
     let response = ''
-    for await (const chunk of agent.streamInvoke([
+    for await (const chunk of agent.invokeStream([
       userMessage('What is the weather like in San Francisco?'),
     ])) {
       response += chunk
@@ -236,7 +236,7 @@ describe('assistant agent', () => {
     })
 
     await expect(async () => {
-      for await (const _ of agent.streamInvoke([userMessage('')])) {
+      for await (const _ of agent.invokeStream([userMessage('')])) {
         // This should throw an error due to empty message
       }
     }).rejects.toThrow()
