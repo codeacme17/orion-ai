@@ -3,9 +3,8 @@ import { describe, it } from 'vitest'
 import { functionTool, FunctionTool } from '@/tools/function'
 import { DeepseekModel } from '@/models'
 import { systemMessage, userMessage, UserMessage } from '@/messages'
-import dotenv from 'dotenv'
-import type { BaseTool } from '@/tools'
 import { DEV_LOGGER } from '@/lib/logger'
+import { config as dotConfig } from 'dotenv'
 
 describe('base tool', () => {
   it('should run', () => {
@@ -29,7 +28,7 @@ describe('base tool', () => {
   })
 
   it('should run in llm', async () => {
-    dotenv.config()
+    dotConfig()
 
     const tool = new FunctionTool({
       name: 'test',
@@ -62,7 +61,7 @@ describe('base tool', () => {
   })
 
   it('should return 2 tools', async () => {
-    dotenv.config()
+    dotConfig()
 
     const weatherTool = new FunctionTool({
       name: 'get_weather',

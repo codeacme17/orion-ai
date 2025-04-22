@@ -3,7 +3,6 @@ import { assistantMessage, UserMessage, userMessage } from '@/messages'
 import { mcpSseTools, mcpStdioTools } from '@/tools'
 import { describe, expect, it } from 'vitest'
 import { config as dotConfig } from 'dotenv'
-import { MCPSseClient } from '@/tools/mcp/sse-client'
 
 describe('tool message', () => {
   dotConfig()

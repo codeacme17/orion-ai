@@ -3,9 +3,9 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { config as dotConfig } from 'dotenv'
 
 import { DeepseekModel, type IDeepSeekModelConfig } from '@/models'
-import { userMessage, UserMessage } from '@/messages'
+import { UserMessage } from '@/messages'
 import { functionTool } from '@/tools/function'
-import { mcpTool } from '@/tools'
+import { mcpStdioTools } from '@/tools'
 import { DEV_LOGGER } from '@/lib/logger'
 
 describe('DeepseekModel', () => {
@@ -150,7 +150,7 @@ describe('DeepseekModel', () => {
   })
 
   it('should support mcp tool', async () => {
-    const tools = await mcpTool(
+    const tools = await mcpStdioTools(
       {
         toolNamePrefix: 'everything',
         clientName: 'everything-client',
