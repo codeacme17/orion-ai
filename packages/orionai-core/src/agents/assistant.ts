@@ -45,7 +45,7 @@ export class AssistantAgent extends BaseAgent {
 
     super(fields)
 
-    this.name = 'ASSISTANT_AGENT'
+    this.name = this.name ?? 'ASSISTANT_AGENT'
     this.systemMessage = systemMessage
     this.model = model
     this.debug = debug ?? false
