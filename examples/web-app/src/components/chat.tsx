@@ -10,29 +10,29 @@ import {
   assistantMessage,
   userMessage,
   functionTool,
-  OpenAIModel,
+  DeepseekModel,
   // DeepseekModel,
 } from '@orion-ai/core'
 import { Browser } from './Browser'
 import { z } from 'zod'
 import { v4 as uuidv4 } from 'uuid'
 
-// const deepseekModel = new DeepseekModel({
-//   apiKey: import.meta.env.VITE_DEEPSEEK_API_KEY,
-//   debug: true,
-//   dangerouslyAllowBrowser: true,
-// })
-
-const openaiModel = new OpenAIModel({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+const deepseekModel = new DeepseekModel({
+  apiKey: import.meta.env.VITE_DEEPSEEK_API_KEY,
   debug: true,
   dangerouslyAllowBrowser: true,
 })
 
+// const openaiModel = new OpenAIModel({
+//   apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+//   debug: true,
+//   dangerouslyAllowBrowser: true,
+// })
+
 const assistant = assistantAgent({
   name: 'AI Assistant',
   systemMessage: 'You are a helpful AI assistant.',
-  model: openaiModel,
+  model: deepseekModel,
   stream: true,
   debug: true,
   tools: [
