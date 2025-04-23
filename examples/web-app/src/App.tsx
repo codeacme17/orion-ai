@@ -4,7 +4,7 @@ import { Chat } from './components/chat'
 
 function App() {
   const fetchApi = async () => {
-    const res = await apis.test()
+    const res = await apis.agent()
     console.log(res)
   }
 

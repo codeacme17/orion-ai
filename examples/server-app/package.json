@@ -3,15 +3,15 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "dev": "bun run src/index.ts"
+    "dev": "NODE_OPTIONS='--loader ts-node/esm' ts-node src/index.ts"
   },
   "devDependencies": {
-    "@types/express": "^5.0.1"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
+    "@types/express": "^5.0.1",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.2"
   },
   "dependencies": {
+    "@orion-ai/core": "workspace:*",
     "express": "^5.1.0"
   }
 }
