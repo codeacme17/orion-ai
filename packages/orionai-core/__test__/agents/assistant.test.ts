@@ -79,11 +79,11 @@ describe('assistant agent', () => {
   it('should use tool and give the result', async () => {
     const agent = new AssistantAgent({
       name: 'assistant',
-      systemMessage: 'you are an useful assistant, you can use tools',
-      model: openaiModel({
-        httpAgent: proxy,
-      }),
-      // model: deepseekModel(),
+      systemMessage: 'you are an useful assistant',
+      // model: openaiModel({
+      //   httpAgent: proxy,
+      // }),
+      model: deepseekModel(),
       debug: true,
       tools: [
         functionTool({
@@ -110,7 +110,9 @@ describe('assistant agent', () => {
     })
 
     const result = await agent.invoke([
-      userMessage('can you give me the weather in beijing? and the time?'),
+      userMessage(
+        'please give me the weather in beijing first, and then give me the time in beijing',
+      ),
     ])
 
     expect(result).toBeDefined()

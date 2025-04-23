@@ -14,6 +14,11 @@ export interface IAssistantAgentFields extends BaseAgentFields {
    * The system message that the assistant will respond with.
    */
   systemMessage: string
+
+  /**
+   * The behavior of the assistant when using tools.
+   */
+  toolUseBehavior?: 'default' | 'stop_on_tool'
 }
 
 export class AssistantAgent extends BaseAgent {
@@ -28,21 +33,27 @@ export class AssistantAgent extends BaseAgent {
    */
   readonly model: TModel
 
+  /**
+   * The behavior of the assistant when using tools.
+   */
+  toolUseBehavior: 'default' | 'stop_on_tool'
+
   private debug: boolean
 
   constructor(fields: IAssistantAgentFields) {
-    const { systemMessage, model, debug, stream } = fields
+    const { systemMessage, model, debug, stream, toolUseBehavior } = fields
 
     super(fields)
 
     this.name = 'ASSISTANT_AGENT'
     this.systemMessage = systemMessage
     this.model = model
-    this.debug = debug || false
-    this.stream = stream || false
+    this.debug = debug ?? false
+    this.stream = stream ?? false
+    this.toolUseBehavior = toolUseBehavior ?? 'default'
   }
 
-  async invoke(messages: Array<TMessage>): Promise<string> {
+  async invoke(messages: Array<TMessage>): Promise<string | Array<TMessage>> {
     try {
       const combinedMessages = [
         new SystemMessage(this.systemMessage),
@@ -66,7 +77,7 @@ export class AssistantAgent extends BaseAgent {
       // If the result is an assistant message and there are tool calls, run the tools
       if (result.tool_calls && result.tool_calls.length > 0) {
         const toolCalls = result.tool_calls
-        const toolResults = []
+        const toolResults: Array<TMessage> = []
 
         // Run each tool call
         for (const tool of toolCalls) {
@@ -87,15 +98,25 @@ export class AssistantAgent extends BaseAgent {
           if (toolFn) {
             const toolResult = await toolFn.run(toolArgs)
 
+            this.debug &&
+              DEV_LOGGER.SUCCESS(
+                `AssistantAgent.invoke: tool results of ${toolFn.name}`,
+                toolResult,
+              )
+
             // Add the tool result to the toolResults array
             toolResults.push(
               toolMessage({
                 output: toolResult,
                 call_id: 'call_id' in tool ? tool.call_id : tool.id,
                 apiType: this.model.apiType,
-              }).get(),
+              }),
             )
           }
+        }
+
+        if (this.toolUseBehavior === 'stop_on_tool' && toolResults.length > 0) {
+          return toolResults
         }
 
         // Combine the messages and tool results
@@ -207,7 +228,7 @@ export class AssistantAgent extends BaseAgent {
                 output: toolResult,
                 call_id: 'call_id' in tool ? tool.call_id : tool.id,
                 apiType: this.model.apiType,
-              }).get(),
+              }),
             )
           }
         }
