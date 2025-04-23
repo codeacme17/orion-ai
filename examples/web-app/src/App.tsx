@@ -9,7 +9,7 @@ function App() {
   }
 
   useEffect(() => {
-    fetchApi()
+    // fetchApi()
   }, [])
 
   return (

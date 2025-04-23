@@ -1,19 +1,19 @@
 import { assistantAgent, deepseekModel, mcpSseTools, mcpStdioTools } from '@orion-ai/core'
 
 export const createAgent = async () => {
-  const mcpTools = await mcpStdioTools(
-    {
-      toolNamePrefix: 'fecth',
-      clientName: 'example-fecth',
-      clientVersion: '1.0.0',
-    },
-    {
-      command: 'npx',
-      args: ['@browsermcp/mcp@latest'],
-    },
-  )
+  // const mcpTools = await mcpStdioTools(
+  //   {
+  //     toolNamePrefix: 'fecth',
+  //     clientName: 'example-fecth',
+  //     clientVersion: '1.0.0',
+  //   },
+  //   {
+  //     command: 'npx',
+  //     args: ['@browsermcp/mcp@latest'],
+  //   },
+  // )
 
-  const tools = [...mcpTools]
+  // const tools = [...mcpTools]
 
   const agent = assistantAgent({
     name: 'My Assistant',
@@ -21,7 +21,7 @@ export const createAgent = async () => {
     model: deepseekModel({
       apiKey: process.env.DEEPSEEK_API_KEY,
     }),
-    tools: tools,
+    // tools: tools,
   })
 
   return agent

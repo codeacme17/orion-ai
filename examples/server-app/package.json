@@ -3,12 +3,13 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "dev": "NODE_OPTIONS='--loader ts-node/esm' ts-node src/index.ts"
+    "dev": "bun run src/index.ts"
   },
   "devDependencies": {
     "@types/express": "^5.0.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5.0.0",
-    "ts-node": "^10.9.2"
+    "vitest": "^3.1.2"
   },
   "dependencies": {
     "@orion-ai/core": "workspace:*",
