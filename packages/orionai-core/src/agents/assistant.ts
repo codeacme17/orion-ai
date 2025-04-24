@@ -16,6 +16,7 @@ enum EChunkType {
   INVOKE_TOOL_ADDED = 'invoke.tool.added',
   INVOKE_TOOL_ARGUMENTS = 'invoke.tool.arguments',
   INVOKE_TOOL_DONE = 'invoke.tool.done',
+  EXECUTE_TOOL_RESULTS = 'execute.tool.results',
 }
 
 interface IChunk {
@@ -258,20 +259,27 @@ export class AssistantAgent extends BaseAgent {
           }
         }
 
-        // Get the final response after tool execution
-        const newMessages = [
-          ...combinedMessages,
-          ...(this.model.apiType === 'chat_completion' ? [toolAssistantMessage] : toolCalls),
-          ...toolResults,
-        ] as Array<TMessage>
+        if (this.toolUseBehavior === 'stop_on_tool' && toolResults.length > 0) {
+          yield {
+            type: EChunkType.EXECUTE_TOOL_RESULTS,
+            content: toolResults,
+          }
+        } else {
+          // Get the final response after tool execution
+          const newMessages = [
+            ...combinedMessages,
+            ...(this.model.apiType === 'chat_completion' ? [toolAssistantMessage] : toolCalls),
+            ...toolResults,
+          ] as Array<TMessage>
 
-        const finalStream = await (this.model as BaseModel).createStream({
-          messages: newMessages,
-          tools: this.tools,
-        })
+          const finalStream = await (this.model as BaseModel).createStream({
+            messages: newMessages,
+            tools: this.tools,
+          })
 
-        for await (const chunk of finalStream) {
-          yield chunk
+          for await (const chunk of finalStream) {
+            yield chunk
+          }
         }
       }
     } catch (error) {

@@ -200,6 +200,7 @@ describe('assistant agent', () => {
       //   model: 'gpt-4o-mini',
       // }),
       model: deepseekModel(),
+      toolUseBehavior: 'stop_on_tool',
       debug: true,
       stream: true,
       tools: [
