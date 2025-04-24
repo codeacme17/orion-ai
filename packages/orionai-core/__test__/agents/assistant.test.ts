@@ -179,10 +179,11 @@ describe('assistant agent', () => {
       let response = ''
       const stream = agent.invokeStream([userMessage('Hello, how are you?')])
       for await (const chunk of stream) {
+        console.log('chunk: ', chunk.content)
         response += chunk.content
       }
 
-      console.log(response)
+      console.log('response: ', response)
 
       expect(response).toBeDefined()
     } catch (error) {
@@ -230,6 +231,7 @@ describe('assistant agent', () => {
       userMessage('can you give me the weather in beijing? and the time?'),
     ])) {
       console.log('chunk', chunk)
+      response += chunk.content
     }
 
     expect(response).toBeDefined()

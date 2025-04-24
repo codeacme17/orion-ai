@@ -162,7 +162,7 @@ export class AssistantAgent extends BaseAgent {
     }
   }
 
-  async *invokeStream(messages: Array<TMessage>): AsyncGenerator<any, void, unknown> {
+  async *invokeStream(messages: Array<TMessage>): AsyncGenerator<IChunk, void, unknown> {
     try {
       const combinedMessages = [
         new SystemMessage(this.systemMessage),
@@ -203,13 +203,20 @@ export class AssistantAgent extends BaseAgent {
 
         if (parsedChunk && parsedChunk.type === EChunkType.INVOKE_TOOL_ARGUMENTS) {
           if (this.model.apiType === 'chat_completion') {
+            console.log('toolCalls: ', currentToolIndex, toolCalls)
+            if (!toolCalls[parsedChunk.tool_index!]) {
+              toolCalls[parsedChunk.tool_index!] =
+                parsedChunk.tool_call as IToolCallChatCompletionResult
+              currentToolIndex = parsedChunk.tool_index ?? 0
+            }
+
             ;(toolCalls[currentToolIndex] as IToolCallChatCompletionResult).function.arguments +=
-              parsedChunk.content
+              (parsedChunk.tool_call as IToolCallChatCompletionResult).function.arguments ?? ''
           } else {
             ;(toolCalls[currentToolIndex] as ITollCallResponsesApiResult).arguments +=
               parsedChunk.content
           }
-          yield { ...parsedChunk, tool_calls: toolCalls }
+          yield { ...parsedChunk }
         }
 
         if (parsedChunk && parsedChunk.type === EChunkType.INVOKE_TOOL_DONE) {
@@ -337,7 +344,7 @@ export class AssistantAgent extends BaseAgent {
      * @model deepseek
      */
     if (this.model.apiType === 'chat_completion' && 'choices' in chunk) {
-      console.log('chunk ========== \n', JSON.stringify(chunk, null, 2), '\n ========== \n')
+      // console.log('chunk ========== \n', JSON.stringify(chunk, null, 2), '\n ========== \n')
 
       // Parse the text content
       if (chunk.choices[0].delta.content) {
@@ -349,6 +356,7 @@ export class AssistantAgent extends BaseAgent {
 
       // Parse the tool calls
       if (chunk.choices[0].delta.tool_calls) {
+        console.log('toolCalls: ', chunk.choices[0].delta.tool_calls[0])
         return {
           type: EChunkType.INVOKE_TOOL_ARGUMENTS,
           tool_index: chunk.choices[0].delta.tool_calls[0].index,
