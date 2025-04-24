@@ -183,27 +183,25 @@ export class AssistantAgent extends BaseAgent {
       for await (const chunk of stream) {
         const parsedChunk = this.parseChunk(chunk)
 
-        if (parsedChunk && parsedChunk.type === 'invoke.text.content') {
+        if (parsedChunk && parsedChunk.type === EChunkType.INVOKE_TEXT_CONTENT) {
           accumulatedContent += parsedChunk.content
           yield parsedChunk
         }
 
-        if (parsedChunk && parsedChunk.type === 'invoke.text.done') {
+        if (parsedChunk && parsedChunk.type === EChunkType.INVOKE_TEXT_DONE) {
           yield parsedChunk
         }
 
-        if (parsedChunk && parsedChunk.type === 'invoke.tool.added' && parsedChunk.tool_call) {
+        if (
+          parsedChunk &&
+          parsedChunk.type === EChunkType.INVOKE_TOOL_ADDED &&
+          parsedChunk.tool_call
+        ) {
           toolCalls.push(parsedChunk.tool_call)
-          console.log('[tool_calls]', toolCalls)
           currentToolIndex = parsedChunk.tool_index ?? 0
         }
 
-        if (parsedChunk && parsedChunk.type === 'invoke.tool.added' && parsedChunk.tool_calls) {
-          toolCalls.push(...parsedChunk.tool_calls)
-          yield parsedChunk
-        }
-
-        if (parsedChunk && parsedChunk.type === 'invoke.tool.arguments' && parsedChunk.tool_call) {
+        if (parsedChunk && parsedChunk.type === EChunkType.INVOKE_TOOL_ARGUMENTS) {
           if (this.model.apiType === 'chat_completion') {
             ;(toolCalls[currentToolIndex] as IToolCallChatCompletionResult).function.arguments +=
               parsedChunk.content
@@ -214,7 +212,7 @@ export class AssistantAgent extends BaseAgent {
           yield { ...parsedChunk, tool_calls: toolCalls }
         }
 
-        if (parsedChunk && parsedChunk.type === 'invoke.tool.done') {
+        if (parsedChunk && parsedChunk.type === EChunkType.INVOKE_TOOL_DONE) {
           yield parsedChunk
         }
       }
@@ -359,6 +357,7 @@ export class AssistantAgent extends BaseAgent {
             arguments: toolCall.function?.arguments ?? '',
             call_id: toolCall.id ?? '',
             type: 'function_call',
+            tool_index: toolCall.index,
           })),
         }
       }
