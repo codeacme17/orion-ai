@@ -23,7 +23,7 @@ interface IChunk {
   content?: string | Array<any> | null
   tool_index?: number
   tool_call?: IToolCallResult
-  tool_calls?: Array<IToolCallResult>
+  tool_calls?: Array<IToolCallResult> | undefined
   useage?: Record<string, any> | null
 }
 
@@ -351,14 +351,8 @@ export class AssistantAgent extends BaseAgent {
       if (chunk.choices[0].delta.tool_calls) {
         return {
           type: EChunkType.INVOKE_TOOL_ARGUMENTS,
-          tool_calls: chunk.choices[0].delta.tool_calls.map((toolCall) => ({
-            id: toolCall.id ?? '',
-            name: toolCall.function?.name ?? '',
-            arguments: toolCall.function?.arguments ?? '',
-            call_id: toolCall.id ?? '',
-            type: 'function_call',
-            tool_index: toolCall.index,
-          })),
+          tool_index: chunk.choices[0].delta.tool_calls[0].index,
+          tool_call: chunk.choices[0].delta.tool_calls[0] as IToolCallChatCompletionResult,
         }
       }
 

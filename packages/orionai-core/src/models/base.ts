@@ -12,11 +12,30 @@ export interface IBaseModelConfig {
 }
 
 export interface IBaseCreateParams {
+  /**
+   * The messages to send to the model
+   */
   messages: Array<TMessage>
-  tools?: Array<TTool>
-  stream?: boolean | null
-  debug?: boolean
+
+  /**
+   * The model to use
+   */
   model?: string
+
+  /**
+   * The tools to use in the model
+   */
+  tools?: Array<TTool>
+
+  /**
+   * Whether to stream the response
+   */
+  stream?: boolean | null
+
+  /**
+   * Whether to debug the model
+   */
+  debug?: boolean
 }
 
 export interface ITollCallResponsesApiResult {
