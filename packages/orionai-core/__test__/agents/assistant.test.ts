@@ -169,10 +169,11 @@ describe('assistant agent', () => {
       const agent = new AssistantAgent({
         name: 'assistant',
         systemMessage: 'you are a helpful assistant',
-        model: openaiModel({
-          httpAgent: proxy,
-          model: 'gpt-4o-mini',
-        }),
+        // model: openaiModel({
+        //   httpAgent: proxy,
+        //   model: 'gpt-4o-mini',
+        // }),
+        model: deepseekModel(),
       })
 
       let response = ''
@@ -193,10 +194,11 @@ describe('assistant agent', () => {
     const agent = new AssistantAgent({
       name: 'assistant',
       systemMessage: 'you are a helpful assistant that can use tools',
-      model: openaiModel({
-        httpAgent: proxy,
-        model: 'gpt-4o-mini',
-      }),
+      // model: openaiModel({
+      //   httpAgent: proxy,
+      //   model: 'gpt-4o-mini',
+      // }),
+      model: deepseekModel(),
       debug: true,
       stream: true,
       tools: [
@@ -237,10 +239,11 @@ describe('assistant agent', () => {
     const agent = new AssistantAgent({
       name: 'assistant',
       systemMessage: 'you are a helpful assistant',
-      model: openaiModel({
-        httpAgent: proxy,
-        model: 'gpt-4o-mini',
-      }),
+      // model: openaiModel({
+      //   httpAgent: proxy,
+      //   model: 'gpt-4o-mini',
+      // }),
+      model: deepseekModel(),
       debug: true,
       stream: true,
     })

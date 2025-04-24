@@ -8,6 +8,24 @@ import type {
   IToolCallResult,
 } from '@/models/base'
 import type { ResponseStreamEvent } from 'openai/resources/responses/responses.mjs'
+import type { ChatCompletionChunk } from 'openai/resources.mjs'
+
+enum EChunkType {
+  INVOKE_TEXT_CONTENT = 'invoke.text.content',
+  INVOKE_TEXT_DONE = 'invoke.text.done',
+  INVOKE_TOOL_ADDED = 'invoke.tool.added',
+  INVOKE_TOOL_ARGUMENTS = 'invoke.tool.arguments',
+  INVOKE_TOOL_DONE = 'invoke.tool.done',
+}
+
+interface IChunk {
+  type: EChunkType
+  content?: string | Array<any> | null
+  tool_index?: number
+  tool_call?: IToolCallResult
+  tool_calls?: Array<IToolCallResult>
+  useage?: Record<string, any> | null
+}
 
 export interface IAssistantAgentFields extends BaseAgentFields {
   /**
@@ -174,13 +192,18 @@ export class AssistantAgent extends BaseAgent {
           yield parsedChunk
         }
 
-        if (parsedChunk && parsedChunk.type === 'invoke.tool.added') {
+        if (parsedChunk && parsedChunk.type === 'invoke.tool.added' && parsedChunk.tool_call) {
           toolCalls.push(parsedChunk.tool_call)
           console.log('[tool_calls]', toolCalls)
-          currentToolIndex = parsedChunk.tool_index
+          currentToolIndex = parsedChunk.tool_index ?? 0
         }
 
-        if (parsedChunk && parsedChunk.type === 'invoke.tool.arguments') {
+        if (parsedChunk && parsedChunk.type === 'invoke.tool.added' && parsedChunk.tool_calls) {
+          toolCalls.push(...parsedChunk.tool_calls)
+          yield parsedChunk
+        }
+
+        if (parsedChunk && parsedChunk.type === 'invoke.tool.arguments' && parsedChunk.tool_call) {
           if (this.model.apiType === 'chat_completion') {
             ;(toolCalls[currentToolIndex] as IToolCallChatCompletionResult).function.arguments +=
               parsedChunk.content
@@ -195,8 +218,6 @@ export class AssistantAgent extends BaseAgent {
           yield parsedChunk
         }
       }
-
-      // console.log('[tool_calls]', toolCalls)
 
       // If there are tool calls, run them and get the final response
       if (toolCalls.length > 0) {
@@ -255,34 +276,41 @@ export class AssistantAgent extends BaseAgent {
     }
   }
 
-  parseChunk(chunk: ResponseStreamEvent): any {
-    console.log('chunk ========== \n', JSON.stringify(chunk, null, 2), '\n ========== \n')
-
-    if (this.model.apiType === 'response') {
+  /**
+   * Parse the chunk, to adapt to the different api types
+   * @param chunk - The chunk to parse
+   * @returns The parsed chunk
+   */
+  parseChunk(chunk: ResponseStreamEvent | ChatCompletionChunk): IChunk {
+    /**
+     * For response api, we need to handle the final response
+     * @model openai
+     */
+    if (this.model.apiType === 'response' && 'type' in chunk) {
       if (chunk.type === 'response.output_text.delta') {
         return {
-          type: 'invoke.text.content',
+          type: EChunkType.INVOKE_TEXT_CONTENT,
           content: chunk.delta,
         }
       }
 
       if (chunk.type === 'response.output_text.done') {
         return {
-          type: 'invoke.text.done',
+          type: EChunkType.INVOKE_TEXT_DONE,
           content: chunk.text,
         }
       }
 
       if (chunk.type === 'response.function_call_arguments.delta') {
         return {
-          type: 'invoke.tool.arguments',
+          type: EChunkType.INVOKE_TOOL_ARGUMENTS,
           content: chunk.delta,
         }
       }
 
       if (chunk.type === 'response.function_call_arguments.done') {
         return {
-          type: 'invoke.tool.done',
+          type: EChunkType.INVOKE_TOOL_DONE,
           content: chunk.arguments,
         }
       }
@@ -290,25 +318,74 @@ export class AssistantAgent extends BaseAgent {
       if (chunk.type === 'response.output_item.added') {
         if (chunk.item.type === 'function_call') {
           return {
-            type: 'invoke.tool.added',
+            type: EChunkType.INVOKE_TOOL_ADDED,
             tool_index: chunk.output_index,
-            tool_call: chunk.item,
+            tool_call: chunk.item as ITollCallResponsesApiResult,
           }
         }
       }
 
       if (chunk.type === 'response.completed') {
         return {
-          type: 'invoke.text.done',
+          type: EChunkType.INVOKE_TEXT_DONE,
           content: chunk.response.output,
           useage: chunk.response.usage,
         }
       }
     }
 
-    if (this.model.apiType === 'chat_completion') {
-      console.log('chunk chat_completion', chunk)
+    /**
+     * For chat completion api, we need to handle the final response
+     * @model deepseek
+     */
+    if (this.model.apiType === 'chat_completion' && 'choices' in chunk) {
+      console.log('chunk ========== \n', JSON.stringify(chunk, null, 2), '\n ========== \n')
+
+      // Parse the text content
+      if (chunk.choices[0].delta.content) {
+        return {
+          type: EChunkType.INVOKE_TEXT_CONTENT,
+          content: chunk.choices[0].delta.content,
+        }
+      }
+
+      // Parse the tool calls
+      if (chunk.choices[0].delta.tool_calls) {
+        return {
+          type: EChunkType.INVOKE_TOOL_ARGUMENTS,
+          tool_calls: chunk.choices[0].delta.tool_calls.map((toolCall) => ({
+            id: toolCall.id ?? '',
+            name: toolCall.function?.name ?? '',
+            arguments: toolCall.function?.arguments ?? '',
+            call_id: toolCall.id ?? '',
+            type: 'function_call',
+          })),
+        }
+      }
+
+      // When the model is done, we need to return the final response
+      //  1. If the model is done because of tool calls, we need to return the tool calls
+      //  2. If the model is done because of stop, we need to return the final response
+      if (chunk.choices[0].finish_reason) {
+        if (chunk.choices[0].finish_reason === 'tool_calls') {
+          return {
+            type: EChunkType.INVOKE_TOOL_DONE,
+            content: chunk.choices[0].delta.content,
+            useage: chunk.usage,
+          }
+        }
+
+        if (chunk.choices[0].finish_reason === 'stop') {
+          return {
+            type: EChunkType.INVOKE_TEXT_DONE,
+            content: chunk.choices[0].delta.content,
+            useage: chunk.usage,
+          }
+        }
+      }
     }
+
+    return chunk as unknown as IChunk
   }
 
   updateSystemMessage(message: string): void {
