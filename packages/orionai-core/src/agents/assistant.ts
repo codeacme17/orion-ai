@@ -203,7 +203,6 @@ export class AssistantAgent extends BaseAgent {
 
         if (parsedChunk && parsedChunk.type === EChunkType.INVOKE_TOOL_ARGUMENTS) {
           if (this.model.apiType === 'chat_completion') {
-            console.log('toolCalls: ', currentToolIndex, toolCalls)
             if (!toolCalls[parsedChunk.tool_index!]) {
               toolCalls[parsedChunk.tool_index!] =
                 parsedChunk.tool_call as IToolCallChatCompletionResult
