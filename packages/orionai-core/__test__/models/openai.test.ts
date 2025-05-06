@@ -6,7 +6,7 @@ import { HttpsProxyAgent } from 'https-proxy-agent'
 import { AssistantMessage, SystemMessage, userMessage, UserMessage } from '@/messages'
 import { DEV_LOGGER } from '@/lib/logger'
 import { functionTool } from '@/tools/function'
-import { mcpTool } from '@/tools'
+import { mcpStdioTools } from '@/tools'
 
 describe('OpenAIModel', () => {
   let model: OpenAIModel
@@ -156,7 +156,7 @@ describe('OpenAIModel', () => {
   })
 
   it('should support mcp tool', async () => {
-    const tools = await mcpTool(
+    const tools = await mcpStdioTools(
       {
         toolNamePrefix: 'everything',
         clientName: 'everything-client',

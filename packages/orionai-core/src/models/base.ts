@@ -12,11 +12,30 @@ export interface IBaseModelConfig {
 }
 
 export interface IBaseCreateParams {
+  /**
+   * The messages to send to the model
+   */
   messages: Array<TMessage>
-  tools?: Array<TTool>
-  stream?: boolean | null
-  debug?: boolean
+
+  /**
+   * The model to use
+   */
   model?: string
+
+  /**
+   * The tools to use in the model
+   */
+  tools?: Array<TTool>
+
+  /**
+   * Whether to stream the response
+   */
+  stream?: boolean | null
+
+  /**
+   * Whether to debug the model
+   */
+  debug?: boolean
 }
 
 export interface ITollCallResponsesApiResult {
@@ -99,7 +118,7 @@ export abstract class BaseModel {
    * @param params The input to the model.
    * @returns A stream of responses that can be used with for await...of syntax.
    */
-  protected abstract createStream(params: IBaseCreateParams): Promise<Stream<any>>
+  abstract createStream(params: IBaseCreateParams): Promise<Stream<any>>
 
   /**
    * Abstract method to be implemented by subclasses to parse the result.

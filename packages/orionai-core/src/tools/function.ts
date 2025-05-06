@@ -71,7 +71,7 @@ export class FunctionTool<T extends TZodObjectAny = TZodObjectAny> extends BaseT
       this.schema.parse(params)
       return true
     } catch (error) {
-      DEV_LOGGER.ERROR(error)
+      DEV_LOGGER.ERROR('FunctionTool.validParams:', error)
       return false
     }
   }
@@ -85,11 +85,13 @@ export class FunctionTool<T extends TZodObjectAny = TZodObjectAny> extends BaseT
       try {
         parsedArgs = JSON.parse(args)
       } catch (error) {
-        throw new Error('[orion ai] if args is a string, it must be a valid JSON string')
+        DEV_LOGGER.ERROR('FunctionTool.run:', error)
+        throw error
       }
     } else parsedArgs = args
 
     if (!this.validParams(parsedArgs)) {
+      DEV_LOGGER.ERROR('FunctionTool.run: Invalid arguments')
       throw new Error('[orion ai] Invalid arguments')
     }
 

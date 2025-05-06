@@ -2,37 +2,37 @@ import { z } from 'zod'
 import { describe, it, expect, beforeEach } from 'vitest'
 import { config as dotConfig } from 'dotenv'
 
-import { DeepSeekModel, type IDeepSeekModelConfig } from '@/models'
-import { userMessage, UserMessage } from '@/messages'
+import { DeepseekModel, type IDeepSeekModelConfig } from '@/models'
+import { UserMessage } from '@/messages'
 import { functionTool } from '@/tools/function'
-import { mcpTool } from '@/tools'
+import { mcpStdioTools } from '@/tools'
 import { DEV_LOGGER } from '@/lib/logger'
 
-describe('DeepSeekModel', () => {
-  let model: DeepSeekModel
+describe('DeepseekModel', () => {
+  let model: DeepseekModel
 
   beforeEach(() => {
     dotConfig()
-    model = new DeepSeekModel()
+    model = new DeepseekModel()
   })
 
   it('should throw an error if no API key is provided', () => {
     const invalidConfig = { model: 'deepseek-chat' } as IDeepSeekModelConfig
-    expect(() => new DeepSeekModel(invalidConfig)).toThrowError(
+    expect(() => new DeepseekModel(invalidConfig)).toThrowError(
       '[orion-ai] DeepSeek API key is required.',
     )
   })
 
   it('should initialize with a valid API key', () => {
     dotConfig()
-    const model = new DeepSeekModel()
-    expect(model).toBeInstanceOf(DeepSeekModel)
+    const model = new DeepseekModel()
+    expect(model).toBeInstanceOf(DeepseekModel)
   })
 
   it('should create a chat completion', async () => {
     dotConfig()
 
-    const model = new DeepSeekModel()
+    const model = new DeepseekModel()
 
     const result = await model.create({
       messages: [new UserMessage(`hi`)],
@@ -42,7 +42,7 @@ describe('DeepSeekModel', () => {
 
   it('should log debug info if debug is enabled', async () => {
     dotConfig()
-    const model = new DeepSeekModel({ debug: true })
+    const model = new DeepseekModel({ debug: true })
 
     await model.create({
       messages: [new UserMessage(`hi`)],
@@ -52,7 +52,7 @@ describe('DeepSeekModel', () => {
   it('should use a tool and give the result', async () => {
     dotConfig()
 
-    const model = new DeepSeekModel()
+    const model = new DeepseekModel()
     const tool = functionTool({
       name: 'weather_tool',
       description: 'use this tool to get the weather',
@@ -72,7 +72,7 @@ describe('DeepSeekModel', () => {
 
   it('should invoke thinking and give the result', async () => {
     dotConfig()
-    const model = new DeepSeekModel({
+    const model = new DeepseekModel({
       model: 'deepseek-reasoner',
     })
 
@@ -86,7 +86,7 @@ describe('DeepSeekModel', () => {
   it('should create a streaming chat completion', async () => {
     dotConfig()
 
-    const model = new DeepSeekModel({ debug: true })
+    const model = new DeepseekModel({ debug: true })
 
     const result = await model.create({
       messages: [new UserMessage('Tell me about machine learning in 3 sentences')],
@@ -105,7 +105,7 @@ describe('DeepSeekModel', () => {
   it('should support async iterator for stream processing', async () => {
     dotConfig()
 
-    const model = new DeepSeekModel({ debug: true })
+    const model = new DeepseekModel({ debug: true })
 
     // get a new stream for each test
     const stream = await model.create({
@@ -133,7 +133,7 @@ describe('DeepSeekModel', () => {
   it('should support thinking and streaming', async () => {
     dotConfig()
 
-    const model = new DeepSeekModel({ model: 'deepseek-reasoner', debug: true })
+    const model = new DeepseekModel({ model: 'deepseek-reasoner', debug: true })
 
     const result = await model.create({
       messages: [new UserMessage('9.11 and 9.8, which is greater?')],
@@ -150,7 +150,7 @@ describe('DeepSeekModel', () => {
   })
 
   it('should support mcp tool', async () => {
-    const tools = await mcpTool(
+    const tools = await mcpStdioTools(
       {
         toolNamePrefix: 'everything',
         clientName: 'everything-client',

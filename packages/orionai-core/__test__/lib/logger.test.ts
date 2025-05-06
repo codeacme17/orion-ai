@@ -4,11 +4,19 @@ import { describe, it } from 'vitest'
 
 describe('logger', () => {
   it('should log a INFO message', () => {
-    DEV_LOGGER.INFO('This is a INFO message')
+    DEV_LOGGER.INFO('This is a INFO message', {
+      content: 'This is a INFO message',
+      error: [
+        213,
+        {
+          test: 'test',
+        },
+      ],
+    })
   })
 
   it('should log a SUCCESS message', () => {
-    DEV_LOGGER.SUCCESS('This is a SUCCESS message')
+    DEV_LOGGER.SUCCESS('This is a SUCCESS message', 1, 2, 3)
   })
 
   it('should log a WARNING message', () => {

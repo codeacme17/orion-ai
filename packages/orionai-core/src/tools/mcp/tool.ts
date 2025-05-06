@@ -1,25 +1,31 @@
 import { z } from 'zod'
 import { BaseTool } from '../base'
-import { MCPClient } from './client'
-import type { IMCPClientOptions, IMCPTool } from './types'
+import { MCPStdioClient } from './stdio-client'
+import { MCPSseClient } from './sse-client'
+import type {
+  IMCPSseClientOptions,
+  IMCPSseTransportOptions,
+  IMCPClientOptions as IMCPStdioClientOptions,
+  IMCPTool,
+} from './types'
 import type { StdioServerParameters } from '@modelcontextprotocol/sdk/client/stdio.js'
 
 export class MCPTool extends BaseTool {
-  private client: MCPClient
+  private client: MCPStdioClient | MCPSseClient
   mcpName: string
 
-  constructor(tool: IMCPTool, client: MCPClient) {
+  constructor(tool: IMCPTool, client: MCPStdioClient | MCPSseClient) {
     super({
       name: tool.name,
       description: tool.description || '',
       schema: tool.inputSchema as z.ZodObject<any, any, any, any>,
     })
-    console.log('tool.inputSchema', tool.inputSchema)
+
     this.client = client
     this.mcpName = tool.name
   }
 
-  async run(args: any): Promise<string> {
+  async run(args: any = {}): Promise<string> {
     const result = await this.client.callTool({
       name: this.mcpName,
       arguments: args,
@@ -52,11 +58,21 @@ export class MCPTool extends BaseTool {
   }
 }
 
-export async function mcpTool(
-  options: IMCPClientOptions = {},
+export async function mcpStdioTools(
+  options: IMCPStdioClientOptions,
   transportOptions: StdioServerParameters,
 ): Promise<MCPTool[]> {
-  const client = new MCPClient(options, transportOptions)
+  const client = new MCPStdioClient(options, transportOptions)
+  await client.connect()
+  const tools = await client.listTools()
+  return tools.map((tool) => new MCPTool(tool, client))
+}
+
+export async function mcpSseTools(
+  options: IMCPSseClientOptions,
+  transportOptions: IMCPSseTransportOptions,
+): Promise<MCPTool[]> {
+  const client = new MCPSseClient(options, transportOptions)
   await client.connect()
   const tools = await client.listTools()
   return tools.map((tool) => new MCPTool(tool, client))

@@ -94,7 +94,7 @@ export class AnthropicModel extends BaseModel {
 
       return this.parseResult(response)
     } catch (error) {
-      console.error('[orion-ai] Anthropic API error:', error)
+      console.error('AnthropicModel.create:', error)
       throw error
     }
   }
