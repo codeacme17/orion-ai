@@ -1,10 +1,14 @@
 import type { Client, ClientOptions } from '@modelcontextprotocol/sdk/client/index.js'
+import type { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
+import type { Implementation } from '@modelcontextprotocol/sdk/types.js'
 import type {
   SSEClientTransport,
   SSEClientTransportOptions,
 } from '@modelcontextprotocol/sdk/client/sse.js'
-import type { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
-import type { Implementation } from '@modelcontextprotocol/sdk/types.js'
+import type {
+  StreamableHTTPClientTransport,
+  StreamableHTTPClientTransportOptions,
+} from '@modelcontextprotocol/sdk/client/streamableHttp.js'
 
 export type JSONValue =
   | string
@@ -61,7 +65,7 @@ export interface IMCPImplementation {
   /**
    * The transport is the transport to use for the client
    */
-  readonly transport: StdioClientTransport | SSEClientTransport
+  readonly transport: StdioClientTransport | StreamableHTTPClientTransport | SSEClientTransport
   /**
    * Whether to log verbose output
    */
@@ -100,4 +104,17 @@ export interface IMCPSseClientOptions {
 export interface IMCPSseTransportOptions {
   url: string
   options?: SSEClientTransportOptions
+}
+
+export interface IMCPStreamableHttpClientOptions {
+  clientInfo: Implementation & {
+    verbose?: boolean
+    toolNamePrefix?: string
+  }
+  options?: ClientOptions
+}
+
+export interface IMCPStreamableHttpTransportOptions {
+  url: string
+  options?: StreamableHTTPClientTransportOptions
 }
