@@ -182,7 +182,7 @@ describe('tool message', () => {
         },
       },
       {
-        url: 'http://localhost:3000/sse',
+        url: 'http://localhost:3011/sse',
       },
     )
 
