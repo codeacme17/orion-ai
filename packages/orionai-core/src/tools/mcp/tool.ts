@@ -6,18 +6,21 @@ import type {
   IMCPSseClientOptions,
   IMCPSseTransportOptions,
   IMCPClientOptions as IMCPStdioClientOptions,
+  IMCPStreamableHttpClientOptions,
+  IMCPStreamableHttpTransportOptions,
   IMCPTool,
 } from './types'
 import type { StdioServerParameters } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { CallToolResultSchema } from '@modelcontextprotocol/sdk/types.js'
 import type { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { DEV_LOGGER } from '@/lib/logger'
+import { MCPStreamableHttpClient } from './streamable-http-client'
 
 export class MCPTool extends BaseTool {
-  private _client: MCPStdioClient | MCPSseClient
+  private _client: MCPStdioClient | MCPSseClient | MCPStreamableHttpClient
   mcpName: string
 
-  constructor(tool: IMCPTool, client: MCPStdioClient | MCPSseClient) {
+  constructor(tool: IMCPTool, client: MCPStdioClient | MCPSseClient | MCPStreamableHttpClient) {
     super({
       name: tool.name,
       description: tool.description || '',
@@ -83,6 +86,16 @@ export async function mcpSseTools(
   transportOptions: IMCPSseTransportOptions,
 ): Promise<MCPTool[]> {
   const client = new MCPSseClient(options, transportOptions)
+  await client.connect()
+  const tools = await client.listTools()
+  return tools.map((tool) => new MCPTool(tool, client))
+}
+
+export async function mcpStreamableHttpClientTools(
+  options: IMCPStreamableHttpClientOptions,
+  transportOptions: IMCPStreamableHttpTransportOptions,
+): Promise<MCPTool[]> {
+  const client = new MCPStreamableHttpClient(options, transportOptions)
   await client.connect()
   const tools = await client.listTools()
   return tools.map((tool) => new MCPTool(tool, client))

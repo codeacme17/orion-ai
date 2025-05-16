@@ -8,7 +8,7 @@ import type {
 import { DEV_LOGGER } from '@/lib/logger'
 import {
   BaseModel,
-  type IBaseCompleteParams,
+  type IBaseCreateParams,
   type IBaseCreateResponse,
   type IBaseModelConfig,
 } from './base'
@@ -22,9 +22,9 @@ export interface IAnthropicModelFields extends Omit<ClientOptions, 'apiKey'>, IB
   model?: Model
 }
 
-export interface IAnthropicCompleteParams
+export interface IAnthropicCreateParams
   extends Omit<MessageCreateParamsNonStreaming, 'messages' | 'model' | 'tools' | 'max_tokens'>,
-    IBaseCompleteParams {
+    IBaseCreateParams {
   messages: Array<TMessage>
   model?: Model
   tools?: Array<BaseTool | FunctionTool>
@@ -75,9 +75,9 @@ export class AnthropicModel extends BaseModel {
   }
 
   public async create(
-    body: IAnthropicCompleteParams,
+    body: IAnthropicCreateParams,
     options: RequestOptions = {},
-  ): Promise<IBaseCreateResponse> {
+  ): Promise<IBaseCreateParams> {
     try {
       const { model, messages, tools, ...rest } = body
 
