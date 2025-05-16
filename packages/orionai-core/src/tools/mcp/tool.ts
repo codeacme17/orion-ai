@@ -9,9 +9,12 @@ import type {
   IMCPTool,
 } from './types'
 import type { StdioServerParameters } from '@modelcontextprotocol/sdk/client/stdio.js'
+import { CallToolResultSchema } from '@modelcontextprotocol/sdk/types.js'
+import type { Client } from '@modelcontextprotocol/sdk/client/index.js'
+import { DEV_LOGGER } from '@/lib/logger'
 
 export class MCPTool extends BaseTool {
-  private client: MCPStdioClient | MCPSseClient
+  private _client: MCPStdioClient | MCPSseClient
   mcpName: string
 
   constructor(tool: IMCPTool, client: MCPStdioClient | MCPSseClient) {
@@ -21,12 +24,12 @@ export class MCPTool extends BaseTool {
       schema: tool.inputSchema as z.ZodObject<any, any, any, any>,
     })
 
-    this.client = client
+    this._client = client
     this.mcpName = tool.name
   }
 
   async run(args: any = {}): Promise<string> {
-    const result = await this.client.callTool({
+    const result = await this._client.callTool({
       name: this.mcpName,
       arguments: args,
     })
@@ -34,7 +37,14 @@ export class MCPTool extends BaseTool {
   }
 
   async close(): Promise<void> {
-    await this.client.close()
+    await this._client.close()
+  }
+
+  getClient(): Client {
+    if (!this._client.client) {
+      throw DEV_LOGGER.ERROR('Client is not initialized')
+    }
+    return this._client.client
   }
 
   toJSON() {

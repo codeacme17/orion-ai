@@ -1,0 +1,27 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# MCP Tool Clients and Structure
+
+The `src/tools/mcp/` directory contains multiple client implementations for interacting with Model Context Protocol (MCP) servers using different transports:
+
+- [streamable-http-client.ts](mdc:src/tools/mcp/streamable-http-client.ts): Implements `MCPStreamableHttpClient`, which connects to an MCP server using a streamable HTTP transport. It supports connecting, listing tools, calling tools, and closing the connection. It uses types from [types.ts](mdc:src/tools/mcp/types.ts) and logs via `DEV_LOGGER` from [lib/logger/dev.ts](mdc:src/lib/logger/dev.ts).
+- [stdio-client.ts](mdc:src/tools/mcp/stdio-client.ts): Implements `MCPStdioClient`, which connects via stdio transport. Its API and structure are similar to the HTTP client.
+- [sse-client.ts](mdc:src/tools/mcp/sse-client.ts): Implements `MCPSseClient`, which connects via Server-Sent Events (SSE) transport.
+- [tool.ts](mdc:src/tools/mcp/tool.ts): Defines `MCPTool`, a wrapper for tools provided by MCP clients, and utility functions to fetch tool lists from stdio and SSE clients.
+- [types.ts](mdc:src/tools/mcp/types.ts): Contains shared type definitions for MCP clients, including tool schemas, client options, and interfaces for tool calls and responses.
+- [index.ts](mdc:src/tools/mcp/index.ts): Re-exports types and main client/tool modules for easier import.
+
+All MCP client classes implement the `IMCPImplementation` interface from [types.ts](mdc:src/tools/mcp/types.ts), ensuring a consistent API for connecting, listing tools, calling tools, and closing the connection.
+
+The [src/tools/base.ts](mdc:src/tools/base.ts) file defines the `BaseTool` class, which is extended by `MCPTool` and other tool types. The [src/tools/function.ts](mdc:src/tools/function.ts) file provides a generic `FunctionTool` for wrapping arbitrary functions as tools.
+
+The [src/tools/index.ts](mdc:src/tools/index.ts) file re-exports all tool types, including MCP tools, and defines the `TTool` union type.
+
+Logging for all MCP clients is handled by `DEV_LOGGER` from [src/lib/logger/dev.ts](mdc:src/lib/logger/dev.ts).
+
+Models in [src/models/](mdc:src/models/) can use tools by referencing the `TTool` type from [src/tools/index.ts](mdc:src/tools/index.ts), as seen in [src/models/base.ts](mdc:src/models/base.ts).
+
+This structure allows for flexible integration of external tools via MCP, supporting multiple transport protocols and consistent tool interfaces.
