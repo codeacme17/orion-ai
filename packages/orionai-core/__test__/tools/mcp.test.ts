@@ -1,4 +1,3 @@
-import { DEV_LOGGER } from '@/lib/logger'
 import { mcpSseTools, mcpStdioTools } from '@/tools'
 import { LoggingMessageNotificationSchema } from '@modelcontextprotocol/sdk/types.js'
 import { describe, expect, it } from 'vitest'
@@ -25,19 +24,18 @@ describe('mcp tools', () => {
       try {
         // Test echo tool
         const echoTool = tools.find((tool) => tool.name === 'everything_echo')
-        console.log('echoTool', echoTool)
         expect(echoTool).toBeDefined()
         const result = await echoTool?.run({ message: 'hello' })
         expect(result).toBeDefined()
       } catch (error) {
-        DEV_LOGGER.ERROR('Error testing echo tool:', error)
+        console.error('Error testing echo tool:', error)
       }
     } catch (error) {
-      DEV_LOGGER.ERROR('MCP server is not available:', error)
+      console.error('MCP server is not available:', error)
     }
   })
 
-  it('should run a sse mcp tool with notifi', async () => {
+  it('should run a sse mcp tool with notification', async () => {
     // Skip test if MCP server is not available
     try {
       // Initialize MCP tools
@@ -56,8 +54,6 @@ describe('mcp tools', () => {
 
       // If we get here, MCP server is available
       try {
-        // Test echo tool
-
         const notificationTool = tools.find(
           (tool) => tool.name === 'everything_start-notification-stream',
         )
@@ -76,10 +72,10 @@ describe('mcp tools', () => {
 
         console.log('res', res)
       } catch (error) {
-        DEV_LOGGER.ERROR('Error testing echo tool:', error)
+        console.error('Error testing echo tool:', error)
       }
     } catch (error) {
-      DEV_LOGGER.ERROR('MCP server is not available:', error)
+      console.error('MCP server is not available:', error)
     }
   })
 })
