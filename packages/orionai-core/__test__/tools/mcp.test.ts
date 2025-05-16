@@ -62,7 +62,7 @@ describe('mcp tools', () => {
 
         client &&
           client.setNotificationHandler(LoggingMessageNotificationSchema, (notification) => {
-            console.log(`Notification: ${notification.params.level} - ${notification.params.data}`)
+            console.log(`Notification: ${JSON.stringify(notification)}`)
           })
 
         const res = await notificationTool?.run({
