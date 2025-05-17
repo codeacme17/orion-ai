@@ -1,8 +1,9 @@
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
-import dts from 'vite-plugin-dts'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
+
+import dts from 'vite-plugin-dts'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -20,7 +21,39 @@ export default defineConfig({
       entry: resolve(__dirname, 'src/index.ts'),
       name: '@orion-ai/core',
       fileName: 'index',
+      formats: ['es', 'cjs'],
     },
+    rollupOptions: {
+      external: [
+        'node:path',
+        'node:url',
+        'node:stream',
+        'node:util',
+        /^node:.*/,
+        /^@?[a-zA-Z0-9-]+$/,
+        /^@?[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+$/,
+      ],
+      output: [
+        {
+          format: 'es',
+          preserveModules: true,
+          preserveModulesRoot: 'src',
+          entryFileNames: '[name].js',
+          dir: 'dist',
+          sourcemap: false,
+        },
+        {
+          format: 'cjs',
+          preserveModules: true,
+          preserveModulesRoot: 'src',
+          entryFileNames: '[name].cjs',
+          dir: 'dist',
+          sourcemap: false,
+        },
+      ],
+    },
+    sourcemap: false,
+    minify: false,
   },
   plugins: [
     nodePolyfills({
@@ -31,13 +64,14 @@ export default defineConfig({
         process: true,
       },
       protocolImports: true,
-    }),
-    // @ts-ignore
+    }) as any,
     dts({
       entryRoot: 'src',
       outDir: 'dist/types',
       copyDtsFiles: true,
       insertTypesEntry: true,
+      include: ['src/**/*.ts'],
+      exclude: ['src/**/*.test.ts', 'src/**/*.spec.ts'],
     }),
   ],
 })

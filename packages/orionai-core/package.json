@@ -5,6 +5,43 @@
   "module": "dist/index.js",
   "types": "dist/types/index.d.ts",
   "main": "dist/index.cjs",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./agents/*": {
+      "types": "./dist/types/agents/*.d.ts",
+      "import": "./dist/agents/*.js",
+      "require": "./dist/agents/*.cjs"
+    },
+    "./messages/*": {
+      "types": "./dist/types/messages/*.d.ts",
+      "import": "./dist/messages/*.js",
+      "require": "./dist/messages/*.cjs"
+    },
+    "./models/*": {
+      "types": "./dist/types/models/*.d.ts",
+      "import": "./dist/models/*.js",
+      "require": "./dist/models/*.cjs"
+    },
+    "./tools/*": {
+      "types": "./dist/types/tools/*.d.ts",
+      "import": "./dist/tools/*.js",
+      "require": "./dist/tools/*.cjs"
+    },
+    "./lib/*": {
+      "types": "./dist/types/lib/*.d.ts",
+      "import": "./dist/lib/*.js",
+      "require": "./dist/lib/*.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "vite build",
     "check": "tsc --noEmit",
