@@ -1,12 +1,12 @@
 import { z } from 'zod'
 import { describe, it, expect, beforeEach } from 'vitest'
-import { openaiModel, OpenAIModel } from '@/models/openai'
+import { openaiModel, OpenAIModel } from '../src/openai'
 import { config as dotConfig } from 'dotenv'
 import { HttpsProxyAgent } from 'https-proxy-agent'
-import { AssistantMessage, SystemMessage, userMessage, UserMessage } from '@/messages'
-import { DEV_LOGGER } from '@/lib/logger'
-import { functionTool } from '@/tools/function'
-import { mcpStdioTools } from '@/tools/mcp'
+import { AssistantMessage, SystemMessage, userMessage, UserMessage } from '@orion-ai/core'
+import { DEV_LOGGER } from '@orion-ai/core/lib/logger/index'
+import { functionTool } from '@orion-ai/core/tools/function'
+import { mcpStdioTools } from '@orion-ai/core/tools/mcp/index'
 
 describe('OpenAIModel', () => {
   let model: OpenAIModel
