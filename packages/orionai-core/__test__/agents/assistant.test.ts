@@ -7,7 +7,7 @@ import { userMessage } from '@/messages'
 import { deepseekModel, openaiModel } from '@/models'
 import { functionTool } from '@/tools/function'
 import { HttpsProxyAgent } from 'https-proxy-agent'
-import { mcpSseTools, mcpStdioTools } from '@/tools'
+import { mcpSseTools, mcpStdioTools } from '@/tools/mcp'
 
 describe('assistant agent', () => {
   let proxy: HttpsProxyAgent<string> | null = null

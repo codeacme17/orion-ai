@@ -1,6 +1,5 @@
 import { DEV_LOGGER } from '@/lib/logger'
 import { assistantMessage, UserMessage, userMessage } from '@/messages'
-import { mcpSseTools, mcpStdioTools } from '@/tools'
 import { describe, expect, it } from 'vitest'
 import { config as dotConfig } from 'dotenv'
 

@@ -1,4 +1,4 @@
-import { mcpSseTools, mcpStdioTools, mcpStreamableHttpClientTools } from '@/tools'
+import { mcpSseTools, mcpStdioTools, mcpStreamableHttpClientTools } from '@/tools/mcp'
 import { LoggingMessageNotificationSchema } from '@modelcontextprotocol/sdk/types.js'
 import { describe, expect, it } from 'vitest'
 
