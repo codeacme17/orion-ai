@@ -11,7 +11,6 @@ import type {
   IMCPTool,
 } from './types'
 import type { StdioServerParameters } from '@modelcontextprotocol/sdk/client/stdio.js'
-import { CallToolResultSchema } from '@modelcontextprotocol/sdk/types.js'
 import type { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { DEV_LOGGER } from '@/lib/logger'
 import { MCPStreamableHttpClient } from './streamable-http-client'
