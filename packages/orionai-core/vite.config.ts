@@ -7,6 +7,16 @@ import dts from 'vite-plugin-dts'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
+// 获取所有目录下的 index.ts 文件作为入口
+const entries = {
+  index: resolve(__dirname, 'src/index.ts'),
+  'agents/index': resolve(__dirname, 'src/agents/index.ts'),
+  'messages/index': resolve(__dirname, 'src/messages/index.ts'),
+  'models/index': resolve(__dirname, 'src/models/index.ts'),
+  'tools/index': resolve(__dirname, 'src/tools/index.ts'),
+  'lib/index': resolve(__dirname, 'src/lib/index.ts'),
+}
+
 export default defineConfig({
   resolve: {
     alias: {
@@ -18,21 +28,13 @@ export default defineConfig({
   },
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
+      entry: entries,
       name: '@orion-ai/core',
-      fileName: 'index',
+      fileName: (format, entryName) => `${entryName}.${format === 'es' ? 'js' : 'cjs'}`,
       formats: ['es', 'cjs'],
     },
     rollupOptions: {
-      external: [
-        'node:path',
-        'node:url',
-        'node:stream',
-        'node:util',
-        /^node:.*/,
-        /^@?[a-zA-Z0-9-]+$/,
-        /^@?[a-zA-Z0-9-]+\/[a-zA-Z0-9-]+$/,
-      ],
+      external: ['node:path', 'node:url', 'node:stream', 'node:util'],
       output: [
         {
           format: 'es',

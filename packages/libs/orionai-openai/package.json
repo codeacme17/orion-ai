@@ -2,16 +2,16 @@
   "name": "@orion-ai/openai",
   "version": "0.0.1",
   "description": "OpenAI API for Orion AI",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "test": "vitest"
+    "build": "tsc && vite build",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
-  "dependencies": {
-    "openai": "^4.89.0"
-  },
   "devDependencies": {
     "@orion-ai/core": "workspace:*",
     "zod": "^3.24.2",
