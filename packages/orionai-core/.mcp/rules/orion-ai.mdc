@@ -1,7 +1,7 @@
 ---
 description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 # MCP Tool Clients and Structure
 
@@ -22,6 +22,6 @@ The [src/tools/index.ts](mdc:src/tools/index.ts) file re-exports all tool types,
 
 Logging for all MCP clients is handled by `DEV_LOGGER` from [src/lib/logger/dev.ts](mdc:src/lib/logger/dev.ts).
 
-Models in [src/models/](mdc:src/models/) can use tools by referencing the `TTool` type from [src/tools/index.ts](mdc:src/tools/index.ts), as seen in [src/models/base.ts](mdc:src/models/base.ts).
+Models in [src/models/](mdc:src/models) can use tools by referencing the `TTool` type from [src/tools/index.ts](mdc:src/tools/index.ts), as seen in [src/models/base.ts](mdc:src/models/base.ts).
 
 This structure allows for flexible integration of external tools via MCP, supporting multiple transport protocols and consistent tool interfaces.
