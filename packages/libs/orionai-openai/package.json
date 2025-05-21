@@ -1,0 +1,20 @@
+{
+  "name": "@orion-ai/openai",
+  "version": "0.0.1",
+  "description": "OpenAI API for Orion AI",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc && vite build",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@orion-ai/core": "workspace:*",
+    "zod": "^3.24.2",
+    "https-proxy-agent": "^7.0.0"
+  }
+}

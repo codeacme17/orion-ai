@@ -1,4 +1,4 @@
-import { assistantAgent, deepseekModel, mcpSseTools, mcpStdioTools } from '@orion-ai/core'
+import { assistantAgent, deepseekModel } from '@orion-ai/core'
 
 export const createAgent = async () => {
   // const mcpTools = await mcpStdioTools(

@@ -4,6 +4,6 @@ import type { MCPTool } from './mcp/tool'
 
 export * from './base'
 export * from './function'
-export * from './mcp/tool'
+export * from './mcp'
 
 export type TTool = BaseTool | FunctionTool | MCPTool

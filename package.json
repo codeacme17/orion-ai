@@ -11,10 +11,11 @@
     "examples/*"
   ],
   "devDependencies": {
+    "@types/node": "^20.11.24",
     "dotenv": "^16.4.7",
     "lerna": "^8.2.0",
     "typescript": "^5.0.0",
     "vite": "^3.0.0",
-    "vitest": "^3.0.6"
+    "vitest": "^3.1.3"
   }
 }

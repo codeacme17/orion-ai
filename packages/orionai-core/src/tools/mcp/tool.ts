@@ -2,31 +2,29 @@ import { z } from 'zod'
 import { BaseTool } from '../base'
 import { MCPStdioClient } from './stdio-client'
 import { MCPSseClient } from './sse-client'
-import type {
-  IMCPSseClientOptions,
-  IMCPSseTransportOptions,
-  IMCPClientOptions as IMCPStdioClientOptions,
-  IMCPTool,
-} from './types'
-import type { StdioServerParameters } from '@modelcontextprotocol/sdk/client/stdio.js'
+import { MCPStreamableHttpClient } from './streamable-http-client'
+import { DEV_LOGGER } from '@/lib/logger'
+
+import type { IMCPTool } from './types'
+import type { Client } from '@modelcontextprotocol/sdk/client/index.js'
 
 export class MCPTool extends BaseTool {
-  private client: MCPStdioClient | MCPSseClient
+  private _client: MCPStdioClient | MCPSseClient | MCPStreamableHttpClient
   mcpName: string
 
-  constructor(tool: IMCPTool, client: MCPStdioClient | MCPSseClient) {
+  constructor(tool: IMCPTool, client: MCPStdioClient | MCPSseClient | MCPStreamableHttpClient) {
     super({
       name: tool.name,
       description: tool.description || '',
       schema: tool.inputSchema as z.ZodObject<any, any, any, any>,
     })
 
-    this.client = client
+    this._client = client
     this.mcpName = tool.name
   }
 
   async run(args: any = {}): Promise<string> {
-    const result = await this.client.callTool({
+    const result = await this._client.callTool({
       name: this.mcpName,
       arguments: args,
     })
@@ -34,7 +32,14 @@ export class MCPTool extends BaseTool {
   }
 
   async close(): Promise<void> {
-    await this.client.close()
+    await this._client.close()
+  }
+
+  getClient(): Client {
+    if (!this._client.client) {
+      throw DEV_LOGGER.ERROR('Client is not initialized')
+    }
+    return this._client.client
   }
 
   toJSON() {
@@ -56,24 +61,4 @@ export class MCPTool extends BaseTool {
       parameters: this.schema,
     }
   }
-}
-
-export async function mcpStdioTools(
-  options: IMCPStdioClientOptions,
-  transportOptions: StdioServerParameters,
-): Promise<MCPTool[]> {
-  const client = new MCPStdioClient(options, transportOptions)
-  await client.connect()
-  const tools = await client.listTools()
-  return tools.map((tool) => new MCPTool(tool, client))
-}
-
-export async function mcpSseTools(
-  options: IMCPSseClientOptions,
-  transportOptions: IMCPSseTransportOptions,
-): Promise<MCPTool[]> {
-  const client = new MCPSseClient(options, transportOptions)
-  await client.connect()
-  const tools = await client.listTools()
-  return tools.map((tool) => new MCPTool(tool, client))
 }
