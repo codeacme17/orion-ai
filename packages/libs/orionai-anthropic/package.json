@@ -1,7 +1,7 @@
 {
-  "name": "@orion-ai/openai",
+  "name": "@orion-ai/anthropic",
   "version": "0.0.1",
-  "description": "OpenAI provider for Orion AI",
+  "description": "Anthropic provider for Orion AI",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -17,11 +17,11 @@
     "test": "vitest",
     "typecheck": "tsc --noEmit"
   },
-  "keywords": ["orion-ai", "openai", "ai", "llm"],
+  "keywords": ["orion-ai", "anthropic", "claude", "ai", "llm"],
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@ai-sdk/openai": "^2.0.52",
+    "@ai-sdk/anthropic": "^2.0.27",
     "ai": "^5.0.70"
   },
   "devDependencies": {

@@ -13,16 +13,16 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
-      name: 'OrionAIOpenAI',
+      name: 'OrionAIAnthropic',
       formats: ['es', 'cjs'],
       fileName: (format) => `index.${format === 'es' ? 'js' : 'cjs'}`,
     },
     rollupOptions: {
-      external: ['ai', '@ai-sdk/openai', '@orion-ai/core'],
+      external: ['ai', '@ai-sdk/anthropic', '@orion-ai/core'],
       output: {
         globals: {
           'ai': 'AI',
-          '@ai-sdk/openai': 'AISDKOpenAI',
+          '@ai-sdk/anthropic': 'AISDKAnthropic',
           '@orion-ai/core': 'OrionAICore',
         },
       },

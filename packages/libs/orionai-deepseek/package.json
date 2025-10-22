@@ -1,7 +1,7 @@
 {
-  "name": "@orion-ai/openai",
+  "name": "@orion-ai/deepseek",
   "version": "0.0.1",
-  "description": "OpenAI provider for Orion AI",
+  "description": "DeepSeek provider for Orion AI",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -17,7 +17,7 @@
     "test": "vitest",
     "typecheck": "tsc --noEmit"
   },
-  "keywords": ["orion-ai", "openai", "ai", "llm"],
+  "keywords": ["orion-ai", "deepseek", "ai", "llm"],
   "author": "",
   "license": "MIT",
   "dependencies": {
