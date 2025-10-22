@@ -60,6 +60,9 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@orion-ai/anthropic": "workspace:*",
+    "@orion-ai/deepseek": "workspace:*",
+    "@orion-ai/openai": "workspace:*",
     "@vitest/coverage-v8": "^3.1.1",
     "http-proxy-agent": "^7.0.2",
     "https-proxy-agent": "^7.0.6",

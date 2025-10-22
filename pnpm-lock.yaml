@@ -158,6 +158,15 @@ importers:
         specifier: ^3.25.76
         version: 3.25.76
     devDependencies:
+      '@orion-ai/anthropic':
+        specifier: workspace:*
+        version: link:../libs/orionai-anthropic
+      '@orion-ai/deepseek':
+        specifier: workspace:*
+        version: link:../libs/orionai-deepseek
+      '@orion-ai/openai':
+        specifier: workspace:*
+        version: link:../libs/orionai-openai
       '@vitest/coverage-v8':
         specifier: ^3.1.1
         version: 3.1.1(vitest@3.1.1(@types/node@22.14.1)(jiti@2.4.2)(lightningcss@1.29.2)(tsx@4.19.3)(yaml@2.7.0))
@@ -189,9 +198,6 @@ importers:
         specifier: ^5.0.70
         version: 5.0.70(zod@3.25.76)
     devDependencies:
-      '@orion-ai/core':
-        specifier: workspace:*
-        version: link:../../core
       typescript:
         specifier: ^5.0.0
         version: 5.7.3
@@ -214,9 +220,6 @@ importers:
         specifier: ^5.0.70
         version: 5.0.70(zod@3.25.76)
     devDependencies:
-      '@orion-ai/core':
-        specifier: workspace:*
-        version: link:../../core
       typescript:
         specifier: ^5.0.0
         version: 5.7.3
@@ -239,9 +242,6 @@ importers:
         specifier: ^5.0.70
         version: 5.0.70(zod@3.25.76)
     devDependencies:
-      '@orion-ai/core':
-        specifier: workspace:*
-        version: link:../../core
       typescript:
         specifier: ^5.0.0
         version: 5.7.3

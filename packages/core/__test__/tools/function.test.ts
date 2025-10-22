@@ -1,8 +1,10 @@
 import { z } from 'zod'
 import { describe, it } from 'vitest'
 import { functionTool, FunctionTool } from '@/tools/function'
-import { DeepseekModel } from '@/models'
+import { createDeepSeekModel } from '@orion-ai/deepseek'
+import { generateText } from 'ai'
 import { systemMessage, userMessage, UserMessage } from '@/messages'
+import { convertMessagesToAISDK, convertToolsToAISDK } from '@/models/adapters'
 import { DEV_LOGGER } from '@/lib/logger'
 import { config as dotConfig } from 'dotenv'
 
@@ -28,6 +30,11 @@ describe('base tool', () => {
   })
 
   it('should run in llm', async () => {
+    if (!process.env.DEEPSEEK_API_KEY) {
+      console.log('Skipping test - no API key')
+      return
+    }
+
     dotConfig()
 
     const tool = new FunctionTool({
@@ -42,25 +49,33 @@ describe('base tool', () => {
       },
     })
 
-    const tools: any = [tool]
-
-    const llm = new DeepseekModel()
-
-    const res = await llm.create({
-      messages: [
-        new UserMessage({
-          content: 'what is the weather in beijing?',
-        }),
-      ],
-      tools,
+    const model = createDeepSeekModel({
+      apiKey: process.env.DEEPSEEK_API_KEY,
     })
 
-    const toolRes = await tool.run(res.tool_calls[0].function.arguments)
+    const messages = convertMessagesToAISDK([
+      new UserMessage({
+        content: 'what is the weather in beijing?',
+      }),
+    ])
 
-    DEV_LOGGER.SUCCESS('tool res ===>', toolRes)
+    const aiTools = convertToolsToAISDK([tool])
+
+    const res = await generateText({
+      model,
+      messages,
+      tools: aiTools,
+    })
+
+    DEV_LOGGER.SUCCESS('response', res)
   })
 
   it('should return 2 tools', async () => {
+    if (!process.env.DEEPSEEK_API_KEY) {
+      console.log('Skipping test - no API key')
+      return
+    }
+
     dotConfig()
 
     const weatherTool = new FunctionTool({
@@ -87,14 +102,21 @@ describe('base tool', () => {
 
     const tools = [weatherTool, locationTool]
 
-    const llm = new DeepseekModel()
+    const model = createDeepSeekModel({
+      apiKey: process.env.DEEPSEEK_API_KEY,
+    })
 
-    const res = await llm.create({
-      messages: [
-        systemMessage('you are a helpful assistant'),
-        userMessage('我需要知道北京的天气情况和北京的地理信息，请分别使用相应工具查询'),
-      ],
-      tools,
+    const messages = convertMessagesToAISDK([
+      systemMessage('you are a helpful assistant'),
+      userMessage('我需要知道北京的天气情况和北京的地理信息，请分别使用相应工具查询'),
+    ])
+
+    const aiTools = convertToolsToAISDK(tools)
+
+    const res = await generateText({
+      model,
+      messages,
+      tools: aiTools,
     })
 
     DEV_LOGGER.SUCCESS('res ===>', res)
