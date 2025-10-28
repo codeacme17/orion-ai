@@ -1,9 +1,8 @@
-import { generateText, streamText } from 'ai'
 import { SystemMessage, type TMessage } from '@/messages'
 import { BaseAgent, type BaseAgentFields } from './base'
 import { DEV_LOGGER } from '@/lib/logger'
+import { EStreamChunkType } from '@/models'
 import type { TModel } from '@/models'
-import { convertMessagesToAISDK, convertToolsToAISDK } from '@/models/adapters'
 
 enum EChunkType {
   INVOKE_TEXT_CONTENT = 'invoke.text.content',
@@ -89,16 +88,10 @@ export class AssistantAgent extends BaseAgent {
 
       this.debug && DEV_LOGGER.INFO('AssistantAgent.invoke: messages \n', combinedMessages)
 
-      // Convert to AI SDK format
-      const aiMessages = convertMessagesToAISDK(combinedMessages)
-      const aiTools = this.tools ? convertToolsToAISDK(this.tools) : undefined
-
-      // Use AI SDK's generateText with automatic tool execution
-      const result = await generateText({
-        model: this.model,
-        messages: aiMessages,
-        tools: aiTools,
-        // AI SDK handles tool execution automatically
+      // Use the model's generate method
+      const result = await this.model.generate({
+        messages: combinedMessages,
+        tools: this.tools,
       })
 
       this.debug && DEV_LOGGER.INFO('AssistantAgent.invoke: response \n', result)
@@ -122,33 +115,37 @@ export class AssistantAgent extends BaseAgent {
 
       this.debug && DEV_LOGGER.INFO('AssistantAgent.invokeStream: messages \n', combinedMessages)
 
-      // Convert to AI SDK format
-      const aiMessages = convertMessagesToAISDK(combinedMessages)
-      const aiTools = this.tools ? convertToolsToAISDK(this.tools) : undefined
-
-      // Use AI SDK's streamText with automatic tool execution
-      const result = streamText({
-        model: this.model,
-        messages: aiMessages,
-        tools: aiTools,
-        // AI SDK handles tool execution automatically
+      // Use the model's stream method
+      const stream = this.model.stream({
+        messages: combinedMessages,
+        tools: this.tools,
       })
 
-      // Stream text deltas
-      for await (const chunk of result.textStream) {
-        yield {
-          type: EChunkType.INVOKE_TEXT_CONTENT,
-          content: chunk,
+      // Convert model stream chunks to our chunk format
+      for await (const chunk of stream) {
+        if (chunk.type === EStreamChunkType.TEXT_DELTA && chunk.text) {
+          yield {
+            type: EChunkType.INVOKE_TEXT_CONTENT,
+            content: chunk.text,
+          }
+        } else if (chunk.type === EStreamChunkType.TEXT_DONE && chunk.text) {
+          yield {
+            type: EChunkType.INVOKE_TEXT_DONE,
+            content: chunk.text,
+          }
+        } else if (chunk.type === EStreamChunkType.TOOL_CALL) {
+          yield {
+            type: EChunkType.INVOKE_TOOL_CALL,
+            toolName: chunk.toolName,
+            toolCallId: chunk.toolCallId,
+          }
+        } else if (chunk.type === EStreamChunkType.TOOL_RESULT) {
+          yield {
+            type: EChunkType.INVOKE_TOOL_RESULT,
+            toolResult: chunk.toolResult,
+            toolCallId: chunk.toolCallId,
+          }
         }
-      }
-
-      // Wait for final result to get tool calls
-      const finalResult = await result
-
-      // Final text done
-      yield {
-        type: EChunkType.INVOKE_TEXT_DONE,
-        content: await finalResult.text,
       }
     } catch (error) {
       DEV_LOGGER.ERROR(`AssistantAgent.invokeStream: ${error}`)

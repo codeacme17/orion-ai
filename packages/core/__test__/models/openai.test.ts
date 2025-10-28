@@ -2,14 +2,13 @@ import { z } from 'zod'
 import { describe, it, expect, beforeEach } from 'vitest'
 import { createOpenAIModel } from '@orion-ai/openai'
 import { config as dotConfig } from 'dotenv'
-import { generateText, streamText, type LanguageModel } from 'ai'
 import { SystemMessage, UserMessage, AssistantMessage } from '@/messages'
 import { DEV_LOGGER } from '@/lib/logger'
 import { functionTool } from '@/tools/function'
-import { convertMessagesToAISDK, convertToolsToAISDK } from '@/models/adapters'
+import type { IModel } from '@orion-ai/core'
 
 describe('OpenAI Model', () => {
-  let model: LanguageModel
+  let model: IModel
 
   dotConfig()
 
@@ -23,6 +22,8 @@ describe('OpenAI Model', () => {
   it('should initialize the OpenAI model correctly', () => {
     expect(model).toBeDefined()
     expect(typeof model).toBe('object')
+    expect(model.generate).toBeDefined()
+    expect(model.stream).toBeDefined()
   })
 
   it('should initialize with custom model', () => {
@@ -40,18 +41,15 @@ describe('OpenAI Model', () => {
       return
     }
 
-    const messages = convertMessagesToAISDK([
-      new SystemMessage('You are a super frontend master, please reply to me in English'),
-      new UserMessage('Please give me a debounce function'),
-      new AssistantMessage('Sure, here is a debounce function'),
-      new UserMessage(
-        'Please first tell me your identity, then tell me what you answered to my last question',
-      ),
-    ])
-
-    const response = await generateText({
-      model,
-      messages,
+    const response = await model.generate({
+      messages: [
+        new SystemMessage('You are a super frontend master, please reply to me in English'),
+        new UserMessage('Please give me a debounce function'),
+        new AssistantMessage('Sure, here is a debounce function'),
+        new UserMessage(
+          'Please first tell me your identity, then tell me what you answered to my last question',
+        ),
+      ],
     })
 
     console.log('response', response)
@@ -66,25 +64,22 @@ describe('OpenAI Model', () => {
       return
     }
 
-    const messages = convertMessagesToAISDK([
-      new UserMessage({
-        content: [
-          {
-            type: 'input_text',
-            text: 'Please tell me what you see in this image',
-          },
-          {
-            type: 'input_image',
-            image_url:
-              'https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png',
-          },
-        ],
-      }),
-    ])
-
-    const response = await generateText({
-      model,
-      messages,
+    const response = await model.generate({
+      messages: [
+        new UserMessage({
+          content: [
+            {
+              type: 'input_text',
+              text: 'Please tell me what you see in this image',
+            },
+            {
+              type: 'input_image',
+              image_url:
+                'https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png',
+            },
+          ],
+        }),
+      ],
     })
 
     DEV_LOGGER.SUCCESS('response', response.text)
@@ -107,16 +102,9 @@ describe('OpenAI Model', () => {
       execute: async ({ city }) => `The weather in ${city} is sunny`,
     })
 
-    const messages = convertMessagesToAISDK([
-      new UserMessage(`hi what the temperature like in Hangzhou?`),
-    ])
-
-    const tools = convertToolsToAISDK([tool])
-
-    const response = await generateText({
-      model,
-      messages,
-      tools,
+    const response = await model.generate({
+      messages: [new UserMessage(`hi what the temperature like in Hangzhou?`)],
+      tools: [tool],
     })
 
     DEV_LOGGER.SUCCESS('response', response)
@@ -129,18 +117,15 @@ describe('OpenAI Model', () => {
       return
     }
 
-    const messages = convertMessagesToAISDK([
-      new UserMessage('Tell me about machine learning in 3 sentences'),
-    ])
-
-    const result = streamText({
-      model,
-      messages,
+    const stream = model.stream({
+      messages: [new UserMessage('Tell me about machine learning in 3 sentences')],
     })
 
     let fullText = ''
-    for await (const chunk of result.textStream) {
-      fullText += chunk
+    for await (const chunk of stream) {
+      if (chunk.text) {
+        fullText += chunk.text
+      }
     }
 
     expect(fullText).not.toBe('')
@@ -161,28 +146,19 @@ describe('OpenAI Model', () => {
       execute: async ({ city }) => `The weather in ${city} is sunny`,
     })
 
-    const messages = convertMessagesToAISDK([
-      new UserMessage(`hi what the temperature like in Hangzhou?`),
-    ])
-
-    const tools = convertToolsToAISDK([tool])
-
-    const result = streamText({
-      model,
-      messages,
-      tools,
+    const stream = model.stream({
+      messages: [new UserMessage(`hi what the temperature like in Hangzhou?`)],
+      tools: [tool],
     })
 
-    let hasToolCalls = false
-    for await (const chunk of result.fullStream) {
-      if (chunk.type === 'tool-call') {
-        hasToolCalls = true
-        console.log('Tool call:', chunk)
+    let hasContent = false
+    for await (const chunk of stream) {
+      if (chunk.text || chunk.toolName) {
+        hasContent = true
+        console.log('Chunk:', chunk)
       }
     }
 
-    // Either we get text or tool calls
-    const finalResult = await result
-    expect(finalResult.text || hasToolCalls).toBeTruthy()
+    expect(hasContent).toBeTruthy()
   })
 })

@@ -145,9 +145,6 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.11.3
         version: 1.11.3
-      ai:
-        specifier: ^5.0.70
-        version: 5.0.70(zod@3.25.76)
       chalk:
         specifier: ^5.4.1
         version: 5.4.1
@@ -238,6 +235,9 @@ importers:
       '@ai-sdk/openai':
         specifier: ^2.0.52
         version: 2.0.52(zod@3.25.76)
+      '@orion-ai/core':
+        specifier: workspace:*
+        version: link:../../core
       ai:
         specifier: ^5.0.70
         version: 5.0.70(zod@3.25.76)

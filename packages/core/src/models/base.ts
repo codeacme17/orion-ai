@@ -1,9 +1,8 @@
-import type { LanguageModel } from 'ai'
 import type { TMessage } from '@/messages'
 import type { TTool } from '@/tools'
 
 /**
- * Base model configuration (kept for backwards compatibility)
+ * Base model configuration
  */
 export interface IBaseModelConfig {
   apiKey?: string
@@ -13,33 +12,18 @@ export interface IBaseModelConfig {
 }
 
 /**
- * Parameters for creating a model response
+ * Parameters for generating model responses
  */
-export interface IBaseCreateParams {
+export interface IGenerateParams {
   /**
    * The messages to send to the model
    */
   messages: Array<TMessage>
 
   /**
-   * The model to use (optional if set in config)
-   */
-  model?: LanguageModel
-
-  /**
    * The tools available to the model
    */
   tools?: Array<TTool>
-
-  /**
-   * Whether to stream the response
-   */
-  stream?: boolean | null
-
-  /**
-   * Whether to enable debug mode
-   */
-  debug?: boolean
 
   /**
    * Maximum number of tokens to generate
@@ -70,21 +54,21 @@ export interface IToolCallResult {
 /**
  * Response from model generation
  */
-export interface IBaseCreateResponse {
+export interface IGenerateResponse {
   /**
    * The reason the generation finished
    */
-  finish_reason?: string
+  finishReason?: string
 
   /**
    * The generated text content
    */
-  content: string
+  text: string
 
   /**
    * Tool calls made by the model
    */
-  tool_calls: Array<IToolCallResult>
+  toolCalls: Array<IToolCallResult>
 
   /**
    * Usage statistics
@@ -102,9 +86,70 @@ export interface IBaseCreateResponse {
 }
 
 /**
+ * Chunk types for streaming
+ */
+export enum EStreamChunkType {
+  TEXT_DELTA = 'text-delta',
+  TEXT_DONE = 'text-done',
+  TOOL_CALL_DELTA = 'tool-call-delta',
+  TOOL_CALL = 'tool-call',
+  TOOL_RESULT = 'tool-result',
+  FINISH = 'finish',
+}
+
+/**
+ * Stream chunk
+ */
+export interface IStreamChunk {
+  type: EStreamChunkType
+  text?: string
+  toolCallId?: string
+  toolName?: string
+  toolArgs?: string
+  toolResult?: any
+  finishReason?: string
+}
+
+/**
+ * Core model interface that all provider models must implement
+ */
+export interface IModel {
+  /**
+   * Generate a complete response from the model
+   */
+  generate(params: IGenerateParams): Promise<IGenerateResponse>
+
+  /**
+   * Stream a response from the model
+   */
+  stream(params: IGenerateParams): AsyncGenerator<IStreamChunk, void, unknown>
+}
+
+/**
  * Legacy type aliases for backwards compatibility
  */
 export type TSupportModelFamily = 'openai' | 'deepseek' | 'anthropic'
+
+export type TModel = IModel
+
+// Old interfaces kept for backwards compatibility
+export interface IBaseCreateParams extends IGenerateParams {
+  stream?: boolean | null
+  debug?: boolean
+  model?: any
+}
+
+export interface IBaseCreateResponse {
+  finish_reason?: string
+  content: string
+  tool_calls: Array<IToolCallResult>
+  usage?: {
+    promptTokens?: number
+    completionTokens?: number
+    totalTokens?: number
+  }
+  thought?: string
+}
 
 export interface ITollCallResponsesApiResult extends IToolCallResult {
   call_id: string

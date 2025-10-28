@@ -1,20 +1,8 @@
-import type { LanguageModel } from 'ai'
+/**
+ * Model interfaces and types for Orion AI
+ *
+ * This module defines the core model interfaces that provider packages must implement.
+ * The core package does not depend on any specific LLM SDK.
+ */
 
-// Export base types
 export * from './base'
-
-// Export model factory
-export * from './factory'
-
-// Export adapters
-export * from './adapters'
-
-/**
- * TModel now represents an AI SDK LanguageModel instance
- */
-export type TModel = LanguageModel
-
-/**
- * Re-export for convenience
- */
-export type { LanguageModel }
